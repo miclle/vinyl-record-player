@@ -53,3 +53,11 @@ dkms.conf
 
 # debug information files
 *.dwo
+
+# FreeCAD regeneration scratch and automatic backups
+*.FCBak
+*.FCStd1
+__pycache__/
+*.pyc
+cad/*.log
+cad/render.done

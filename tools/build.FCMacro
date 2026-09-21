@@ -1,0 +1,26 @@
+# Run from FreeCAD: Macro > Macros > Execute. The file location determines repo root.
+import sys
+import importlib.util
+from pathlib import Path
+import FreeCAD as App
+import FreeCADGui as Gui
+
+macro_path = Path(__file__).resolve()
+if str(macro_path.parent) not in sys.path:
+    sys.path.insert(0, str(macro_path.parent))
+
+def load_local_module(name):
+    # Read source directly: repeated macros must not reuse modules or stale pyc.
+    path = macro_path.parent / (name + '.py')
+    spec = importlib.util.spec_from_file_location(name, path)
+    module = importlib.util.module_from_spec(spec)
+    exec(compile(path.read_bytes(), str(path), 'exec'), module.__dict__)
+    sys.modules[name] = module
+    return module
+
+build_model = load_local_module('build_model')
+render_views = load_local_module('render_views')
+dimension_sheet = load_local_module('dimension_sheet')
+doc, parameters, groups = build_model.deliver()
+render_views.render(doc, parameters, groups)
+dimension_sheet.create(doc, parameters)

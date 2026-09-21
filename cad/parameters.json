@@ -1,0 +1,45 @@
+{
+  "units": "mm",
+  "revision": "v0.2-concept",
+  "width": 448.6,
+  "depth": 345.5,
+  "closed_height": 214.2,
+  "foot_height": 26.0,
+  "cabinet_top": 150.0,
+  "wall": 12.0,
+  "deck_thickness": 6.0,
+  "cover_wall": 3.0,
+  "cover_bottom": 151.0,
+  "cover_angle_open": 70.0,
+  "front_angle": 72.0,
+  "slat_count": 8,
+  "platter_diameter": 300.0,
+  "platter_x": 176.0,
+  "platter_y": 172.0,
+  "pivot_distance": 200.0,
+  "arm_effective_length": 218.0,
+  "headshell_offset": 24.7,
+  "pivot_bearing_degrees": 32.0,
+  "driver_count": 3,
+  "tweeter": {
+    "flange_diameter": 54.0,
+    "cutout_diameter": 40.0,
+    "depth": 30.0,
+    "center_x": [
+      80.0,
+      368.6
+    ],
+    "center_z": 88.0
+  },
+  "woofer": {
+    "flange_diameter": 116.0,
+    "cutout_diameter": 100.0,
+    "depth": 65.0,
+    "center_x": 224.3,
+    "center_y": 94.0
+  },
+  "acoustic_divider_x": [
+    140.0,
+    300.6
+  ]
+}

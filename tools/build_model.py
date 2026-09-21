@@ -1,0 +1,221 @@
+"""LUMI reference reconstruction. Run build.FCMacro in FreeCAD to rebuild.
+
+All distances are millimetres. JSON drives regeneration; native Part features
+remain independent, editable solids, not a fully constrained manufacturing tree.
+"""
+import csv
+import json
+import math
+from pathlib import Path
+
+import FreeCAD as App
+import Part
+
+ROOT = Path(__file__).resolve().parents[1]
+V = App.Vector
+WOOD = (0.37, 0.225, 0.13)
+SLAT = (0.48, 0.32, 0.20)
+BLACK = (0.065, 0.072, 0.079)
+SILVER = (0.73, 0.75, 0.77)
+GRAY = (0.23, 0.25, 0.27)
+
+
+def build():
+    p = json.loads((ROOT / 'cad/parameters.json').read_text())
+    if p['driver_count'] != 3 or len(p['tweeter']['center_x']) != 2:
+        raise ValueError('This layout requires one woofer and two tweeters')
+    W, D, H = p['width'], p['depth'], p['cabinet_top']
+    t, z0 = p['wall'], p['foot_height']
+    a = math.radians(p['front_angle'])
+    inward = V(0, math.sin(a), -math.cos(a))
+    front_y = lambda z: 8 + (z - (z0+t)) / math.tan(a)
+    if 'LumiThreeDriver' in App.listDocuments():
+        raise RuntimeError('Close LumiThreeDriver before rebuilding; unsaved edits are protected')
+    doc = App.newDocument('LumiThreeDriver')
+    doc.Label = 'LUMI · 一低音两高音空间评审 · v0.2'
+    groups = {}
+    for name, label in [('Cabinet','01 胡桃木外壳'), ('Front','02 倾斜格栅与灯光'),
+                        ('Deck','03 浮动唱盘底板'), ('Mechanism','04 唱盘与唱臂包络'),
+                        ('Audio','05 一低音两高音与分隔音腔'), ('Electronics','06 电子空间占位'),
+                        ('Cover','07 透明盖与铰链'), ('Feet','08 脚垫')]:
+        groups[name] = doc.addObject('App::DocumentObjectGroup', name)
+        groups[name].Label = label
+    rows = []
+
+    def add(name, label, shape, group, color, basis='估算 / 待选型', material='概念件', transparency=0):
+        if shape.isNull() or not shape.isValid() or not shape.Solids:
+            raise ValueError('Invalid solid: '+name)
+        obj = doc.addObject('Part::Feature', name)
+        obj.Label, obj.Shape = label, shape
+        obj.addProperty('App::PropertyString','DimensionBasis','Design').DimensionBasis = basis
+        obj.addProperty('App::PropertyString','MaterialNote','Design').MaterialNote = material
+        groups[group].addObject(obj)
+        if App.GuiUp:
+            obj.ViewObject.ShapeColor = color
+            obj.ViewObject.LineColor = (0.10,0.10,0.10)
+            obj.ViewObject.DisplayMode = 'Flat Lines'
+            obj.ViewObject.LineWidth = 1.0
+            obj.ViewObject.Transparency = transparency
+        b = shape.optimalBoundingBox(False)
+        rows.append([name,label,group,material,basis,round(b.XLength,3),round(b.YLength,3),round(b.ZLength,3)])
+        return obj
+
+    def box(name,label,x,y,z,dx,dy,dz,group,color,**kw):
+        return add(name,label,Part.makeBox(dx,dy,dz,V(x,y,z)),group,color,**kw)
+
+    def cyl(name,label,r,h,base,group,color,direction=V(0,0,1),**kw):
+        return add(name,label,Part.makeCylinder(r,h,base,direction),group,color,**kw)
+
+    def slope(zlo,zhi,offset,thick,x=t,width=None):
+        width = W-2*t if width is None else width
+        points = [V(x,front_y(zlo)+offset,zlo),V(x,front_y(zhi)+offset,zhi),
+                  V(x,front_y(zhi)+offset+thick,zhi),V(x,front_y(zlo)+offset+thick,zlo)]
+        return Part.Face(Part.makePolygon(points+[points[0]])).extrude(V(width,0,0))
+
+    # Separable cabinet panels. The nominal overall depth excludes rear connectors.
+    box('SideLeft','左侧木板',0,0,z0,t,D,H-z0,'Cabinet',WOOD,material='12 mm 木板 / 胡桃木表面')
+    box('SideRight','右侧木板',W-t,0,z0,t,D,H-z0,'Cabinet',WOOD,material='12 mm 木板 / 胡桃木表面')
+    woofer=p['woofer']; tweeter=p['tweeter']
+    bottom=Part.makeBox(W-2*t,D,t,V(t,0,z0))
+    bottom=bottom.cut(Part.makeCylinder(woofer['cutout_diameter']/2,t+2,V(woofer['center_x'],woofer['center_y'],z0-1)))
+    add('Bottom','底板 · 低音向下开孔',bottom,'Cabinet',BLACK,material='12 mm 木板；低音开孔待选型')
+    box('Back','后板',t,D-t,z0+t,W-2*t,t,H-z0-t,'Cabinet',WOOD)
+    box('Fascia','前沿银色饰条',t,0,H-20,W-2*t,6,20,'Front',SILVER,material='铝饰面 / 厚度估算')
+    box('LowerRail','格栅下横梁',t,0,z0,W-2*t,8,t,'Front',BLACK)
+    # Thin cloth proxy; actual cloth is acoustically open, unlike this visual solid.
+    cloth = add('GrilleCloth','透声布外观占位（非实心材料）',slope(z0+t,H-22,4,0.5),'Front',BLACK,material='透声织物（薄实体仅用于显示）')
+    n=p['slat_count']
+    for i in range(n):
+        z=z0+t+2+i*(H-24-(z0+t)-7)/(n-1)
+        add('Slat%02d'%(i+1),'横向木格栅 %02d'%(i+1),slope(z,z+7,0,3),'Front',SLAT,material='胡桃木饰条 / 厚 3 mm')
+    box('LightChannel','灯带铝槽占位',t+6,7,H-22,W-2*t-12,14,2,'Front',SILVER)
+    box('LightDiffuser','3000 K 暖光扩散片',t+8,8,H-23,W-2*t-16,12,1,'Front',(1.0,0.64,0.22),material='扩散片 / 光色示意')
+
+    # Baffle and sealed front chambers, with a shared acoustic roof below the deck.
+    zlo,zhi=z0+t,H-22
+    baffle=slope(zlo,zhi,8,8)
+    speaker_centres=[]
+    for x in tweeter['center_x']:
+        centre=V(x,front_y(tweeter['center_z'])+8,tweeter['center_z'])
+        speaker_centres.append(centre)
+        baffle=baffle.cut(Part.makeCylinder(tweeter['cutout_diameter']/2,30,centre-inward*5,inward))
+    add('Baffle','左右高音斜面障板',baffle,'Audio',BLACK,material='8 mm 障板；开孔待单元选型')
+    box('AcousticRoof','声腔顶板',t,0,H-22,W-2*t,158,8,'Audio',GRAY)
+    box('AcousticRear','声腔后隔板',t,150,zlo,W-2*t,8,zhi-zlo,'Audio',GRAY)
+    # Divider follows the baffle inner plane, so it meets without protruding.
+    for side,x in zip(['Left','Right'],p['acoustic_divider_x']):
+        pts=[V(x,front_y(zlo)+16,zlo),V(x,150,zlo),V(x,150,zhi),V(x,front_y(zhi)+16,zhi)]
+        divider=Part.Face(Part.makePolygon(pts+[pts[0]])).extrude(V(8,0,0))
+        add('AcousticDivider'+side,'低音腔'+('左' if side=='Left' else '右')+'隔板',divider,'Audio',GRAY)
+
+    def driver(name,label,c,axis,spec,role):
+        r=spec['cutout_diameter']/2; depth=spec['depth']
+        magnet_r=r*0.6; magnet_h=min(14,depth*0.35); cone_h=depth*0.35
+        flange=Part.makeCylinder(spec['flange_diameter']/2,3,c-axis*3,axis).cut(Part.makeCylinder(r-1,4,c-axis*3.5,axis))
+        cone=Part.makeCone(r-1,r*0.35,cone_h,c,axis).cut(Part.makeCone(r-2,r*0.35-1,cone_h,c-axis*0.7,axis))
+        magnet=Part.makeCylinder(magnet_r,magnet_h,c+axis*(depth-magnet_h),axis)
+        basket=Part.makeCone(r,magnet_r,depth-magnet_h,c,axis).cut(Part.makeCone(r-1,magnet_r-1,depth-magnet_h,c,axis))
+        obj=add(name,label,Part.makeCompound([flange,cone,basket,magnet]),'Audio',BLACK)
+        obj.addProperty('App::PropertyString','DriverRole','Installation').DriverRole=role
+        obj.addProperty('App::PropertyVector','MountCentre','Installation').MountCentre=c
+        obj.addProperty('App::PropertyVector','InwardAxis','Installation').InwardAxis=axis
+        for key,value in [('FlangeDiameter',spec['flange_diameter']),('CutoutDiameter',spec['cutout_diameter']),('ReservedDepth',depth)]:
+            obj.addProperty('App::PropertyLength',key,'Installation');setattr(obj,key,value)
+
+    for side,c in zip(['Left','Right'],speaker_centres):
+        driver('Tweeter'+side,('左' if side=='Left' else '右')+'高音 · 安装占位',c,inward,tweeter,'tweeter')
+    driver('Woofer','中央低音 · 朝下安装占位',V(woofer['center_x'],woofer['center_y'],z0),V(0,0,1),woofer,'woofer')
+
+    box('RearSupport','后部隔振承托梁',t+8,280,H-22,W-2*t-16,30,8,'Deck',GRAY)
+    for i,(x,y) in enumerate([(44,100),(W-44,100),(W/2,295)]):
+        cyl('Isolator%d'%i,'弹性支承 %d（刚度待定）'%(i+1),8,8,V(x,y,H-14),'Deck',(0.12,0.15,0.16))
+    deck_shape=Part.makeBox(W-2*t-8,D-t-24,p['deck_thickness'],V(t+4,8,H-p['deck_thickness']))
+    deck_shape=deck_shape.cut(Part.makeCylinder(10.2,p['deck_thickness']+2,V(p['platter_x'],p['platter_y'],H-p['deck_thickness']-1)))
+    deck=add('FloatingDeck','唱盘与唱臂共用浮动底板',deck_shape,'Deck',BLACK,material='结构底板 / 6 mm 占位；主轴孔 Ø20.4 待选型')
+    box('Amplifier','功放板空间占位',270,207,48,112,65,24,'Electronics',(0.11,0.34,0.28))
+    box('PhonoBoard','唱放板空间占位',60,220,48,80,52,17,'Electronics',(0.12,0.32,0.28))
+    box('ConnectorPlate','后部接口安装板占位',W/2-35,D-t-2,65,110,2,32,'Electronics',BLACK)
+    # Connector holes are intentionally deferred until actual parts are selected.
+
+    cx,cy=p['platter_x'],p['platter_y']
+    cyl('MotorEnvelope','马达空间占位',18,34,V(cx-64,cy+55,H-40),'Mechanism',GRAY)
+    cyl('BearingEnvelope','主轴轴承空间占位',10,36,V(cx,cy,H-36),'Mechanism',SILVER)
+    cyl('PlatterHub','唱盘支承轮毂',32,3,V(cx,cy,H),'Mechanism',BLACK)
+    cyl('Platter',f"Ø{p['platter_diameter']:g} 唱盘",p['platter_diameter']/2,12,V(cx,cy,H+3),'Mechanism',BLACK,basis='直径初值来自官方；厚度估算',material='唱盘总成占位')
+    cyl('PlatterMat','唱片垫',149,2,V(cx,cy,H+15),'Mechanism',(0.09,0.095,0.10))
+    # Fine rim is geometry rather than a drawn circle.
+    rim=Part.makeCylinder(143,0.12,V(cx,cy,H+17)).cut(Part.makeCylinder(142.7,0.12,V(cx,cy,H+17)))
+    add('MatRing','唱片垫细环',rim,'Mechanism',SILVER)
+    cyl('Spindle','主轴',3.5,11,V(cx,cy,H+17),'Mechanism',SILVER)
+    cyl('ControlBase','左前旋钮底座',17,2,V(46,43,H),'Mechanism',GRAY)
+    cyl('ControlKnob','多功能旋钮',16,14,V(46,43,H+2),'Mechanism',BLACK)
+    theta=math.radians(p['pivot_bearing_degrees'])
+    pivot=V(cx+p['pivot_distance']*math.cos(theta),cy+p['pivot_distance']*math.sin(theta),H+38)
+    cyl('ArmBase','唱臂底座',23,7,V(pivot.x,pivot.y,H),'Mechanism',BLACK)
+    cyl('ArmColumn','唱臂支柱',10,31,V(pivot.x,pivot.y,H+7),'Mechanism',GRAY)
+    # Pivot/stylus planar geometry: outer groove reference at R140.
+    R=140.0; L=p['arm_effective_length']; d=p['pivot_distance']
+    along=(R*R-L*L+d*d)/(2*d)
+    across=math.sqrt(R*R-along*along)
+    stylus=V(cx+along*math.cos(theta)+across*math.sin(theta),cy+along*math.sin(theta)-across*math.cos(theta),H+17.3)
+    forward=V(stylus.x-pivot.x,stylus.y-pivot.y,0); forward.normalize()
+    head_dir=App.Rotation(V(0,0,1),p['headshell_offset']).multVec(forward)
+    arm_end=V(stylus.x-head_dir.x*21,stylus.y-head_dir.y*21,H+30)
+    tube_vector=arm_end-pivot
+    cyl('TonearmTube','唱臂管外观包络',3.6,tube_vector.Length,pivot,'Mechanism',BLACK,tube_vector)
+    cyl('CounterweightRod','平衡锤轴',3.5,36,pivot,'Mechanism',SILVER,-forward)
+    cyl('Counterweight','平衡锤包络',12,19,pivot-forward*30,'Mechanism',BLACK,-forward)
+    head=Part.makeBox(14,28,3,V(-7,-24,H+27))
+    rot=App.Rotation(V(0,0,1),math.degrees(math.atan2(head_dir.y,head_dir.x))-90)
+    head.Placement=App.Placement(V(stylus.x,stylus.y,0),rot)
+    add('Headshell','唱头壳外观包络',head,'Mechanism',BLACK)
+    cartridge=Part.makeBox(12,16,7,V(-6,-12,H+20))
+    cartridge.Placement=App.Placement(V(stylus.x,stylus.y,0),rot)
+    add('Cartridge','唱头占位（非安装图）',cartridge,'Mechanism',(0.72,0.73,0.70))
+    cyl('Stylus','针尖几何基准',0.45,2.7,stylus,'Mechanism',SILVER)
+    cyl('ArmRest','唱臂支架占位',4,26,V(pivot.x+10,pivot.y-69,H),'Mechanism',BLACK)
+
+    # Closed cover is a five-sided hollow shell, not a solid box.
+    cw=p['cover_wall']; cb=p['cover_bottom']; ch=p['closed_height']-cb
+    cover=Part.makeBox(W-2*t,D-4,ch,V(t,2,cb)).cut(Part.makeBox(W-2*t-2*cw,D-4-2*cw,ch,V(t+cw,2+cw,cb-cw)))
+    lid=add('DustCover','烟灰透明防尘盖',cover,'Cover',(0.34,0.37,0.39),material='3 mm 亚克力概念壳',transparency=76)
+    for i,x in enumerate([55,W-77]):
+        box('HingeBase%d'%i,'铰链固定座 %d'%(i+1),x,D-13,H-12,22,9,12,'Cover',BLACK)
+        cyl('HingePin%d'%i,'铰链轴 %d'%(i+1),3,22,V(x,D-3,cb),'Cover',GRAY,V(1,0,0))
+    for i,(x,y) in enumerate([(33,30),(W-33,30),(33,D-30),(W-33,D-30)]):
+        foot=Part.makeCylinder(15,19,V(x,y,7)).fuse(Part.makeCone(11,15,7,V(x,y,0)))
+        add('Foot%d'%i,'脚垫 %d'%(i+1),foot,'Feet',BLACK,material='弹性脚垫占位')
+
+    info=doc.addObject('App::FeaturePython','GeometryDatums')
+    info.Label='尺寸基准（JSON 修改后重建）'
+    info.addProperty('App::PropertyString','BuildParametersJSON','Build').BuildParametersJSON=json.dumps(p,sort_keys=True,separators=(',',':'),ensure_ascii=False)
+    info.setEditorMode('BuildParametersJSON',1)
+    for name,value in [('Width',W),('Depth',D),('ClosedHeight',p['closed_height']),('PivotDistance',d),('EffectiveArmLength',L)]:
+        info.addProperty('App::PropertyLength',name,'Dimensions');setattr(info,name,value)
+        info.setEditorMode(name,1)
+    info.addProperty('App::PropertyVector','SpindlePoint','Geometry').SpindlePoint=V(cx,cy,H+17.3)
+    info.addProperty('App::PropertyVector','PivotPoint','Geometry').PivotPoint=V(pivot.x,pivot.y,H+17.3)
+    info.addProperty('App::PropertyVector','StylusPoint','Geometry').StylusPoint=stylus
+    info.addProperty('App::PropertyVector','CoverHinge','Geometry').CoverHinge=V(0,D-3,cb)
+    doc.recompute()
+    with (ROOT/'cad/parts.csv').open('w',newline='',encoding='utf-8-sig') as f:
+        writer=csv.writer(f,lineterminator='\n');writer.writerow(['ID','零件','分组','材料说明','尺寸依据','包络X_mm','包络Y_mm','包络Z_mm']);writer.writerows(rows)
+    return doc,p,groups
+
+
+def deliver():
+    doc,p,groups=build()
+    solids=[o for o in doc.Objects if o.TypeId=='Part::Feature' and o.Shape.Solids]
+    import Import
+    Import.export(solids,str(ROOT/'cad/lumi-three-driver.step'))
+    if App.GuiUp:
+        import FreeCADGui as Gui
+        Gui.activeDocument().activeView().viewAxonometric()
+        Gui.activeDocument().activeView().fitAll()
+    doc.recompute()
+    doc.saveAs(str(ROOT/'cad/lumi-three-driver.FCStd'))
+    return doc,p,groups
+
+
+if __name__=='__main__':
+    deliver()

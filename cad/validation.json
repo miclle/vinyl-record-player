@@ -1,0 +1,71 @@
+{
+  "revision": "v0.2-concept",
+  "freecad": "1.1.1",
+  "checks": {
+    "all_shapes_valid": true,
+    "overall_matches_parameters": true,
+    "one_woofer_two_tweeters": true,
+    "driver_dimensions_match_parameters": true,
+    "build_parameters_match": true,
+    "pivot_distance": true,
+    "effective_arm_length": true,
+    "platter_diameter": true,
+    "cover_closed_no_interference": true,
+    "cover_sweep_samples_clear": true,
+    "internal_envelopes_clear": true,
+    "solid_installation_reservations_clear": true,
+    "woofer_floor_clearance": true,
+    "step_valid": true,
+    "step_solid_count": true,
+    "no_group_duplicates_in_step": true,
+    "step_volume": true,
+    "step_bounds": true
+  },
+  "metrics": {
+    "part_count": 60,
+    "solid_count": 69,
+    "overall_mm": [
+      448.6,
+      345.5,
+      214.2
+    ],
+    "driver_reservations_mm": {
+      "TweeterLeft": {
+        "role": "tweeter",
+        "flange_diameter": 54.0,
+        "cutout_diameter": 40.0,
+        "depth": 30.0
+      },
+      "TweeterRight": {
+        "role": "tweeter",
+        "flange_diameter": 54.0,
+        "cutout_diameter": 40.0,
+        "depth": 30.0
+      },
+      "Woofer": {
+        "role": "woofer",
+        "flange_diameter": 116.0,
+        "cutout_diameter": 100.0,
+        "depth": 65.0
+      }
+    },
+    "pivot_distance_mm": 199.99999999999997,
+    "effective_length_mm": 217.99999999999994,
+    "stylus_radius_mm": 140.0,
+    "cover_closed_intersections_mm3": {},
+    "cover_to_mechanism_min_distance_mm": 11.0,
+    "cover_sweep_collisions": [],
+    "internal_collisions": [],
+    "installation_reservation_collisions": [],
+    "woofer_floor_clearance_mm": 23.0
+  },
+  "limitations": [
+    "静态 Part 实体由 JSON 驱动重建，原生文件不含自动联动的完整特征历史",
+    "音响与唱盘部件为概念包络；声学、隔振、连接工艺及电气均未验证",
+    "214.2 mm 暂作为闭盖总高；原厂测量基准未明确",
+    "开盖按 0 至 70 度每 5 度抽样检查，非连续运动求解",
+    "未对所有零件做全局干涉放行；这里只检查列出的关键部件与外壳"
+  ],
+  "requested_revision": "v0.2-concept",
+  "passed": true
+}

@@ -1,0 +1,3 @@
+# Preserve CAD exchange files verbatim and prevent line-based merges.
+cad/*.step binary
+cad/*.FCStd binary
