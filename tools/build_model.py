@@ -22,8 +22,8 @@ GRAY = (0.23, 0.25, 0.27)
 
 def build():
     p = json.loads((ROOT / 'cad/parameters.json').read_text())
-    if p['driver_count'] != 3 or len(p['tweeter']['center_x']) != 2:
-        raise ValueError('This layout requires one woofer and two tweeters')
+    if p['driver_count'] != 3 or len(p['fullrange']['center_x']) != 2:
+        raise ValueError('This layout requires one woofer and two full-range satellites')
     W, D, H = p['width'], p['depth'], p['cabinet_top']
     t, z0 = p['wall'], p['foot_height']
     a = math.radians(p['front_angle'])
@@ -32,11 +32,11 @@ def build():
     if 'LumiThreeDriver' in App.listDocuments():
         raise RuntimeError('Close LumiThreeDriver before rebuilding; unsaved edits are protected')
     doc = App.newDocument('LumiThreeDriver')
-    doc.Label = 'LUMI · 一低音两高音空间评审 · v0.2'
+    doc.Label = 'LUMI · SC-2103 三音腔布局 · v0.4'
     groups = {}
     for name, label in [('Cabinet','01 胡桃木外壳'), ('Front','02 倾斜格栅与灯光'),
                         ('Deck','03 浮动唱盘底板'), ('Mechanism','04 唱盘与唱臂包络'),
-                        ('Audio','05 一低音两高音与分隔音腔'), ('Electronics','06 电子空间占位'),
+                        ('Audio','05 一低音两全频与独立音腔'), ('Electronics','06 电子空间占位'),
                         ('Cover','07 透明盖与铰链'), ('Feet','08 脚垫')]:
         groups[name] = doc.addObject('App::DocumentObjectGroup', name)
         groups[name].Label = label
@@ -75,11 +75,24 @@ def build():
     # Separable cabinet panels. The nominal overall depth excludes rear connectors.
     box('SideLeft','左侧木板',0,0,z0,t,D,H-z0,'Cabinet',WOOD,material='12 mm 木板 / 胡桃木表面')
     box('SideRight','右侧木板',W-t,0,z0,t,D,H-z0,'Cabinet',WOOD,material='12 mm 木板 / 胡桃木表面')
-    woofer=p['woofer']; tweeter=p['tweeter']
+    woofer=p['woofer']; tweeter=p['fullrange']
     bottom=Part.makeBox(W-2*t,D,t,V(t,0,z0))
     bottom=bottom.cut(Part.makeCylinder(woofer['cutout_diameter']/2,t+2,V(woofer['center_x'],woofer['center_y'],z0-1)))
     add('Bottom','底板 · 低音向下开孔',bottom,'Cabinet',BLACK,material='12 mm 木板；低音开孔待选型')
-    box('Back','后板',t,D-t,z0+t,W-2*t,t,H-z0-t,'Cabinet',WOOD)
+    port=p['bass_port']; ac=p['acoustic']
+    px,pz=port['center_x'],port['center_z']
+    pr=port['inner_diameter']/2; outer_r=pr+port['wall_thickness']
+    back=Part.makeBox(W-2*t,t,H-z0-t,V(t,D-t,z0+t))
+    back=back.cut(Part.makeCylinder(outer_r,t+2,V(px,D-t-1,pz),V(0,1,0)))
+    back=back.cut(Part.makeCylinder(port['flange_diameter']/2,port['flange_thickness']+1,
+                                  V(px,D-port['flange_thickness'],pz),V(0,1,0)))
+    add('Back','后板 · 可换倒相管沉台',back,'Cabinet',WOOD)
+    tube=Part.makeCylinder(outer_r,port['length']-port['flange_thickness'],V(px,D-port['length'],pz),V(0,1,0))
+    tube=tube.fuse(Part.makeCylinder(port['flange_diameter']/2,port['flange_thickness'],
+                                   V(px,D-port['flange_thickness'],pz),V(0,1,0)))
+    tube=tube.cut(Part.makeCylinder(pr,port['length']+2,V(px,D-port['length']-1,pz),V(0,1,0)))
+    add('BassPort',f"后置倒相管 · Ø{port['inner_diameter']:g} × {port['length']:g} 可换试验件",tube,'Audio',(0.22,0.48,0.62),
+        basis='按可用空间设计的试验初值；非 SC-2103 原厂调谐，密封固定及端口圆角待细化')
     box('Fascia','前沿银色饰条',t,0,H-20,W-2*t,6,20,'Front',SILVER,material='铝饰面 / 厚度估算')
     box('LowerRail','格栅下横梁',t,0,z0,W-2*t,8,t,'Front',BLACK)
     # Thin cloth proxy; actual cloth is acoustically open, unlike this visual solid.
@@ -91,22 +104,34 @@ def build():
     box('LightChannel','灯带铝槽占位',t+6,7,H-22,W-2*t-12,14,2,'Front',SILVER)
     box('LightDiffuser','3000 K 暖光扩散片',t+8,8,H-23,W-2*t-16,12,1,'Front',(1.0,0.64,0.22),material='扩散片 / 光色示意')
 
-    # Baffle and sealed front chambers, with a shared acoustic roof below the deck.
-    zlo,zhi=z0+t,H-22
+    # Two sealed trial satellite chambers and one central rear-ported chamber.
+    zlo,zhi=z0+t,ac['roof_bottom_z']
+    rear=ac['satellite_rear_y']; pt=ac['partition_thickness']
+    left,right=p['acoustic_divider_x']
     baffle=slope(zlo,zhi,8,8)
     speaker_centres=[]
     for x in tweeter['center_x']:
         centre=V(x,front_y(tweeter['center_z'])+8,tweeter['center_z'])
         speaker_centres.append(centre)
         baffle=baffle.cut(Part.makeCylinder(tweeter['cutout_diameter']/2,30,centre-inward*5,inward))
-    add('Baffle','左右高音斜面障板',baffle,'Audio',BLACK,material='8 mm 障板；开孔待单元选型')
-    box('AcousticRoof','声腔顶板',t,0,H-22,W-2*t,158,8,'Audio',GRAY)
-    box('AcousticRear','声腔后隔板',t,150,zlo,W-2*t,8,zhi-zlo,'Audio',GRAY)
-    # Divider follows the baffle inner plane, so it meets without protruding.
+    add('Baffle','左右全频斜面障板',baffle,'Audio',BLACK,material='8 mm 障板；开孔待实测')
+    roof=Part.makeBox(W-2*t,rear+pt,ac['roof_thickness'],V(t,0,zhi)).fuse(
+        Part.makeBox(right+pt-left,D-t-rear-pt,ac['roof_thickness'],V(left,rear+pt,zhi)))
+    # A sealed local recess clears the generic bearing without opening the low chamber.
+    bx,by=p['platter_x'],p['platter_y']
+    roof=roof.cut(Part.makeCylinder(14,ac['roof_thickness']+2,V(bx,by,zhi-1)))
+    add('AcousticRoof','三音腔共用顶板 · 中部延伸至后板',roof,'Audio',GRAY)
+    pocket=Part.makeCylinder(14,zhi+ac['roof_thickness']-110,V(bx,by,110)).cut(
+        Part.makeCylinder(12,zhi+ac['roof_thickness']-111,V(bx,by,112)))
+    add('BearingPocket','通用轴承密封避让杯（选定机芯待重做）',pocket,'Audio',GRAY)
+    rear_panels=Part.makeCompound([
+        Part.makeBox(left-t,pt,zhi-zlo,V(t,rear,zlo)),
+        Part.makeBox(W-t-right-pt,pt,zhi-zlo,V(right+pt,rear,zlo))])
+    add('AcousticRear','左右全频腔后板 · 密封试装',rear_panels,'Audio',GRAY)
     for side,x in zip(['Left','Right'],p['acoustic_divider_x']):
-        pts=[V(x,front_y(zlo)+16,zlo),V(x,150,zlo),V(x,150,zhi),V(x,front_y(zhi)+16,zhi)]
-        divider=Part.Face(Part.makePolygon(pts+[pts[0]])).extrude(V(8,0,0))
-        add('AcousticDivider'+side,'低音腔'+('左' if side=='Left' else '右')+'隔板',divider,'Audio',GRAY)
+        pts=[V(x,front_y(zlo)+16,zlo),V(x,D-t,zlo),V(x,D-t,zhi),V(x,front_y(zhi)+16,zhi)]
+        divider=Part.Face(Part.makePolygon(pts+[pts[0]])).extrude(V(pt,0,0))
+        add('AcousticDivider'+side,'低音腔'+('左' if side=='Left' else '右')+'全深隔板',divider,'Audio',GRAY)
 
     def driver(name,label,c,axis,spec,role):
         r=spec['cutout_diameter']/2
@@ -127,23 +152,29 @@ def build():
             obj.addProperty('App::PropertyLength',key,'Installation');setattr(obj,key,value)
 
     for side,c in zip(['Left','Right'],speaker_centres):
-        driver('Tweeter'+side,('左' if side=='Left' else '右')+'高音 · 安装占位',c,inward,tweeter,'tweeter')
-    driver('Woofer','中央低音 · 朝下安装占位',V(woofer['center_x'],woofer['center_y'],z0),V(0,0,1),woofer,'woofer')
+        driver('Tweeter'+side,('左' if side=='Left' else '右')+'全频 · SC-2103 安装占位',c,inward,tweeter,'fullrange')
+    driver('Woofer','后排低音 · SC-2103 朝下安装占位',V(woofer['center_x'],woofer['center_y'],z0),V(0,0,1),woofer,'woofer')
 
-    box('RearSupport','后部隔振承托梁',t+8,280,H-22,W-2*t-16,30,8,'Deck',GRAY)
+    support=Part.makeCompound([Part.makeBox(left-t-8,30,8,V(t+8,280,H-22)),
+                               Part.makeBox(W-t-8-right-pt,30,8,V(right+pt,280,H-22))])
+    add('RearSupport','后部两侧隔振承托梁',support,'Deck',GRAY)
     for i,(x,y) in enumerate([(44,100),(W-44,100),(W/2,295)]):
         cyl('Isolator%d'%i,'弹性支承 %d（刚度待定）'%(i+1),8,8,V(x,y,H-14),'Deck',(0.12,0.15,0.16))
     deck_shape=Part.makeBox(W-2*t-8,D-t-24,p['deck_thickness'],V(t+4,8,H-p['deck_thickness']))
     deck_shape=deck_shape.cut(Part.makeCylinder(10.2,p['deck_thickness']+2,V(p['platter_x'],p['platter_y'],H-p['deck_thickness']-1)))
     deck=add('FloatingDeck','唱盘与唱臂共用浮动底板',deck_shape,'Deck',BLACK,material='结构底板 / 6 mm 占位；主轴孔 Ø20.4 待选型')
     amplifier=p['amplifier']
+    if amplifier['rotation_degrees'] not in (0,90):
+        raise ValueError('Amplifier rotation must be 0 or 90 degrees')
+    amp_x,amp_y=(amplifier['width'],amplifier['length']) if amplifier['rotation_degrees']==90 else (amplifier['length'],amplifier['width'])
     box('Amplifier','功放板 · 含散热片整体包络',amplifier['x'],amplifier['y'],
         z0+t+amplifier['bottom_clearance_assumption'],
-        amplifier['length'],amplifier['width'],amplifier['height'],
+        amp_x,amp_y,amplifier['height'],
         'Electronics',(0.11,0.34,0.28),
         basis='用户提供含散热片外廓长宽高；离底板间距暂估，安装孔位未知',
         material='功放板及散热片整体占位；未细化散热片、端子和支柱')
-    box('PhonoBoard','唱放板空间占位',60,220,48,80,52,17,'Electronics',(0.12,0.32,0.28))
+    phono=p['phono_board']
+    box('PhonoBoard','唱放板空间占位',*[phono[k] for k in ['x','y','z','length','width','height']],'Electronics',(0.12,0.32,0.28))
     transformer=p['power_transformer']
     length,width,height=(transformer[k] for k in ['body_length','body_width','body_height'])
     span=transformer['mount_span']; ear_thickness=transformer['mount_thickness_assumption']
@@ -162,11 +193,11 @@ def build():
                       ('MountSpan',span),('MountThicknessAssumption',ear_thickness)]:
         power.addProperty('App::PropertyLength',key,'Installation');setattr(power,key,value)
 
-    box('ConnectorPlate','后部接口安装板占位',W/2-35,D-t-2,65,110,2,32,'Electronics',BLACK)
+    box('ConnectorPlate','后部接口安装板占位',324,D-t-2,65,105,2,32,'Electronics',BLACK)
     # Connector holes are intentionally deferred until actual parts are selected.
 
     cx,cy=p['platter_x'],p['platter_y']
-    cyl('MotorEnvelope','马达空间占位',18,34,V(cx-64,cy+55,H-40),'Mechanism',GRAY)
+    cyl('MotorEnvelope','马达空间占位',18,34,V(cx-76,cy+55,H-40),'Mechanism',GRAY)
     cyl('BearingEnvelope','主轴轴承空间占位',10,36,V(cx,cy,H-36),'Mechanism',SILVER)
     cyl('PlatterHub','唱盘支承轮毂',32,3,V(cx,cy,H),'Mechanism',BLACK)
     cyl('Platter',f"Ø{p['platter_diameter']:g} 唱盘",p['platter_diameter']/2,12,V(cx,cy,H+3),'Mechanism',BLACK,basis='直径初值来自官方；厚度估算',material='唱盘总成占位')

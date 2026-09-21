@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-FreeCAD concept model of a turntable with one downward-facing woofer, two front tweeters, a shared transformer, and an amplifier including its heatsink. The selected curved-arm mechanism has a separate fit-study assembly; installation is not released.
+FreeCAD concept model of a turntable with one downward-facing woofer, two front full-range satellites, a shared transformer, and an amplifier including its heatsink. The selected curved-arm mechanism has a separate fit-study assembly; installation is not released.
 
 - `tools/build_model.py`: geometry generation and CAD export.
 - `tools/build.FCMacro`: GUI entry point; invokes generation, rendering, and dimension-sheet creation.
@@ -40,7 +40,7 @@ Use four-space Python indentation, `snake_case` functions and JSON keys, and sta
 
 ## Testing Guidelines
 
-Use FreeCAD’s Python to run `-m unittest discover -s tests -v`. Tests use temporary directories. Validation uses FreeCAD and Open CASCADE; no coverage threshold is configured. Add descriptive boolean checks for changed dimensions, mounting clearances, or export behavior. After geometry changes, regenerate deliverables, run validation, and visually inspect affected previews. Export leaf `Part::Feature` objects only to avoid duplicated group geometry.
+Use FreeCAD’s Python to run `-m unittest discover -s tests -v`. Tests use temporary directories. Validation uses FreeCAD and Open CASCADE; no coverage threshold is configured. Add descriptive boolean checks for changed dimensions, mounting clearances, chamber closure, port airflow, or export behavior. Read exact dimensions with `optimalBoundingBox(False)` so GUI tessellation does not change dimension checks. After geometry changes, regenerate deliverables, run validation, and visually inspect affected previews. Export leaf `Part::Feature` objects only to avoid duplicated group geometry.
 
 ## Commit & Pull Request Guidelines
 
@@ -48,4 +48,4 @@ No established commit convention exists. Prefer concise imperative messages, opt
 
 ## Modeling Boundaries
 
-Edit `cad/parameters.json` and rebuild: saved `Part::Feature` solids do not update automatically. Validation rejects mismatched or missing parameter snapshots. Driver `total_height` includes `flange_thickness`; inward depth is their difference. Amplifier dimensions already include the heatsink. Transformer ear width/thickness, speaker cutouts, mounting holes, and amplifier floor clearance remain assumptions. Distinguish user-provided dimensions from estimates. Passing geometry checks does not establish acoustic performance or manufacturing readiness. Reference photos retain their owners' copyright; the repository license does not cover them.
+Edit `cad/parameters.json` and rebuild: saved `Part::Feature` solids do not update automatically. Validation rejects mismatched or missing parameter snapshots. The SC-2103 layout has three independent chambers and a replaceable rear port; `fullrange` is the parameter/role name, while `TweeterLeft` / `TweeterRight` remain stable legacy object IDs. CAD cavity volumes and trial port dimensions are not verified acoustic tuning. Driver `total_height` includes `flange_thickness`; inward depth is their difference. Amplifier dimensions already include the heatsink. Transformer ear width/thickness, speaker cutouts, mounting holes, and amplifier floor clearance remain assumptions. Distinguish user-provided dimensions from estimates. Passing geometry checks does not establish acoustic performance or manufacturing readiness. Reference photos retain their owners' copyright; the repository license does not cover them.

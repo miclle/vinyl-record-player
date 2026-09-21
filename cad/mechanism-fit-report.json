@@ -1,7 +1,7 @@
 {
   "revision": "v0.3-fit-study",
   "selected_option": "28高端弯臂机芯全套餐装好直接用 自动回臂",
-  "base_sha256": "764ad16573d2829de43d1458d5032668e41d9bfb763bd0016bf5c69dcbf8da43",
+  "base_sha256": "29d6e36944ebd652fad2f5780f6aeeaafb0dc885e4f95b99c7650a1c07e218fb",
   "assumptions": {
     "revision": "v0.3-fit-study",
     "selected_option": "28高端弯臂机芯全套餐装好直接用 自动回臂",
@@ -56,8 +56,8 @@
       },
       {
         "part": "RearSupport",
-        "label": "后部隔振承托梁",
-        "overlap_mm3": 85200.0
+        "label": "后部两侧隔振承托梁",
+        "overlap_mm3": 39456.0
       },
       {
         "part": "Isolator0",
@@ -75,38 +75,48 @@
         "overlap_mm3": 594438.892
       },
       {
+        "part": "BassPort",
+        "label": "后置倒相管 · Ø32 × 160 可换试验件",
+        "overlap_mm3": 14018.283
+      },
+      {
         "part": "Baffle",
-        "label": "左右高音斜面障板",
+        "label": "左右全频斜面障板",
         "overlap_mm3": 65184.873
       },
       {
         "part": "AcousticRoof",
-        "label": "声腔顶板",
-        "overlap_mm3": 357840.0
+        "label": "三音腔共用顶板 · 中部延伸至后板",
+        "overlap_mm3": 587733.183
+      },
+      {
+        "part": "BearingPocket",
+        "label": "通用轴承密封避让杯（选定机芯待重做）",
+        "overlap_mm3": 5152.212
       },
       {
         "part": "AcousticRear",
-        "label": "声腔后隔板",
-        "overlap_mm3": 65320.0
+        "label": "左右全频腔后板 · 密封试装",
+        "overlap_mm3": 30249.6
       },
       {
         "part": "AcousticDividerLeft",
-        "label": "低音腔左隔板",
-        "overlap_mm3": 18490.86
+        "label": "低音腔左全深隔板",
+        "overlap_mm3": 48298.86
       },
       {
         "part": "AcousticDividerRight",
-        "label": "低音腔右隔板",
-        "overlap_mm3": 18490.86
+        "label": "低音腔右全深隔板",
+        "overlap_mm3": 48298.86
       },
       {
         "part": "TweeterLeft",
-        "label": "左高音 · 安装占位",
+        "label": "左全频 · SC-2103 安装占位",
         "overlap_mm3": 3217.692
       },
       {
         "part": "TweeterRight",
-        "label": "右高音 · 安装占位",
+        "label": "右全频 · SC-2103 安装占位",
         "overlap_mm3": 2898.764
       }
     ],

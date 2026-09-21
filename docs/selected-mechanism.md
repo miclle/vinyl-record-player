@@ -16,12 +16,12 @@
 
 ## CAD 与核对结果
 
-[FreeCAD 核对装配](../cad/lumi-selected-mechanism-fit.FCStd) 和 [STEP](../cad/lumi-selected-mechanism-fit.step) 沿用 v0.2 的外壳与电子、音响布局，并替换上部机芯外观。原基线文件保持独立，是本核对版的生成输入。
+[FreeCAD 核对装配](../cad/lumi-selected-mechanism-fit.FCStd) 和 [STEP](../cad/lumi-selected-mechanism-fit.step) 沿用 v0.4 SC-2103 的外壳与电子、音响布局，并替换上部机芯外观。原基线文件保持独立，是本核对版的生成输入。
 
 | 继承部件 | 用户提供的外廓 | 仍待确认 |
 |---|---|---|
 | 低音 × 1 | 口端 Ø132 mm，总高 65 mm | 开孔、边沿厚度、孔位及背部轮廓；朝下安装 |
-| 高音 × 2 | 口端 Ø78 mm，总高 40 mm | 开孔、边沿厚度、孔位及背部轮廓；朝前安装 |
+| 全频 × 2 | 口端 Ø78 mm，总高 40 mm | 开孔、边沿厚度、孔位及背部轮廓；朝前安装 |
 | 共用变压器 × 1 | 本体 60 × 55 × 50 mm，固定耳总长 88 mm | 固定耳宽厚、孔距及高度基准 |
 | 功放板 × 1 | 125 × 75 × 45 mm，已含散热片 | 安装孔、支柱、端子及散热条件 |
 
@@ -29,7 +29,7 @@
 
 ![弯臂机芯开盖示意](../previews/selected-mechanism-open.png)
 
-现有安装台面 Z=150 mm，声腔顶板上表面 Z=136 mm，只相隔 **14 mm**。若采用整个 355 × 280 mm 平面下探 **45 mm** 的矩形预留，需要比现有顶板多 **31 mm** 的竖向空间。预留包络还与承载板、部分支承、隔板及高音等重叠，详见 [核对报告](../cad/mechanism-fit-report.json)。
+现有安装台面 Z=150 mm，声腔顶板上表面 Z=136 mm，只相隔 **14 mm**。若采用整个 355 × 280 mm 平面下探 **45 mm** 的矩形预留，需要比现有顶板多 **31 mm** 的竖向空间。预留包络还与承载板、部分支承、隔板及全频等重叠，详见 [核对报告](../cad/mechanism-fit-report.json)。
 
 这个矩形包络不是实际底部形状：真实机芯可能仅局部下探，**重叠不能证明实物必然碰撞，也不能据此直接降低整块声腔顶板**。承载板开口、弹簧支点和固定孔尚未设计。
 
@@ -45,7 +45,7 @@
 
 参数入口按部件区分：[基线参数](../cad/parameters.json) 控制外壳、扬声器、变压器和功放；[机芯参数](../cad/selected-mechanism.json) 控制弯臂机芯占位及下探假设。
 
-1. 先把手动改动另存。基线参数有变化时，按 [README](../README.md#v02-基线重建) 重建基线并运行 `tools/validate_model.py`；报告必须与刚保存的基线一致。
+1. 先把手动改动另存。基线参数有变化时，按 [README](../README.md#v04-基线重建) 重建基线并运行 `tools/validate_model.py`；报告必须与刚保存的基线一致。
 2. 关闭核对版文档，包括重新打开的 `lumi-selected-mechanism-fit.FCStd`。核对版脚本同时检查文档名及解析符号链接后的文件路径，拒绝覆盖仍打开的目标。
 3. 在 FreeCAD 执行 `tools/mechanism-study.FCMacro`，生成核对版 FCStd、STEP、`mechanism-fit-report.json` 和两张预览。仅改机芯参数时可以直接执行此步，但输入基线须是已验证的当前版本。
 4. 核对报告中的 `geometry_checks` 与 `fit`。几何及 STEP 检查通过不表示安装放行；当前 `installation_released=false`，仍有下探包络重叠。
@@ -59,4 +59,6 @@ PYTHONPATH=/Applications/FreeCAD.app/Contents/Resources/lib \
   /Applications/FreeCAD.app/Contents/Resources/bin/python tools/mechanism_study.py
 ```
 
-该入口生成 CAD 与报告，不刷新 GUI 颜色和预览。`tools/validate_model.py` 的 25 项检查只针对 v0.2 基线，不能用来宣称此款机芯已适配。
+该入口生成 CAD 与报告，不刷新 GUI 颜色和预览。`tools/validate_model.py` 的 30 项检查只针对 v0.4 基线，不能用来宣称此款机芯已适配。
+
+音响布局详见 [SC-2103 三音腔设计](audio-layout.md)。低音腔向后延伸后，顶板与倒相管仍需按弯臂机芯真实底部重新核对。`BearingPocket` 是基线通用轴承的密封避让杯，在核对版中作为现有结构保留，不代表适配了选定机芯。

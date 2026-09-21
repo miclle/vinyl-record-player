@@ -185,10 +185,12 @@ def render_study(doc, cfg):
     for obj in doc.getObject('Cabinet').Group:
         obj.ViewObject.Transparency = 75
     doc.getObject('AcousticRoof').ViewObject.Visibility = False
+    doc.getObject('BearingPocket').ViewObject.Visibility = False
     for obj in doc.getObject('FitAnalysis').Group:
         obj.ViewObject.Visibility = obj.Name in ['UnderbodyReservation', 'InterferenceAcousticRoof']
     save('selected-mechanism-clearance.png')
     doc.getObject('AcousticRoof').ViewObject.Visibility = True
+    doc.getObject('BearingPocket').ViewObject.Visibility = True
     for obj in doc.getObject('FitAnalysis').Group:
         obj.ViewObject.Visibility = False
     for obj in doc.getObject('Cabinet').Group:

@@ -46,6 +46,8 @@ def _validate_document(doc,p):
         'PowerTransformer': ['Shape'],
         'Amplifier': ['Shape'],
     }
+    for name in ['BassPort','BearingPocket','AcousticRoof','AcousticRear','AcousticDividerLeft','AcousticDividerRight','Baffle','Bottom','Back']:
+        required[name]=['Shape']
     for name in ['Woofer','TweeterLeft','TweeterRight']:
         required[name]=['Shape','DriverRole','FlangeDiameter','CutoutDiameter','ReservedDepth',
                         'TotalHeight','FlangeThickness','MountCentre','InwardAxis']
@@ -71,7 +73,7 @@ def _validate_document(doc,p):
     metrics['overall_mm']=[bb.XLength,bb.YLength,bb.ZLength]
     checks['overall_matches_parameters']=all(abs(v-p[k])<1e-5 for v,k in zip(metrics['overall_mm'],['width','depth','closed_height']))
     drivers=[o for o in objects if hasattr(o,'DriverRole')]
-    checks['one_woofer_two_tweeters']=len(drivers)==3 and sorted(o.DriverRole for o in drivers)==['tweeter','tweeter','woofer']
+    checks['one_woofer_two_fullrange']=len(drivers)==3 and sorted(o.DriverRole for o in drivers)==['fullrange','fullrange','woofer']
     metrics['driver_reservations_mm']={o.Name:{'role':o.DriverRole,'flange_diameter':float(o.FlangeDiameter),'cutout_diameter':float(o.CutoutDiameter),'depth':float(o.ReservedDepth),'total_height':float(o.TotalHeight),'flange_thickness':float(o.FlangeThickness)} for o in drivers}
     checks['driver_dimensions_match_parameters']=all(all(abs(float(getattr(o,prop))-p[o.DriverRole][key])<1e-6 for prop,key in [('FlangeDiameter','flange_diameter'),('CutoutDiameter','cutout_diameter'),('TotalHeight','total_height'),('FlangeThickness','flange_thickness')]) for o in drivers)
     # Rotate each saved shape to its own axis; tilted tweeter world bounds are not its height.
@@ -92,7 +94,7 @@ def _validate_document(doc,p):
     metrics['stylus_radius_mm']=(datum.StylusPoint-datum.SpindlePoint).Length
     checks['pivot_distance']=abs(metrics['pivot_distance_mm']-p['pivot_distance'])<1e-6
     checks['effective_arm_length']=abs(metrics['effective_length_mm']-p['arm_effective_length'])<1e-6
-    checks['platter_diameter']=abs(doc.getObject('Platter').Shape.BoundBox.XLength-p['platter_diameter'])<1e-6
+    checks['platter_diameter']=abs(doc.getObject('Platter').Shape.optimalBoundingBox(False).XLength-p['platter_diameter'])<1e-6
     stationary=doc.getObject('Cabinet').Group+doc.getObject('Mechanism').Group+doc.getObject('Deck').Group
     lid=doc.getObject('DustCover').Shape
     def volume(a,b):
@@ -112,7 +114,7 @@ def _validate_document(doc,p):
     checks['cover_sweep_samples_clear']=not collisions
     metrics['cover_sweep_collisions']=collisions
     internal_envelopes=drivers+[doc.getObject(n) for n in ['MotorEnvelope','BearingEnvelope','Amplifier','PhonoBoard']]
-    boundaries=[doc.getObject(n) for n in ['SideLeft','SideRight','Bottom','Back','AcousticRoof','AcousticRear','AcousticDividerLeft','AcousticDividerRight','Baffle','FloatingDeck']]
+    boundaries=[doc.getObject(n) for n in ['SideLeft','SideRight','Bottom','Back','AcousticRoof','AcousticRear','AcousticDividerLeft','AcousticDividerRight','Baffle','FloatingDeck','BearingPocket']]
     bad=[]
     for obj in internal_envelopes:
         for boundary in boundaries:
@@ -127,7 +129,7 @@ def _validate_document(doc,p):
         reserved.append((o.Name,full))
     reservation_collisions=[]
     for name,shape in reserved:
-        for boundary in boundaries+doc.getObject('Mechanism').Group+doc.getObject('Electronics').Group:
+        for boundary in boundaries+[doc.getObject('BassPort')]+doc.getObject('Mechanism').Group+doc.getObject('Electronics').Group:
             v=volume(shape,boundary.Shape)
             if v>1e-5:reservation_collisions.append({'part':name,'boundary':boundary.Name,'volume_mm3':v})
     for i,(name,shape) in enumerate(reserved):
@@ -165,7 +167,7 @@ def _validate_document(doc,p):
     spec=p['amplifier']
     bb=amplifier.Shape.optimalBoundingBox(False)
     metrics['amplifier_envelope_mm']=[bb.XLength,bb.YLength,bb.ZLength]
-    expected=[spec['length'],spec['width'],spec['height']]
+    expected=([spec['width'],spec['length'],spec['height']] if spec['rotation_degrees']==90 else [spec['length'],spec['width'],spec['height']])
     checks['amplifier_dimensions_match']=all(abs(a-b)<1e-5 for a,b in zip(metrics['amplifier_envelope_mm'],expected))
     amplifier_hits=[]
     amplifier_gaps={}
@@ -178,6 +180,8 @@ def _validate_document(doc,p):
     metrics['amplifier_reservation_collisions']=amplifier_hits
     metrics['amplifier_clearances_mm']=amplifier_gaps
     checks['amplifier_reservation_clear']=not amplifier_hits
+    acoustic_checks,acoustic_metrics=check_acoustics(doc,p,reserved+[(transformer.Name,envelope)])
+    checks.update(acoustic_checks);metrics['acoustics']=acoustic_metrics
     metrics['woofer_floor_clearance_mm']=doc.getObject('Woofer').Shape.BoundBox.ZMin
     checks['woofer_floor_clearance']=metrics['woofer_floor_clearance_mm']>=20
     readback=Part.read(str(ROOT/'cad/lumi-three-driver.step'))
@@ -187,6 +191,103 @@ def _validate_document(doc,p):
     checks['step_volume']=abs(readback.Volume-compound.Volume)/compound.Volume<1e-7
     checks['step_bounds']=all(abs(a-b)<1e-5 for a,b in zip([readback.BoundBox.XLength,readback.BoundBox.YLength,readback.BoundBox.ZLength],metrics['overall_mm']))
     return finish()
+
+def check_acoustics(doc,p,reserved):
+    """Measure enclosed saved geometry with only the intended driver/port holes capped.
+
+    Net volume subtracts solid installation envelopes, not hollow visual baskets;
+    it is a conservative layout estimate, not an acoustic measurement of the drivers.
+    """
+    V=App.Vector
+    W,D,H=p['width'],p['depth'],p['cabinet_top']
+    t=p['wall']; z0=p['foot_height']; ac=p['acoustic']; port=p['bass_port']
+    zlo,zhi=z0+t,ac['roof_bottom_z']
+    def obj(name):return doc.getObject(name).Shape
+    a=math.radians(p['front_angle'])
+    front_y=lambda z:8+(z-zlo)/math.tan(a)
+    pts=[V(t,front_y(zlo)+8,zlo),V(t,front_y(zhi)+8,zhi),
+         V(t,front_y(zhi)+16,zhi),V(t,front_y(zlo)+16,zlo)]
+    blank_baffle=Part.Face(Part.makePolygon(pts+[pts[0]])).extrude(V(W-2*t,0,0))
+    blank_bottom=Part.makeBox(W-2*t,D,t,V(t,0,z0))
+    caps=[]
+    for name in ['Woofer','TweeterLeft','TweeterRight']:
+        driver=doc.getObject(name)
+        cutter=Part.makeCylinder(float(driver.CutoutDiameter)/2,30,
+                                driver.MountCentre-driver.InwardAxis*5,driver.InwardAxis)
+        caps.append(cutter.common(blank_bottom if name=='Woofer' else blank_baffle))
+    px,pz=port['center_x'],port['center_z']; pr=port['inner_diameter']/2
+    outer_r=pr+port['wall_thickness']
+    caps.append(Part.makeCylinder(outer_r,t,V(px,D-t,pz),V(0,1,0)))
+    caps.append(Part.makeCylinder(port['flange_diameter']/2,port['flange_thickness'],
+                                 V(px,D-port['flange_thickness'],pz),V(0,1,0)))
+    walls=[obj(n) for n in ['SideLeft','SideRight','Bottom','Back','Baffle','AcousticRoof',
+                           'AcousticRear','AcousticDividerLeft','AcousticDividerRight','BearingPocket']]
+    barrier=walls[0].multiFuse(walls[1:]+caps)
+    # The outside remains connected; closed acoustic voids form separate solids.
+    region=Part.makeBox(W+4,D+4,H+4,V(-2,-2,-2))
+    air=region.cut(barrier)
+    # Locate each chamber from its current boundaries, not the original layout.
+    left,right=p['acoustic_divider_x']; pt=ac['partition_thickness']
+    seed_z=(zlo+zhi)/2
+    inner_front=front_y(seed_z)+16
+    satellite_y=(inner_front+ac['satellite_rear_y'])/2
+    seeds={'left':V((t+left)/2,satellite_y,seed_z),
+           'woofer':V((left+pt+right)/2,(inner_front+D-t)/2,seed_z),
+           'right':V((right+pt+W-t)/2,satellite_y,seed_z)}
+    candidates={key:[i for i,solid in enumerate(air.Solids) if solid.isInside(seed,1e-6,False)]
+                for key,seed in seeds.items()}
+    sealed=all(len(ids)==1 for ids in candidates.values())
+    if sealed:
+        indices=[ids[0] for ids in candidates.values()]
+        sealed=len(set(indices))==3 and all(air.Solids[i].BoundBox.XMin>0 and
+            air.Solids[i].BoundBox.YMin>0 and air.Solids[i].BoundBox.ZMin>0 for i in indices)
+    checks={'three_independent_enclosed_chambers':sealed}
+    metrics={'volume_basis':'保存实体封闭性检测；仅临时封住设计的扬声器及倒相口。净容积扣除所有已建模占用，扬声器与变压器采用实心安装包络，倒相管扣除整个外廓；重叠占用只扣一次。未计尚未建模的吸音材料、支柱、密封件及线缆。',
+             'acoustic_performance_verified':False,'chambers':{},'port_inner_diameter_mm':port['inner_diameter'],
+             'port_length_mm':port['length'],'port_trial_lengths_mm':port['trial_lengths']}
+    port_outer=Part.makeCylinder(outer_r,port['length'],V(px,D-port['length'],pz),V(0,1,0))
+    objects=[o for o in doc.Objects if o.TypeId=='Part::Feature']
+    replaced_names={name for name,_ in reserved}|{'BassPort'}
+    occupants=[o.Shape for o in objects if o.Name not in replaced_names]
+    occupants.extend(shape for _,shape in reserved)
+    occupants.append(port_outer)
+    if sealed:
+        for key,ids in candidates.items():
+            cavity=air.Solids[ids[0]]
+            net=cavity
+            # Boolean subtraction counts overlapping reservations only once.
+            for shape in occupants:
+                if net.BoundBox.intersect(shape.BoundBox):
+                    net=net.cut(shape)
+            metrics['chambers'][key]={'gross_after_recess_l':cavity.Volume/1e6,
+                                     'conservative_net_l':net.Volume/1e6}
+    port_hits=[]
+    for o in objects:
+        if o.Name=='BassPort':continue
+        overlap=obj('BassPort').common(o.Shape).Volume
+        if overlap>1e-5:port_hits.append({'part':o.Name,'volume_mm3':overlap})
+    bounds=obj('BassPort').optimalBoundingBox(False)
+    expected_volume=math.pi*((outer_r**2-pr**2)*(port['length']-port['flange_thickness'])+
+                            ((port['flange_diameter']/2)**2-pr**2)*port['flange_thickness'])
+    checks['bass_port_dimensions_match']=all(abs(a-b)<1e-5 for a,b in zip(
+        [bounds.XMin,bounds.YMin,bounds.ZMin,bounds.XLength,bounds.YLength,bounds.ZLength],
+        [px-port['flange_diameter']/2,D-port['length'],pz-port['flange_diameter']/2,
+         port['flange_diameter'],port['length'],port['flange_diameter']])) and abs(obj('BassPort').Volume-expected_volume)<1e-4
+    checks['bass_port_solid_clear']=not port_hits
+    metrics['port_collisions']=port_hits
+    # Reject a blocked tube or a blocked one-diameter approach at its inner mouth.
+    path=Part.makeCylinder(pr,port['length']+port['inner_diameter'],
+                           V(px,D-port['length']-port['inner_diameter'],pz),V(0,1,0))
+    path_hits=[o.Name for o in objects if path.common(o.Shape).Volume>1e-5]
+    path_hits.extend(name+' installation envelope' for name,shape in reserved if path.common(shape).Volume>1e-5)
+    checks['bass_port_air_path_clear']=not path_hits
+    metrics['port_air_path_obstructions']=path_hits
+    checks['bass_port_connects_only_woofer']=False
+    if sealed:
+        mouth=V(px,D-port['length']-1,pz)
+        checks['bass_port_connects_only_woofer']=air.Solids[candidates['woofer'][0]].isInside(mouth,1e-6,False)
+    return checks,metrics
+
 
 if __name__=='__main__':
     raise SystemExit(0 if validate()['passed'] else 1)

@@ -29,7 +29,7 @@ def create(doc,p):
 <defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto-start-reverse"><path d="M0,1 L7,4 L0,7" fill="none" stroke="#8a5137"/></marker></defs>
 <rect width="1400" height="1030" fill="white"/>
 <style>text{font-family:'PingFang SC','Noto Sans CJK SC',sans-serif;fill:#252a2d}.title{font-size:27px;font-weight:600}.label{font-size:18px;font-weight:600}.note{font-size:16px}.dim{stroke:#8a5137;stroke-width:1;fill:none}.ext{stroke:#aba49e;stroke-width:0.8}.value{font-size:16px;fill:#8a5137}</style>
-<text x="60" y="49" class="title">LUMI 参考外形 · 一低音两高音概念 CAD</text>
+<text x="60" y="49" class="title">LUMI 参考外形 · 一低音两全频概念 CAD</text>
 <line x1="60" y1="68" x2="1340" y2="68" stroke="#d8d3cc"/>
 <text x="80" y="99" class="label">俯视 · 移除防尘盖</text>
 <text x="80" y="595" class="label">正视 · 闭盖</text>
@@ -53,7 +53,7 @@ def create(doc,p):
     # The platter diameter is tied to its projected geometric boundary.
     diameter=p['platter_diameter']
     hdim(80+(p['platter_x']-diameter/2)*s,510-p['platter_y']*s,diameter*s,510-p['platter_y']*s,f'Ø{diameter:g}')
-    out.extend([f'<text x="750" y="532" class="note">轴距 {p["pivot_distance"]:g} · 有效臂长 {p["arm_effective_length"]:g} · 一低音两高音占位</text>',
+    out.extend([f'<text x="750" y="532" class="note">轴距 {p["pivot_distance"]:g} · 有效臂长 {p["arm_effective_length"]:g} · 一低音两全频占位</text>',
                 f'<text x="750" y="558" class="note">前格栅后倾 {90-p["front_angle"]:g}° · 木壳厚 {p["wall"]:g}（估算）</text>',
                 '<line x1="60" y1="948" x2="1340" y2="948" stroke="#d8d3cc"/>',
                 f'<text x="60" y="978" class="note">* {H:g} 为当前闭盖总高；原图未明确测量基准。板厚、盖高及内部接口为本项目估算。</text>',

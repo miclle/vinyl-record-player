@@ -29,6 +29,7 @@ def render(doc,p,groups):
     doc.recompute()
     view.setCameraOrientation(App.Rotation(App.Vector(1,0,0),90).Q);view.fitAll();save('front.png')
     view.setCameraOrientation(App.Rotation(App.Vector(0,1,0),App.Vector(0,0,1),App.Vector(1,0,0),'ZXY').Q);view.fitAll();save('right.png')
+    view.viewRear();view.fitAll();save('rear.png')
     view.setCameraOrientation(App.Rotation(App.Vector(1,0,0),180).Q);view.fitAll();save('bottom.png')
     # Top view intentionally omits the cover to show mechanical layout.
     for obj in groups['Cover'].Group:obj.ViewObject.Visibility=False
@@ -36,12 +37,17 @@ def render(doc,p,groups):
     visible={obj.Name:obj.ViewObject.Visibility for obj in doc.Objects if obj.TypeId=='Part::Feature'}
     for key in ['Front','Mechanism','Deck']:
         for obj in groups[key].Group:obj.ViewObject.Visibility=False
-    for name in ['AcousticRoof','Baffle']:
+    for name in ['AcousticRoof','Baffle','BearingPocket']:
         doc.getObject(name).ViewObject.Visibility=False
+    floor=doc.getObject('Bottom')
+    floor_color=floor.ViewObject.ShapeColor
+    floor.ViewObject.ShapeColor=(0.82,0.80,0.76)
     iso();save('internal.png')
+    view.viewTop();view.fitAll();save('audio-layout.png')
+    floor.ViewObject.ShapeColor=floor_color
     for name,value in visible.items():doc.getObject(name).ViewObject.Visibility=value
     for obj in groups['Cover'].Group:obj.ViewObject.Visibility=True
     iso()
     doc.recompute()
     doc.save()
-    (ROOT/'cad/render.done').write_text('Rendered closed, open, front, right, bottom, top, internal from FreeCAD viewport.\n')
+    (ROOT/'cad/render.done').write_text('Rendered closed, open, front, right, bottom, top, rear, internal, audio-layout from FreeCAD viewport.\n')

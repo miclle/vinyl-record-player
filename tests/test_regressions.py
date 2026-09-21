@@ -36,7 +36,7 @@ class ParameterValidationTests(unittest.TestCase):
                         doc, params, _ = build_model.deliver()
                         datum = doc.getObject('GeometryDatums')
                         if case == 'old_schema':
-                            for role in ['woofer', 'tweeter']:
+                            for role in ['woofer', 'fullrange']:
                                 params[role]['depth'] = params[role].pop('total_height')
                                 params[role].pop('flange_thickness')
                             for name in ['Woofer', 'TweeterLeft', 'TweeterRight']:
@@ -80,7 +80,7 @@ class ParameterValidationTests(unittest.TestCase):
             root = Path(tmp)
             (root / 'cad').mkdir()
             params = json.loads((ROOT / 'cad/parameters.json').read_text())
-            params['power_transformer']['center_x'] = 300.0
+            params['power_transformer']['center_x'] = 360.0
             (root / 'cad/parameters.json').write_text(json.dumps(params))
             with patch.object(build_model, 'ROOT', root):
                 doc, _, _ = build_model.deliver()
@@ -128,7 +128,7 @@ class ParameterValidationTests(unittest.TestCase):
                 for change in ['position', 'revision', 'amplifier_size']:
                     params = json.loads(json.dumps(original))
                     if change == 'position':
-                        params['woofer']['center_x'] = 300.0
+                        params['woofer']['center_x'] = 360.0
                     elif change == 'amplifier_size':
                         params['amplifier']['height'] += 1
                     else:
@@ -137,6 +137,92 @@ class ParameterValidationTests(unittest.TestCase):
                     result = validate_model.validate()
                     with self.subTest(change=change):
                         self.assertFalse(result['passed'])
+
+
+class AcousticLayoutTests(unittest.TestCase):
+    def test_chamber_leak_and_blocked_port_are_detected_from_saved_solids(self):
+        import Part
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp); (root/'cad').mkdir()
+            shutil.copy2(ROOT/'cad/parameters.json',root/'cad/parameters.json')
+            with patch.object(build_model,'ROOT',root):
+                doc,p,_=build_model.deliver()
+            try:
+                divider=doc.getObject('AcousticDividerLeft')
+                original=divider.Shape.copy()
+                divider.Shape=divider.Shape.cut(Part.makeCylinder(6,20,App.Vector(125,110,70),App.Vector(1,0,0)))
+                doc.recompute();doc.save()
+                with patch.object(validate_model,'ROOT',root),contextlib.redirect_stdout(io.StringIO()):
+                    result=validate_model._validate_document(doc,p)
+                self.assertFalse(result['checks']['three_independent_enclosed_chambers'])
+                divider.Shape=original
+                port=doc.getObject('BassPort');spec=p['bass_port']
+                port.Shape=port.Shape.fuse(Part.makeCylinder(spec['inner_diameter']/2,2,
+                    App.Vector(spec['center_x'],p['depth']-spec['length']+2,spec['center_z']),App.Vector(0,1,0)))
+                doc.recompute();doc.save()
+                with patch.object(validate_model,'ROOT',root),contextlib.redirect_stdout(io.StringIO()):
+                    result=validate_model._validate_document(doc,p)
+                self.assertTrue(result['checks']['three_independent_enclosed_chambers'])
+                self.assertFalse(result['checks']['bass_port_air_path_clear'])
+                self.assertFalse(result['checks']['bass_port_dimensions_match'])
+            finally:
+                App.closeDocument(doc.Name)
+
+    def test_shorter_satellite_chambers_remain_independent(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp); (root/'cad').mkdir()
+            p=json.loads((ROOT/'cad/parameters.json').read_text())
+            p['acoustic']['satellite_rear_y']=100.0
+            (root/'cad/parameters.json').write_text(json.dumps(p))
+            with patch.object(build_model,'ROOT',root):
+                doc,_,_=build_model.deliver();App.closeDocument(doc.Name)
+            with patch.object(validate_model,'ROOT',root),contextlib.redirect_stdout(io.StringIO()):
+                result=validate_model.validate()
+            self.assertTrue(result['passed'],result)
+            chambers=result['metrics']['acoustics']['chambers']
+            self.assertAlmostEqual(chambers['left']['gross_after_recess_l'],0.64631680194,places=8)
+            self.assertAlmostEqual(chambers['right']['gross_after_recess_l'],0.64631680194,places=8)
+
+    def test_electronics_in_chamber_reduce_net_volume(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp); (root/'cad').mkdir()
+            original=json.loads((ROOT/'cad/parameters.json').read_text())
+            net_volumes={}
+            # The transformer reserves the full box above its mounting ears too.
+            for case in ['baseline','amplifier','power_transformer']:
+                p=json.loads(json.dumps(original))
+                if case=='amplifier':p[case].update(x=180.0,y=55.0)
+                if case=='power_transformer':p[case].update(center_x=224.3,center_y=110.0)
+                (root/'cad/parameters.json').write_text(json.dumps(p))
+                with patch.object(build_model,'ROOT',root):
+                    doc,_,_=build_model.deliver();App.closeDocument(doc.Name)
+                with patch.object(validate_model,'ROOT',root),contextlib.redirect_stdout(io.StringIO()):
+                    result=validate_model.validate()
+                self.assertTrue(result['passed'],result)
+                net_volumes[case]=result['metrics']['acoustics']['chambers']['woofer']['conservative_net_l']
+            self.assertAlmostEqual(net_volumes['baseline']-net_volumes['amplifier'],125*75*45/1e6,places=8)
+            self.assertAlmostEqual(net_volumes['baseline']-net_volumes['power_transformer'],88*55*50/1e6,places=8)
+
+    def test_replaceable_port_lengths_fit_and_displace_chamber_volume(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);(root/'cad').mkdir()
+            p=json.loads((ROOT/'cad/parameters.json').read_text())
+            volumes=[]
+            for length in p['bass_port']['trial_lengths']:
+                with self.subTest(length=length):
+                    p['bass_port']['length']=length
+                    (root/'cad/parameters.json').write_text(json.dumps(p))
+                    with patch.object(build_model,'ROOT',root):
+                        doc,_,_=build_model.deliver();App.closeDocument(doc.Name)
+                    with patch.object(validate_model,'ROOT',root),contextlib.redirect_stdout(io.StringIO()):
+                        result=validate_model.validate()
+                    self.assertTrue(result['passed'],result)
+                    chambers=result['metrics']['acoustics']['chambers']
+                    self.assertGreater(chambers['woofer']['conservative_net_l'],3.9)
+                    self.assertGreater(chambers['left']['conservative_net_l'],1.1)
+                    volumes.append(chambers['woofer']['conservative_net_l'])
+            self.assertGreater(volumes[0],volumes[1])
+            self.assertGreater(volumes[1],volumes[2])
 
 
 class MacroReloadTests(unittest.TestCase):

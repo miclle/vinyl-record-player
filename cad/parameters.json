@@ -1,6 +1,6 @@
 {
   "units": "mm",
-  "revision": "v0.2-concept",
+  "revision": "v0.4-sc2103-layout",
   "width": 448.6,
   "depth": 345.5,
   "closed_height": 214.2,
@@ -21,7 +21,37 @@
   "headshell_offset": 24.7,
   "pivot_bearing_degrees": 32.0,
   "driver_count": 3,
-  "tweeter": {
+  "woofer": {
+    "flange_diameter": 132.0,
+    "cutout_diameter": 100.0,
+    "center_x": 224.3,
+    "center_y": 247.0,
+    "total_height": 65.0,
+    "flange_thickness": 3.0
+  },
+  "acoustic_divider_x": [
+    129.0,
+    311.6
+  ],
+  "power_transformer": {
+    "body_length": 60.0,
+    "body_width": 55.0,
+    "body_height": 50.0,
+    "mount_span": 88.0,
+    "mount_thickness_assumption": 2.0,
+    "center_x": 70.0,
+    "center_y": 277.0
+  },
+  "amplifier": {
+    "length": 125.0,
+    "width": 75.0,
+    "height": 45.0,
+    "x": 335.0,
+    "y": 185.0,
+    "bottom_clearance_assumption": 10.0,
+    "rotation_degrees": 90
+  },
+  "fullrange": {
     "flange_diameter": 78.0,
     "cutout_diameter": 40.0,
     "center_x": [
@@ -32,33 +62,35 @@
     "total_height": 40.0,
     "flange_thickness": 3.0
   },
-  "woofer": {
-    "flange_diameter": 132.0,
-    "cutout_diameter": 100.0,
-    "center_x": 224.3,
-    "center_y": 94.0,
-    "total_height": 65.0,
-    "flange_thickness": 3.0
+  "acoustic": {
+    "partition_thickness": 8.0,
+    "satellite_rear_y": 150.0,
+    "roof_bottom_z": 128.0,
+    "roof_thickness": 8.0,
+    "source": "Shockwave SC-2103 salvaged drivers; original cabinets and ports unavailable; exact variant unconfirmed",
+    "satellite_alignment": "sealed trial; response unverified"
   },
-  "acoustic_divider_x": [
-    140.0,
-    300.6
-  ],
-  "power_transformer": {
-    "body_length": 60.0,
-    "body_width": 55.0,
-    "body_height": 50.0,
-    "mount_span": 88.0,
-    "mount_thickness_assumption": 2.0,
-    "center_x": 205.0,
-    "center_y": 247.5
+  "bass_port": {
+    "inner_diameter": 32.0,
+    "wall_thickness": 2.0,
+    "length": 160.0,
+    "trial_lengths": [
+      120.0,
+      160.0,
+      200.0
+    ],
+    "center_x": 288.0,
+    "center_z": 106.0,
+    "flange_diameter": 48.0,
+    "flange_thickness": 3.0,
+    "note": "flush removable cartridge; acoustic tuning, air velocity, seal and retention unverified"
   },
-  "amplifier": {
-    "length": 125.0,
-    "width": 75.0,
-    "height": 45.0,
-    "x": 270.0,
-    "y": 207.0,
-    "bottom_clearance_assumption": 10.0
+  "phono_board": {
+    "x": 26.0,
+    "y": 170.0,
+    "z": 48.0,
+    "length": 80.0,
+    "width": 52.0,
+    "height": 17.0
   }
 }
