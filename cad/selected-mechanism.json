@@ -1,0 +1,17 @@
+{
+  "revision": "v0.3-fit-study",
+  "selected_option": "28高端弯臂机芯全套餐装好直接用 自动回臂",
+  "product_url": "https://item.taobao.com/item.htm?id=712086565319&skuId=5162746531784",
+  "dimension_status": "unconfirmed_for_selected_curved_arm_variant",
+  "dimension_reference": "references/selected-mechanism/straight-arm-dimensions.png",
+  "appearance_reference": "references/selected-mechanism/selected-curved-arm-kit.png",
+  "nominal_width": 355.0,
+  "nominal_depth": 280.0,
+  "platter_diameter": 280.0,
+  "platter_thickness": 10.0,
+  "platter_center_x": 176.0,
+  "platter_center_y": 172.0,
+  "underbody_depth_assumption": 45.0,
+  "mounting_holes_confirmed": false,
+  "assumption_note": "355/280/10 mm 来自直臂配图，只作候选弯臂款占位参考；45 mm 下探深度为本项目假设，未获得商家数据。唱臂外观按选定款照片近似，无循迹或安装尺寸承诺。"
+}
