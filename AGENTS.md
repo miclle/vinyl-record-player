@@ -12,6 +12,7 @@ FreeCAD concept model of a turntable with one downward-facing woofer, two front 
 - `cad/parameters.json`: cabinet, drivers, transformer, and amplifier inputs; `lumi-three-driver.FCStd` / `.step`, `parts.csv`, and `validation.json` are baseline outputs.
 - `cad/selected-mechanism.json`: mechanism assumptions; `lumi-selected-mechanism-fit.FCStd` / `.step` and `mechanism-fit-report.json` are fit-study outputs. The study reads the saved baseline FCStd. `lumi-dual-driver.*` files are historical.
 - `previews/`: generated PNG and SVG assets.
+- `docs/audio-layout.md`: chamber volumes, trial ports, and unimplemented satellite-port options; `docs/current-work-handoff.md`: verified resume state.
 - `docs/design-basis.md`: dimension sources and manufacturing limitations; `docs/selected-mechanism.md`: fit-study assumptions, rebuild sequence, and remaining installation work. Reference images are under `references/`.
 
 ## Build, Test, and Development Commands
@@ -44,7 +45,7 @@ Use FreeCAD’s Python to run `-m unittest discover -s tests -v`. Tests use temp
 
 ## Commit & Pull Request Guidelines
 
-No established commit convention exists. Prefer concise imperative messages, optionally prefixed with `feat:`, `fix:`, or `docs:`. PRs should explain dimension changes, assumptions, validation results, and relevant issues, with before/after previews for geometry changes. Include regenerated artifacts alongside their source changes; exclude ignored backups and logs.
+Follow the existing concise English Angular-style commit messages, such as `feat(cad): ...`, `fix: ...`, or `docs: ...`. PRs should explain dimension changes, assumptions, validation results, and relevant issues, with before/after previews for geometry changes. Include regenerated artifacts alongside their source changes; exclude ignored backups and logs.
 
 ## Modeling Boundaries
 
