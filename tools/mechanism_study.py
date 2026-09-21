@@ -50,7 +50,7 @@ def build_study():
     analysis = doc.addObject('App::DocumentObjectGroup', 'FitAnalysis')
     analysis.Label = '安装包络与干涉 · 非实物零件'
     # Preserve inherited electronic spaces without claiming the kit needs a preamp.
-    doc.getObject('Amplifier').Label = '套装功放板预留区（沿用估算尺寸）'
+    doc.getObject('Amplifier').Label = '功放板 · 含散热片整体包络（用户提供尺寸）'
     doc.getObject('PhonoBoard').Label = '备用电子预留区（不代表另需唱放）'
     doc.getObject('ConnectorPlate').Label = '套装 RCA 后板预留区（孔位待确认）'
     doc.getObject('FloatingDeck').Label = '现有承载板（机芯开口与孔位待调整）'

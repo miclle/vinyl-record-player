@@ -5,6 +5,7 @@ import io
 import json
 import re
 import shutil
+import subprocess
 import sys
 import tempfile
 import types
@@ -21,6 +22,98 @@ import validate_model
 
 
 class ParameterValidationTests(unittest.TestCase):
+    def test_incompatible_model_replaces_success_report_and_closes_document(self):
+        cases = ['old_schema', 'missing_property', 'missing_snapshot', 'invalid_snapshot']
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / 'cad').mkdir()
+            (root / 'tools').mkdir()
+            shutil.copy2(ROOT / 'cad/parameters.json', root / 'cad/parameters.json')
+            shutil.copy2(ROOT / 'tools/validate_model.py', root / 'tools/validate_model.py')
+            for case in cases:
+                with self.subTest(case=case):
+                    with patch.object(build_model, 'ROOT', root):
+                        doc, params, _ = build_model.deliver()
+                        datum = doc.getObject('GeometryDatums')
+                        if case == 'old_schema':
+                            for role in ['woofer', 'tweeter']:
+                                params[role]['depth'] = params[role].pop('total_height')
+                                params[role].pop('flange_thickness')
+                            for name in ['Woofer', 'TweeterLeft', 'TweeterRight']:
+                                doc.getObject(name).removeProperty('TotalHeight')
+                                doc.getObject(name).removeProperty('FlangeThickness')
+                            doc.removeObject('PowerTransformer')
+                            datum.BuildParametersJSON = json.dumps(params)
+                        elif case == 'missing_property':
+                            doc.getObject('Woofer').removeProperty('TotalHeight')
+                        elif case == 'missing_snapshot':
+                            datum.removeProperty('BuildParametersJSON')
+                        else:
+                            datum.BuildParametersJSON = '{invalid'
+                        doc.recompute()
+                        doc.save()
+                        App.closeDocument(doc.Name)
+                    report_path = root / 'cad/validation.json'
+                    report_path.write_text('{"passed": true}')
+                    opened_before = set(App.listDocuments())
+                    try:
+                        with patch.object(validate_model, 'ROOT', root), contextlib.redirect_stdout(io.StringIO()):
+                            result = validate_model.validate()
+                    finally:
+                        opened_after = set(App.listDocuments())
+                        for name in opened_after - opened_before:
+                            App.closeDocument(name)
+                    self.assertFalse(result['passed'])
+                    self.assertEqual(json.loads(report_path.read_text()), result)
+                    self.assertEqual(opened_after, opened_before)
+                    self.assertTrue(result['errors'])
+                    # Exercise the actual CLI exit path and overwrite a stale successful report.
+                    report_path.write_text('{"passed": true}')
+                    run = subprocess.run([sys.executable, str(root / 'tools/validate_model.py')],
+                                         capture_output=True, text=True)
+                    self.assertEqual(run.returncode, 1, run.stderr)
+                    self.assertNotIn('Traceback', run.stderr)
+                    self.assertFalse(json.loads(report_path.read_text())['passed'])
+
+    def test_transformer_envelope_rejects_overlap_with_amplifier(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / 'cad').mkdir()
+            params = json.loads((ROOT / 'cad/parameters.json').read_text())
+            params['power_transformer']['center_x'] = 300.0
+            (root / 'cad/parameters.json').write_text(json.dumps(params))
+            with patch.object(build_model, 'ROOT', root):
+                doc, _, _ = build_model.deliver()
+                App.closeDocument(doc.Name)
+            with patch.object(validate_model, 'ROOT', root), contextlib.redirect_stdout(io.StringIO()):
+                result = validate_model.validate()
+            self.assertTrue(result['checks']['transformer_dimensions_match'])
+            self.assertFalse(result['checks']['transformer_reservation_clear'])
+            self.assertIn('Amplifier', [hit['part'] for hit in result['metrics']['transformer_reservation_collisions']])
+
+    def test_saved_driver_height_is_checked_independently_of_metadata(self):
+        import Part
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / 'cad').mkdir()
+            shutil.copy2(ROOT / 'cad/parameters.json', root / 'cad/parameters.json')
+            with patch.object(build_model, 'ROOT', root):
+                doc, params, _ = build_model.deliver()
+                woofer = doc.getObject('Woofer')
+                # Keep the parameter snapshot and properties intact, but corrupt geometry.
+                woofer.Shape = Part.makeCylinder(params['woofer']['flange_diameter'] / 2,
+                    params['woofer']['total_height'] + 1,
+                    woofer.MountCentre - woofer.InwardAxis * float(woofer.FlangeThickness))
+                doc.recompute()
+                doc.save()
+                App.closeDocument(doc.Name)
+            with patch.object(validate_model, 'ROOT', root), contextlib.redirect_stdout(io.StringIO()):
+                result = validate_model.validate()
+            self.assertTrue(result['checks']['build_parameters_match'])
+            self.assertTrue(result['checks']['driver_dimensions_match_parameters'])
+            self.assertFalse(result['checks']['driver_geometry_matches_dimensions'])
+            self.assertFalse(result['passed'])
+
     def test_changed_position_or_revision_rejects_stale_model(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -32,10 +125,12 @@ class ParameterValidationTests(unittest.TestCase):
             with patch.object(validate_model, 'ROOT', root), contextlib.redirect_stdout(io.StringIO()):
                 self.assertTrue(validate_model.validate()['passed'])
                 original = json.loads((root / 'cad/parameters.json').read_text())
-                for change in ['position', 'revision']:
+                for change in ['position', 'revision', 'amplifier_size']:
                     params = json.loads(json.dumps(original))
                     if change == 'position':
                         params['woofer']['center_x'] = 300.0
+                    elif change == 'amplifier_size':
+                        params['amplifier']['height'] += 1
                     else:
                         params['revision'] = 'different-build'
                     (root / 'cad/parameters.json').write_text(json.dumps(params))

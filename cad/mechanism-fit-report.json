@@ -1,7 +1,7 @@
 {
   "revision": "v0.3-fit-study",
   "selected_option": "28高端弯臂机芯全套餐装好直接用 自动回臂",
-  "base_sha256": "38cbd83a7f376c6fb73eac4133409d4e94e3fbe6b39d76c8daac7c77ae226756",
+  "base_sha256": "764ad16573d2829de43d1458d5032668e41d9bfb763bd0016bf5c69dcbf8da43",
   "assumptions": {
     "revision": "v0.3-fit-study",
     "selected_option": "28高端弯臂机芯全套餐装好直接用 自动回臂",
@@ -102,12 +102,12 @@
       {
         "part": "TweeterLeft",
         "label": "左高音 · 安装占位",
-        "overlap_mm3": 804.082
+        "overlap_mm3": 3217.692
       },
       {
         "part": "TweeterRight",
         "label": "右高音 · 安装占位",
-        "overlap_mm3": 804.082
+        "overlap_mm3": 2898.764
       }
     ],
     "illustrative_closed_cover_clear": true,

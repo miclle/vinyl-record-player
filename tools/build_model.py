@@ -109,17 +109,21 @@ def build():
         add('AcousticDivider'+side,'低音腔'+('左' if side=='Left' else '右')+'隔板',divider,'Audio',GRAY)
 
     def driver(name,label,c,axis,spec,role):
-        r=spec['cutout_diameter']/2; depth=spec['depth']
+        r=spec['cutout_diameter']/2
+        flange_thickness=spec['flange_thickness']
+        depth=spec['total_height']-flange_thickness
+        if depth <= 0 or flange_thickness <= 0:
+            raise ValueError('Driver total height must exceed positive flange thickness')
         magnet_r=r*0.6; magnet_h=min(14,depth*0.35); cone_h=depth*0.35
-        flange=Part.makeCylinder(spec['flange_diameter']/2,3,c-axis*3,axis).cut(Part.makeCylinder(r-1,4,c-axis*3.5,axis))
+        flange=Part.makeCylinder(spec['flange_diameter']/2,flange_thickness,c-axis*flange_thickness,axis).cut(Part.makeCylinder(r-1,flange_thickness+1,c-axis*(flange_thickness+0.5),axis))
         cone=Part.makeCone(r-1,r*0.35,cone_h,c,axis).cut(Part.makeCone(r-2,r*0.35-1,cone_h,c-axis*0.7,axis))
         magnet=Part.makeCylinder(magnet_r,magnet_h,c+axis*(depth-magnet_h),axis)
         basket=Part.makeCone(r,magnet_r,depth-magnet_h,c,axis).cut(Part.makeCone(r-1,magnet_r-1,depth-magnet_h,c,axis))
-        obj=add(name,label,Part.makeCompound([flange,cone,basket,magnet]),'Audio',BLACK)
+        obj=add(name,label,Part.makeCompound([flange,cone,basket,magnet]),'Audio',BLACK,basis='用户提供口端外径与总高；开孔、边沿厚度及内部轮廓暂估')
         obj.addProperty('App::PropertyString','DriverRole','Installation').DriverRole=role
         obj.addProperty('App::PropertyVector','MountCentre','Installation').MountCentre=c
         obj.addProperty('App::PropertyVector','InwardAxis','Installation').InwardAxis=axis
-        for key,value in [('FlangeDiameter',spec['flange_diameter']),('CutoutDiameter',spec['cutout_diameter']),('ReservedDepth',depth)]:
+        for key,value in [('FlangeDiameter',spec['flange_diameter']),('CutoutDiameter',spec['cutout_diameter']),('ReservedDepth',depth),('TotalHeight',spec['total_height']),('FlangeThickness',flange_thickness)]:
             obj.addProperty('App::PropertyLength',key,'Installation');setattr(obj,key,value)
 
     for side,c in zip(['Left','Right'],speaker_centres):
@@ -132,8 +136,32 @@ def build():
     deck_shape=Part.makeBox(W-2*t-8,D-t-24,p['deck_thickness'],V(t+4,8,H-p['deck_thickness']))
     deck_shape=deck_shape.cut(Part.makeCylinder(10.2,p['deck_thickness']+2,V(p['platter_x'],p['platter_y'],H-p['deck_thickness']-1)))
     deck=add('FloatingDeck','唱盘与唱臂共用浮动底板',deck_shape,'Deck',BLACK,material='结构底板 / 6 mm 占位；主轴孔 Ø20.4 待选型')
-    box('Amplifier','功放板空间占位',270,207,48,112,65,24,'Electronics',(0.11,0.34,0.28))
+    amplifier=p['amplifier']
+    box('Amplifier','功放板 · 含散热片整体包络',amplifier['x'],amplifier['y'],
+        z0+t+amplifier['bottom_clearance_assumption'],
+        amplifier['length'],amplifier['width'],amplifier['height'],
+        'Electronics',(0.11,0.34,0.28),
+        basis='用户提供含散热片外廓长宽高；离底板间距暂估，安装孔位未知',
+        material='功放板及散热片整体占位；未细化散热片、端子和支柱')
     box('PhonoBoard','唱放板空间占位',60,220,48,80,52,17,'Electronics',(0.12,0.32,0.28))
+    transformer=p['power_transformer']
+    length,width,height=(transformer[k] for k in ['body_length','body_width','body_height'])
+    span=transformer['mount_span']; ear_thickness=transformer['mount_thickness_assumption']
+    if not (0 < length <= span and width > 0 and 0 < ear_thickness < height):
+        raise ValueError('Invalid transformer body or mounting envelope dimensions')
+    tx,ty=transformer['center_x'],transformer['center_y']
+    base_z=z0+t
+    body=Part.makeBox(length,width,height,V(tx-length/2,ty-width/2,base_z))
+    # Full-width, symmetric foot envelope; actual ear outline and holes are unknown.
+    feet=Part.makeBox(span,width,ear_thickness,V(tx-span/2,ty-width/2,base_z))
+    power=add('PowerTransformer','扬声器电源变压器 · 含固定耳包络',body.fuse(feet).removeSplitter(),
+        'Electronics',(0.48,0.34,0.19),
+        basis='本体长宽高与固定耳总长由用户提供；耳宽按本体宽保守预留，耳厚为参数中的暂估值，孔位未知',
+        material='变压器空间占位；电气、散热与磁场影响未验证')
+    for key,value in [('BodyLength',length),('BodyWidth',width),('BodyHeight',height),
+                      ('MountSpan',span),('MountThicknessAssumption',ear_thickness)]:
+        power.addProperty('App::PropertyLength',key,'Installation');setattr(power,key,value)
+
     box('ConnectorPlate','后部接口安装板占位',W/2-35,D-t-2,65,110,2,32,'Electronics',BLACK)
     # Connector holes are intentionally deferred until actual parts are selected.
 

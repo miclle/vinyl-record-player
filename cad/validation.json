@@ -2,11 +2,13 @@
   "revision": "v0.2-concept",
   "freecad": "1.1.1",
   "checks": {
+    "build_parameters_match": true,
+    "required_model_fields_present": true,
     "all_shapes_valid": true,
     "overall_matches_parameters": true,
     "one_woofer_two_tweeters": true,
     "driver_dimensions_match_parameters": true,
-    "build_parameters_match": true,
+    "driver_geometry_matches_dimensions": true,
     "pivot_distance": true,
     "effective_arm_length": true,
     "platter_diameter": true,
@@ -14,6 +16,11 @@
     "cover_sweep_samples_clear": true,
     "internal_envelopes_clear": true,
     "solid_installation_reservations_clear": true,
+    "transformer_dimensions_match": true,
+    "transformer_mount_on_floor": true,
+    "transformer_reservation_clear": true,
+    "amplifier_dimensions_match": true,
+    "amplifier_reservation_clear": true,
     "woofer_floor_clearance": true,
     "step_valid": true,
     "step_solid_count": true,
@@ -22,8 +29,8 @@
     "step_bounds": true
   },
   "metrics": {
-    "part_count": 60,
-    "solid_count": 69,
+    "part_count": 61,
+    "solid_count": 70,
     "overall_mm": [
       448.6,
       345.5,
@@ -32,22 +39,45 @@
     "driver_reservations_mm": {
       "TweeterLeft": {
         "role": "tweeter",
-        "flange_diameter": 54.0,
+        "flange_diameter": 78.0,
         "cutout_diameter": 40.0,
-        "depth": 30.0
+        "depth": 37.0,
+        "total_height": 40.0,
+        "flange_thickness": 3.0
       },
       "TweeterRight": {
         "role": "tweeter",
-        "flange_diameter": 54.0,
+        "flange_diameter": 78.0,
         "cutout_diameter": 40.0,
-        "depth": 30.0
+        "depth": 37.0,
+        "total_height": 40.0,
+        "flange_thickness": 3.0
       },
       "Woofer": {
         "role": "woofer",
-        "flange_diameter": 116.0,
+        "flange_diameter": 132.0,
         "cutout_diameter": 100.0,
-        "depth": 65.0
+        "depth": 62.0,
+        "total_height": 65.0,
+        "flange_thickness": 3.0
       }
+    },
+    "driver_local_bounds_mm": {
+      "TweeterLeft": [
+        78.0,
+        78.0,
+        40.00000000000001
+      ],
+      "TweeterRight": [
+        78.0,
+        78.0,
+        40.00000000000001
+      ],
+      "Woofer": [
+        132.0,
+        132.0,
+        65.0
+      ]
     },
     "pivot_distance_mm": 199.99999999999997,
     "effective_length_mm": 217.99999999999994,
@@ -57,6 +87,32 @@
     "cover_sweep_collisions": [],
     "internal_collisions": [],
     "installation_reservation_collisions": [],
+    "transformer_envelope_mm": [
+      88.0,
+      55.0,
+      50.0
+    ],
+    "transformer_reservation_collisions": [],
+    "transformer_clearances_mm": {
+      "RearSupport": 40.311288741492746,
+      "FloatingDeck": 56.0,
+      "Amplifier": 21.0,
+      "PhonoBoard": 21.0
+    },
+    "amplifier_envelope_mm": [
+      125.0,
+      75.0,
+      45.0
+    ],
+    "amplifier_reservation_collisions": [],
+    "amplifier_clearances_mm": {
+      "SideRight": 41.60000000000002,
+      "Bottom": 10.0,
+      "Back": 51.5,
+      "RearSupport": 35.0,
+      "FloatingDeck": 51.0,
+      "PowerTransformer": 22.47220505424423
+    },
     "woofer_floor_clearance_mm": 23.0
   },
   "limitations": [
@@ -64,7 +120,8 @@
     "音响与唱盘部件为概念包络；声学、隔振、连接工艺及电气均未验证",
     "214.2 mm 暂作为闭盖总高；原厂测量基准未明确",
     "开盖按 0 至 70 度每 5 度抽样检查，非连续运动求解",
-    "未对所有零件做全局干涉放行；这里只检查列出的关键部件与外壳"
+    "未对所有零件做全局干涉放行；这里只检查列出的关键部件与外壳",
+    "变压器固定耳宽厚为保守占位，孔距未知；未验证散热、磁场、电气或走线"
   ],
   "requested_revision": "v0.2-concept",
   "passed": true

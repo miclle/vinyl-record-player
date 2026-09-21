@@ -16,7 +16,16 @@
 
 ## CAD 与核对结果
 
-[FreeCAD 核对装配](../cad/lumi-selected-mechanism-fit.FCStd) 和 [STEP](../cad/lumi-selected-mechanism-fit.step) 沿用 v0.2 的外壳、一个下向低音及两个前向高音占位，替换上部机芯外观。功放和 RCA 后板沿用原空间占位，备用电路板区域不代表需要另购唱放。原装配文件保持独立。
+[FreeCAD 核对装配](../cad/lumi-selected-mechanism-fit.FCStd) 和 [STEP](../cad/lumi-selected-mechanism-fit.step) 沿用 v0.2 的外壳与电子、音响布局，并替换上部机芯外观。原基线文件保持独立，是本核对版的生成输入。
+
+| 继承部件 | 用户提供的外廓 | 仍待确认 |
+|---|---|---|
+| 低音 × 1 | 口端 Ø132 mm，总高 65 mm | 开孔、边沿厚度、孔位及背部轮廓；朝下安装 |
+| 高音 × 2 | 口端 Ø78 mm，总高 40 mm | 开孔、边沿厚度、孔位及背部轮廓；朝前安装 |
+| 共用变压器 × 1 | 本体 60 × 55 × 50 mm，固定耳总长 88 mm | 固定耳宽厚、孔距及高度基准 |
+| 功放板 × 1 | 125 × 75 × 45 mm，已含散热片 | 安装孔、支柱、端子及散热条件 |
+
+扬声器总高包含暂估的 3 mm 边沿，开孔仍暂估。RCA 后板沿用原空间占位，备用电路板区域不代表需要另购唱放。布局及估算依据见[设计依据](design-basis.md)。
 
 ![弯臂机芯开盖示意](../previews/selected-mechanism-open.png)
 
@@ -32,8 +41,22 @@
 
 ## 后续适配与重建
 
-向商家取得弯臂款的底部安装图，至少包含安装基准、最大下探深度与位置、支点及孔距、上部最大高度。再据此确定台面开口、声腔避让和隔振支承。功放板还需核对尺寸、供电、输出通道、负载和分频接法；套装不意味着能直接驱动当前三个扬声器。
+向商家取得弯臂款的底部安装图，至少包含安装基准、最大下探深度与位置、支点及孔距、上部最大高度。再据此确定台面开口、声腔避让和隔振支承。功放板还需补齐安装孔位、端子位置并核对供电、输出通道、负载和分频接法；套装不意味着能直接驱动当前三个扬声器。
 
-修改 [占位参数](../cad/selected-mechanism.json)，先将手动改动另存，并关闭核对版文档（包括重新打开的 `lumi-selected-mechanism-fit.FCStd`），在 FreeCAD 执行 `tools/mechanism-study.FCMacro`，生成 CAD、报告和两张预览。脚本按文档名及解析符号链接后的文件路径检查目标是否仍打开，拒绝覆盖。它从已保存的 `lumi-three-driver.FCStd` 复制基线，报告保存基线 SHA-256；若基线参数改变，先重建并验证基线，再重建本核对版。
+参数入口按部件区分：[基线参数](../cad/parameters.json) 控制外壳、扬声器、变压器和功放；[机芯参数](../cad/selected-mechanism.json) 控制弯臂机芯占位及下探假设。
 
-无 GUI 时，用 FreeCAD 自带 Python 运行 `tools/mechanism_study.py`，只生成 CAD 与报告。原 `tools/validate_model.py` 的 18 项检查只针对 v0.2，不能用来宣称此款机芯已适配。
+1. 先把手动改动另存。基线参数有变化时，按 [README](../README.md#v02-基线重建) 重建基线并运行 `tools/validate_model.py`；报告必须与刚保存的基线一致。
+2. 关闭核对版文档，包括重新打开的 `lumi-selected-mechanism-fit.FCStd`。核对版脚本同时检查文档名及解析符号链接后的文件路径，拒绝覆盖仍打开的目标。
+3. 在 FreeCAD 执行 `tools/mechanism-study.FCMacro`，生成核对版 FCStd、STEP、`mechanism-fit-report.json` 和两张预览。仅改机芯参数时可以直接执行此步，但输入基线须是已验证的当前版本。
+4. 核对报告中的 `geometry_checks` 与 `fit`。几何及 STEP 检查通过不表示安装放行；当前 `installation_released=false`，仍有下探包络重叠。
+
+核对版读取已保存的 `lumi-three-driver.FCStd`，不会自动读取最新基线 JSON 重建外壳，也不包含基线 GUI 内尚未保存的修改。报告的 `base_sha256` 绑定输入 FCStd；基线保存后若字节变化，应重建核对版再使用报告。
+
+无 GUI 时可在仓库根目录运行：
+
+```sh
+PYTHONPATH=/Applications/FreeCAD.app/Contents/Resources/lib \
+  /Applications/FreeCAD.app/Contents/Resources/bin/python tools/mechanism_study.py
+```
+
+该入口生成 CAD 与报告，不刷新 GUI 颜色和预览。`tools/validate_model.py` 的 25 项检查只针对 v0.2 基线，不能用来宣称此款机芯已适配。
