@@ -23,7 +23,7 @@ import validate_model
 
 class ParameterValidationTests(unittest.TestCase):
     def test_incompatible_model_replaces_success_report_and_closes_document(self):
-        missing_neighbors = ['GrilleCloth', 'Fascia', 'LowerRail', 'LightChannel', 'LightDiffuser']
+        missing_neighbors = ['GrilleCloth', 'Fascia', 'LightChannel', 'LightDiffuser']
         cases = ['old_schema', 'missing_property', 'missing_snapshot', 'invalid_snapshot', 'Feet'] + missing_neighbors
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

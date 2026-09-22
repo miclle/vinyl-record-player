@@ -311,10 +311,16 @@ def make_books(data,out,font):
                 f'参考平面包络 {num(cfg["nominal_width"])} × {num(cfg["nominal_depth"])}；假设下探深度 {num(cfg["underbody_depth_assumption"])}；唱盘 Ø{num(cfg["platter_diameter"])} × {num(cfg["platter_thickness"])}。',
                 '上图投影是已建模的上部外观实体；不把矩形下探诊断包络当成实体机芯或零件。',
                 f'安装面 Z={num(H)}；音腔顶板顶面 Z={num(roof_top)}，现有净深 {num(H-roof_top)}；假设下探多需 {num(max(0,cfg["underbody_depth_assumption"]-(H-roof_top)))}，真实安装方案尚未确认。'])
-        for i in range(0,len(cards),2):
-            page_title=' / '.join(c['title'].split(' · ')[0] for c in cards[i:i+2])
-            book.start(page_title,f'{prefix}-P{i//2+1:02}','尺寸表：长 X / 宽 Y / 高 Z / 厚度')
-            for j,card in enumerate(cards[i:i+2]):book.card(card,12+j*202,32)
+        pages={}
+        for card in cards:
+            pages.setdefault(card['drawing_code'],[]).append(card)
+        for code,page_cards in pages.items():
+            page_title=' / '.join(c['title'].split(' · ')[0] for c in page_cards)
+            book.start(page_title,code,'尺寸表：长 X / 宽 Y / 高 Z / 厚度')
+            if code=='A-P03':
+                book.text(18,48,'底板前沿一体保留',14)
+                book.paragraph(18,60,'前沿属于完整底板，不另列备料或装配件。底板尺寸见 A-P01，开孔定位见 A-H01。',174,10,INK,5)
+            for card in page_cards:book.card(card,12+card['drawing_column']*202,32)
             book.end()
         for sheet in data['hole_sheets']:
             if sheet['volume']==volume:

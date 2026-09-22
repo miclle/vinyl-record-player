@@ -148,7 +148,7 @@ class Guide:
         self.start(2, '02  分层展开，认识内部结构',
                    '板件仅为展示而移开，零件尺寸未缩放  /  图中层间距离不是安装间隙或拆装顺序')
         anchors = self.image('exploded', (53, 62, 273, 261))
-        left = ['W03', 'W05', 'W06', 'W10', 'F02', 'F03', 'S01', 'E03', 'E04', 'S02']
+        left = ['W03', 'W06', 'W10', 'F02', 'F03', 'S01', 'E03', 'E04', 'S02']
         right = [e['code'] for e in self.data['entries'] if e['page'] == 2
                  and e['code'] not in left+['W04', 'E05', 'E06']]
         self.balloons(anchors, left, right, 25, 363, 62, 24)

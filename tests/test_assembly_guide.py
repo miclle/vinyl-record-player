@@ -44,7 +44,7 @@ class AssemblyGuideTests(unittest.TestCase):
             shutil.copy2(ROOT/'cad/lumi-selected-mechanism-fit.FCStd', path)
             doc = App.openDocument(str(path))
             try:
-                self.assertEqual(assembly_guide.check_coverage(doc, entries), 62)
+                self.assertEqual(assembly_guide.check_coverage(doc, entries), 61)
                 with self.assertRaisesRegex(ValueError, 'coverage mismatch'):
                     assembly_guide.check_coverage(doc, entries[:-1])
                 with self.assertRaisesRegex(ValueError, 'duplicate=True'):
@@ -52,7 +52,7 @@ class AssemblyGuideTests(unittest.TestCase):
             finally:
                 App.closeDocument(doc.Name)
         catalog = {e['code']: e for e in entries}
-        self.assertEqual(len(catalog), 36)
+        self.assertEqual(len(catalog), 35)
         self.assertEqual(catalog['W02']['quantity'], '8 条')
         self.assertEqual(catalog['W08']['quantity'], '2 块')
         self.assertEqual(catalog['W06']['stock_mm'], [426, 98, 8])

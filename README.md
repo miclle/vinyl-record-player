@@ -15,7 +15,7 @@
 
 ## 分组平面图纸
 
-先看[整机结构导览（两页 A2 PDF）](output/pdf/00-assembly-guide.pdf)：[开盖全景](previews/assembly-guide-1.png)和[内部展开](previews/assembly-guide-2.png)用编号标出部件、材料状态、数量及对应详图号，覆盖当前选定装配的全部 62 个物理对象。详见[导览说明](docs/assembly-guide.md)。
+先看[整机结构导览（两页 A2 PDF）](output/pdf/00-assembly-guide.pdf)：[开盖全景](previews/assembly-guide-1.png)和[内部展开](previews/assembly-guide-2.png)用编号标出部件、材料状态、数量及对应详图号，覆盖当前选定装配的全部 61 个物理对象。详见[导览说明](docs/assembly-guide.md)。
 
 当前模型已整理为 **3 份 A3 矢量 PDF，共 40 页**：
 
@@ -35,15 +35,15 @@
 
 | 文件 | 用途 |
 |---|---|
-| [FreeCAD 装配](cad/lumi-three-driver.FCStd) | 68 个独立零件，按结构分组，可隐藏、移动和进一步建模 |
-| [STEP 装配](cad/lumi-three-driver.step) | 毫米制实体交换，共 79 个实体；三个扬声器各含 4 个子实体 |
+| [FreeCAD 装配](cad/lumi-three-driver.FCStd) | 67 个独立零件，按结构分组，可隐藏、移动和进一步建模 |
+| [STEP 装配](cad/lumi-three-driver.step) | 毫米制实体交换，共 78 个实体；三个扬声器各含 4 个子实体 |
 | [三视尺寸图 SVG](previews/dimensions.svg) / [PNG](previews/dimensions.png) | CAD 实体投影，含外廓和唱盘尺寸；不是加工图 |
 | [闭盖](previews/closed.png) / [开盖](previews/open.png) / [内部布局](previews/internal.png) | 实际 FreeCAD 视口渲染 |
 | [底部低音安装](previews/bottom.png) | 低音朝下，底板预留圆孔 |
 | [俯视](previews/top.png) / [正视](previews/front.png) / [右视](previews/right.png) | 外形与布局核对 |
 | [主要参数](cad/parameters.json) | 修改后通过脚本重建 |
 | [零件清单](cad/parts.csv) | 材料说明、包络尺寸和估算标记 |
-| [木板备料清单](cad/wood-cut-list.csv) | 22 块 / 条板件，整数矩形备料长宽、名义板厚、数量及后续修切说明 |
+| [木板备料清单](cad/wood-cut-list.csv) | 21 块 / 条板件，整数矩形备料长宽、名义板厚、数量及后续修切说明 |
 | [设计依据](docs/design-basis.md) | 官方资料、估算边界与后续选型要求 |
 | [验证报告](cad/validation.json) | 实体、关键尺寸、干涉及 STEP 回读结果 |
 
@@ -77,7 +77,7 @@
 
 ## 木板加工尺寸
 
-箱体平面采用 450 × 350 mm；侧板 350 × 124 × 12、底板 426 × 350 × 12、后板 426 × 112 × 12、浮动台面 418 × 314 × 6 mm。格栅为 426 × 7 × 3 mm 矩形条，整体后倾 18°，竖向节距 11 mm。
+箱体平面采用 450 × 350 mm；侧板 350 × 124 × 12、底板 426 × 350 × 12、后板 426 × 112 × 12、浮动台面 418 × 314 × 6 mm。底板前沿一体保留，已取消与底板完全重叠的独立下横梁。格栅为 426 × 7 × 3 mm 矩形条，整体后倾 18°，竖向节距 11 mm。
 
 斜障板采用真实法向厚 8 mm，矩形备料 426 × 98 × 8 mm，之后修上下斜口至安装竖高 90 mm；两道低音隔板各备料 314 × 90 × 8 mm，按精确斜前缘修切。图册同时保留成形包络与整数备料，不能逐项四舍五入斜切坐标。脚座安装孔及配合间隙按上述假设预留；其余未定义的榫槽、紧固孔和通用间隙未建模。名义板厚、贴皮、拼接与装配余量仍须在材料和工艺确定后实测确认。
 
@@ -134,14 +134,15 @@ PYTHONPATH="${FREECAD_RESOURCES:?请先设置 FreeCAD 运行环境}/lib" \
 
 ## 验证范围
 
-2026-09-22 障板与开孔图补充后，26 项 CAD 相关用例通过，另在独立 PDF 环境通过 4 项用例；具体执行批次及模型报告范围见[验证证据](docs/current-work-handoff.md#验证证据)。测试覆盖宏重载、参数快照、保存实体尺寸、变压器与功放干涉、非默认尺寸标注，音腔泄漏、缩短全频腔、电子件入腔后的净容积扣除、倒相管堵塞、120／160／200 mm 三种试验管长，以及机芯核对版的覆盖保护和下探深度。新增脚垫尺寸、穿板孔、固定座移位和音腔泄漏回归。导览覆盖对象映射、图号关联、1／3／8 根格栅的标注目标及缺失／遮挡标注拒绝检查。旧模型、缺少属性及无效快照的测试同时核对失败报告覆盖、命令行退出和文档关闭。几何变更测试在临时目录生成模型；图册与导览测试另会只读检查仓库当前交付物，因此需先完成两套 CAD 的重建。新增出图检查覆盖板孔局部坐标、底面盲孔深度、障板法向投影与非默认参数，以及 PDF 孔表和虚构截面边回归。测试不会改写原交付文件：
+2026-09-22 取消独立下横梁并重建交付物后，26 项 CAD 相关用例通过，另在独立 PDF 环境通过 5 项用例；具体执行批次及模型报告范围见[验证证据](docs/current-work-handoff.md#验证证据)。测试覆盖宏重载、参数快照、保存实体尺寸、变压器与功放干涉、非默认尺寸标注，音腔泄漏、缩短全频腔、电子件入腔后的净容积扣除、倒相管堵塞、120／160／200 mm 三种试验管长，以及机芯核对版的覆盖保护和下探深度。新增脚垫尺寸、穿板孔、固定座移位和音腔泄漏回归。导览覆盖对象映射、图号关联、1／3／8 根格栅的标注目标及缺失／遮挡标注拒绝检查。旧模型、缺少属性及无效快照的测试同时核对失败报告覆盖、命令行退出和文档关闭。几何变更测试在临时目录生成模型；图册与导览测试另会只读检查仓库当前交付物，因此需先完成两套 CAD 的重建。新增出图检查覆盖板孔局部坐标、底面盲孔深度、障板法向投影与非默认参数，以及 PDF 孔表和虚构截面边回归；完整出图回归执行 CAD 提取和三册 PDF 命令行入口，核对页数、安装位置表及保留图号。测试不会改写原交付文件：
 
 ```sh
 PYTHONPATH="${FREECAD_RESOURCES:?请先设置 FreeCAD 运行环境}/lib" \
   "$FREECAD_RESOURCES/bin/python" -m unittest discover -s tests -v
 
 # 普通 Python 环境需 reportlab、svglib、pypdf、pdfplumber，补跑：
-python3 -m unittest discover -s tests -p '*_pdf.py' -v
+FREECAD_RESOURCES="${FREECAD_RESOURCES:?请先设置 FreeCAD 运行环境}" \
+  python3 -m unittest discover -s tests -p '*_pdf.py' -v
 ```
 
 v0.7 基线的几何验证（不覆盖选定机芯核对版）：

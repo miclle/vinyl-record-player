@@ -1,5 +1,6 @@
 """PDF geometry scale checks; run with reportlab and svglib installed."""
 import importlib.util
+import os
 import sys
 import unittest
 from pathlib import Path
@@ -11,6 +12,43 @@ AVAILABLE=importlib.util.find_spec('reportlab') and importlib.util.find_spec('sv
 
 @unittest.skipUnless(AVAILABLE, 'PDF runtime dependencies are separate from FreeCAD')
 class PDFProjectionTests(unittest.TestCase):
+    @unittest.skipUnless(os.environ.get('FREECAD_RESOURCES'), 'Set FREECAD_RESOURCES for the full drawing pipeline')
+    def test_all_books_complete_with_position_tables_and_stable_part_codes(self):
+        import hashlib
+        import json
+        import subprocess
+        import tempfile
+        import reportlab
+        from pypdf import PdfReader
+
+        resources=Path(os.environ['FREECAD_RESOURCES'])
+        env=dict(os.environ, PYTHONPATH=str(resources/'lib'))
+        sources=list((ROOT/'cad').glob('*.FCStd'))
+        before={p:hashlib.sha256(p.read_bytes()).hexdigest() for p in sources}
+        with tempfile.TemporaryDirectory() as tmp:
+            data=Path(tmp)/'drawing-data.json'
+            subprocess.run([str(resources/'bin/python'), str(ROOT/'tools/drawing_data.py'),
+                            '--output', str(data)], env=env, check=True, capture_output=True, text=True)
+            # A bundled font keeps this execution test independent of local CJK fonts.
+            font=Path(reportlab.__file__).parent/'fonts/Vera.ttf'
+            result=subprocess.run([sys.executable, str(ROOT/'tools/drawing_pack.py'),
+                                   '--data', str(data), '--output', tmp, '--font', str(font)],
+                                  check=True, capture_output=True, text=True)
+            summaries=json.loads(result.stdout)
+            self.assertEqual([s['pages'] for s in summaries], [15,11,14])
+            for prefix,summary in zip('ABC',summaries):
+                pdf=PdfReader(Path(tmp)/summary['file'])
+                self.assertEqual(len(pdf.pages),summary['pages'])
+                self.assertIn(prefix+'-POS','\n'.join(p.extract_text() for p in pdf.pages))
+            first=PdfReader(Path(tmp)/summaries[0]['file'])
+            self.assertIn('A-P03',first.pages[7].extract_text())
+            self.assertIn('GrilleCloth',first.pages[7].extract_text())
+            self.assertIn('A-P04',first.pages[8].extract_text())
+            self.assertIn('Slat01',first.pages[8].extract_text())
+            self.assertIn('A-P07',first.pages[11].extract_text())
+            self.assertIn('FootMount0',first.pages[11].extract_text())
+        self.assertEqual(before,{p:hashlib.sha256(p.read_bytes()).hexdigest() for p in sources})
+
     def test_svg_pixel_units_do_not_shrink_geometry_relative_to_dimensions(self):
         import drawing_pack
         self.assertTrue(hasattr(drawing_pack,'load_projection'))
@@ -50,8 +88,7 @@ class PDFProjectionTests(unittest.TestCase):
         parts=[]
         for key,u,v,w,h in [('Baffle',16,34.5,37.654,90),('GrilleCloth',12,34.5,29.743,90),
                              ('Bottom',0,22.5,90,12),('AcousticRoof',0,124.5,90,8),
-                             ('Slat04',18,67.5,5,7),('Fascia',0,126.5,6,20),
-                             ('LowerRail',0,22.5,8,12)]:
+                             ('Slat04',18,67.5,5,7),('Fascia',0,126.5,6,20)]:
             path=(f'M0 {h} L29.243 0 L{w} 0 L{w-29.243} {h} Z'
                   if key in ('Baffle','GrilleCloth') else f'M0 0 H{w} V{h} H0 Z')
             parts.append(dict(key=key,origin_mm=[u,v],size_mm=[w,h],projection=dict(size_mm=[w,h],

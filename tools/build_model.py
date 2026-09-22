@@ -79,6 +79,7 @@ def build():
     box('SideLeft','左侧木板',0,0,z0,t,D,H-z0,'Cabinet',WOOD,material='12 mm 木板 / 胡桃木表面')
     box('SideRight','右侧木板',W-t,0,z0,t,D,H-z0,'Cabinet',WOOD,material='12 mm 木板 / 胡桃木表面')
     woofer=p['woofer']; tweeter=p['fullrange']
+    # The full-depth bottom includes the front edge; no separate lower rail.
     bottom=Part.makeBox(W-2*t,D,t,V(t,0,z0))
     bottom=bottom.cut(Part.makeCylinder(woofer['cutout_diameter']/2,t+2,V(woofer['center_x'],woofer['center_y'],z0-1)))
     for part in foot_parts:
@@ -109,7 +110,6 @@ def build():
     add('BassPort',f"后置倒相管 · Ø{port['inner_diameter']:g} × {port['length']:g} 可换试验件",tube,'Audio',(0.22,0.48,0.62),
         basis='按可用空间设计的试验初值；非 SC-2103 原厂调谐，密封固定及端口圆角待细化')
     box('Fascia','前沿银色饰条',t,0,H-20,W-2*t,6,20,'Front',SILVER,material='铝饰面 / 厚度估算')
-    box('LowerRail','格栅下横梁',t,0,z0,W-2*t,8,t,'Front',BLACK)
     # Thin cloth proxy; actual cloth is acoustically open, unlike this visual solid.
     cloth = add('GrilleCloth','透声布外观占位（非实心材料）',slope(z0+t,H-22,4,0.5),'Front',BLACK,material='透声织物（薄实体仅用于显示）')
     n=p['slat_count']
@@ -285,7 +285,6 @@ def build():
         'SideLeft':(V(1,0,0),t,'矩形板'), 'SideRight':(V(1,0,0),t,'矩形板'),
         'Bottom':(V(0,0,1),t,f"矩形板；低音通孔；4×Ø{p['feet']['panel_hole_diameter_assumption']:g} 脚座通孔、12×Ø{p['feet']['pilot_diameter_assumption']:g} 深{p['feet']['pilot_depth_assumption']:g} 底面盲预孔（安装假设）"),
         'Back':(V(0,1,0),t,'矩形板；倒相孔及沉台；AC 横孔 48×28 R3、上下 2×Ø4.5 孔距 40'),
-        'LowerRail':(V(0,1,0),8,'矩形横梁'),
         'Baffle':(inward,ac['baffle_thickness'],f'整数矩形备料；上下两边修 {90-p["front_angle"]:g}° 斜口至安装竖高 {zhi-zlo:g}；另开法向孔'),
         'AcousticRoof':(V(0,0,1),ac['roof_thickness'],'矩形备料；切 T 形轮廓并开轴承孔'),
         'AcousticRear':(V(0,1,0),pt,'两块独立矩形板'),

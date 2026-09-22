@@ -11,7 +11,9 @@
 
 图上编号对应右侧目录中的中文名称、材料状态、数量与详图号。`A-Pxx` 对应图册 01，`B-Pxx` 对应图册 02，`C-Pxx` 对应图册 03；图号是页面右上角的编号，不是 PDF 阅读器页码。新增的 `A-03` 障板局部剖视、`A-H01`／`A-H02` 和 `B-H01` 至 `B-H03` 板件开孔图见[开孔定位索引](drawing-pack.md#障板装配与板件开孔定位)。原零件页已补开孔图引用；原 `A-Pxx`／`B-Pxx` 图号保持不变，因此导览目录仍有效，插页后不要沿用旧 PDF 页码。
 
-当前默认配置的 36 个标注项覆盖选定装配的全部 62 个物理 CAD 对象。重复零件和总成可合并标注，例如脚垫及固定座各 4 件合并为 C03 四套、格栅 8 条、铰链 2 座加 2 轴、唱头壳与唱头各 1 件。`AcousticRear` 与 `RearSupport` 各是一个含两块独立板件的对象，数量按实物板件说明，不把对象数当作采购件数。格栅数量与标注目标从当前模型的零件目录读取；调整 `slat_count` 并重建模型后，导览选择现有格栅的中间一根作标注。编号与 CAD 对象、原图号、源文件 SHA-256 的映射保存在 [导览索引](../cad/assembly-guide-index.json)。
+当前默认配置的 35 个标注项覆盖选定装配的全部 61 个物理 CAD 对象。重复零件和总成可合并标注，例如脚垫及固定座各 4 件合并为 C03 四套、格栅 8 条、铰链 2 座加 2 轴、唱头壳与唱头各 1 件。`AcousticRear` 与 `RearSupport` 各是一个含两块独立板件的对象，数量按实物板件说明，不把对象数当作采购件数。格栅数量与标注目标从当前模型的零件目录读取；调整 `slat_count` 并重建模型后，导览选择现有格栅的中间一根作标注。编号与 CAD 对象、原图号、源文件 SHA-256 的映射保存在 [导览索引](../cad/assembly-guide-index.json)。
+
+底板前沿与底板一体保留，已取消原独立下横梁及其 W05 标注；其余导览编号不重排。
 
 木板标注整数矩形备料尺寸；斜切成形尺寸仍需查看原零件图。胡桃木饰面与板材基材分别表述，未确定的材料、壁厚和采购型号明确标注待确认。蓝、绿、木色等是识别色，不代表最终材料或采购状态。
 
@@ -40,5 +42,6 @@ python3 tools/assembly_guide_pdf.py --font tmp/fonts/chinese-font.ttf
 ```sh
 PYTHONPATH="${FREECAD_RESOURCES:?请先设置 FreeCAD 运行环境}/lib" \
   "$FREECAD_RESOURCES/bin/python" -m unittest discover -s tests -v
-python3 -m unittest discover -s tests -p '*_pdf.py' -v
+FREECAD_RESOURCES="${FREECAD_RESOURCES:?请先设置 FreeCAD 运行环境}" \
+  python3 -m unittest discover -s tests -p '*_pdf.py' -v
 ```

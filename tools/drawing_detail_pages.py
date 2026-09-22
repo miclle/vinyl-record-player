@@ -117,7 +117,7 @@ def section_page(book, section, p):
     anchors=[('AcousticRoof','音腔顶板',231,84),('Baffle','倾斜扬声器障板',231,125),
              ('Bottom','底板',231,192),('GrilleCloth','透声布',21,121),
              (f'Slat{max(1,(p["slat_count"]+1)//2):02}','木格栅',21,162),
-             ('Fascia','前沿饰条',21,73),('LowerRail','格栅下横梁',21,204)]
+             ('Fascia','前沿饰条',21,73)]
     for key,label,tx,ty in anchors:
         part=by_key[key];u,v=part['origin_mm'];w,h=part['size_mm']
         ax,ay=ox+(u+w/2)*scale,base_y-(v+h/2)*scale

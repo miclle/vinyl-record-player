@@ -45,6 +45,10 @@ class WoodworkingTests(unittest.TestCase):
                     for actual,want in zip([bb.XLength,bb.YLength,bb.ZLength],[426,7,slat_thickness]):
                         self.assertAlmostEqual(actual,want,places=6)
                     self.assertAlmostEqual(doc.Slat08.Shape.CenterOfMass.z-doc.Slat01.Shape.CenterOfMass.z,77,places=6)
+                    self.assertIsNone(doc.getObject('LowerRail'))
+                    front_edge=Part.makeBox(426,8,p['wall'],App.Vector(p['wall'],0,p['foot_height']))
+                    self.assertLess(front_edge.cut(doc.Bottom.Shape).Volume,1e-6)
+                    self.assertLess(doc.Baffle.Shape.distToShape(doc.Bottom.Shape)[0],1e-6)
                     self.assertEqual([doc.Bottom.StockLength.Value,doc.Bottom.StockWidth.Value,doc.Bottom.StockThickness.Value],[426,350,12])
                     self.assertEqual([doc.Slat01.StockLength.Value,doc.Slat01.StockWidth.Value,doc.Slat01.StockThickness.Value],[426,7,slat_thickness])
                     for obj in doc.Objects:

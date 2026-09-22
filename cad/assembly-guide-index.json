@@ -1,8 +1,8 @@
 {
   "revision": "v0.7-purchased-feet",
   "sources": {
-    "lumi-three-driver.FCStd": "bf8878e762ac8d39fbdf561e3d0af85908b75b6f88bb425ddb852cfe96d93d13",
-    "lumi-selected-mechanism-fit.FCStd": "d46d721d6254f5d96cf915d3caed0d977b1d73a5fc4db1c212ef19ded47fa93a"
+    "lumi-three-driver.FCStd": "15bb2c895cb4609733331e06bc4cdc4d74852d77f33aa5a4f5b1c6efdadd83fb",
+    "lumi-selected-mechanism-fit.FCStd": "bda7adb85296985ee59526f54d65ad723b0b3afd9b5273ee83b5be6ecdbe2e49"
   },
   "entries": [
     {
@@ -351,29 +351,6 @@
         426.0,
         112.0,
         12.0
-      ]
-    },
-    {
-      "code": "W05",
-      "page": 2,
-      "title": "格栅下横梁",
-      "ids": [
-        "LowerRail"
-      ],
-      "quantity": "1 件",
-      "material": "木质横梁；基材待定",
-      "drawings": [
-        "A-P03"
-      ],
-      "size_mm": [
-        426.0,
-        8.0,
-        12.0
-      ],
-      "stock_mm": [
-        426.0,
-        12.0,
-        8.0
       ]
     },
     {
@@ -750,5 +727,5 @@
     350.0,
     210.7
   ],
-  "physical_object_count": 62
+  "physical_object_count": 61
 }

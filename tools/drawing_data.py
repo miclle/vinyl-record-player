@@ -122,7 +122,7 @@ def collect(root=ROOT, project=True):
                             holes.append({'u_mm':hx-pos[0],'v_mm':p['fullrange']['center_z']-pos[2],
                                           'label':f"Ø{p['fullrange']['cutout_diameter']:g} 法向"})
                     card['holes']=holes
-                    if name in ('SideLeft','LowerRail','Slat01','AcousticRear','AcousticDividerLeft','RearSupport'):
+                    if name in ('SideLeft','Slat01','AcousticRear','AcousticDividerLeft','RearSupport'):
                         card['notes'].append('当前实体无开孔；连接孔须待装配工艺确认。')
                     if hasattr(obj,'StockLength'):
                         card['stock_mm']=[float(getattr(obj,key)) for key in ('StockLength','StockWidth','StockThickness')]
@@ -150,7 +150,6 @@ def collect(root=ROOT, project=True):
                 f"法兰厚 {f(inlet['flange_thickness'])}；自前表面总深 {f(inlet['total_depth'])}；背后另留 {f(inlet['wire_clearance_assumption'])} 接线空间（暂估）。",
                 '商家资料未验证；保护接地不可用，整机绝缘、额定负载、保险及接线待确认，未放行通电。'])
             add('Fascia',1,6,['厚度方向 Y；前沿饰条高 20。'])
-            add('LowerRail',1,8,['厚度方向 Y；梁高取模型 Z 尺寸。'])
             add('GrilleCloth',1,0.5*sin,[f'Y 向显示厚度 0.5；法向显示厚度 {f(0.5*sin)}。','透声布仅是薄实体外观占位，实物布厚未知。',f'斜面实际高度 {f((p["acoustic"]["roof_bottom_z"]-zlo)/sin)}；后倾 {f(90-p["front_angle"])}°。'])
             add('Slat01',1,p['slat_thickness'],[f'矩形截面：面宽 {f(p["slat_face_width"])} × 法向厚 {f(p["slat_thickness"])}；整体后倾 {f(90-p["front_angle"])}°。',f'竖向节距 {f(p["slat_pitch"])}；前表面下缘首条 Z={f(zlo+2)}，共 {p["slat_count"]} 条。','尺寸表为倾斜安装包络；直接下料使用上方矩形备料尺寸。'],[f'Slat{i:02}' for i in range(2,p['slat_count']+1)])
             add('LightChannel',1,2,['模型为实心薄块；未建 U 形槽，不能作为型材截面图。'])
@@ -239,6 +238,13 @@ def collect(root=ROOT, project=True):
                 shape=Part.makeCompound([o.Shape for o in objects])
                 assemblies.append({'key':key,'title':title,'size_mm':bounds(shape)[0],
                                    'views':{v:project_shape(shape,v) for v in views} if project else {}})
+            # Keep the retired lower-rail slot (A-P03 left) vacant so all
+            # existing part drawing IDs and guide references stay stable.
+            for volume in (1, 2, 3):
+                for i, card in enumerate(c for c in cards if c['volume'] == volume):
+                    slot = i + (1 if volume == 1 and i >= 4 else 0)
+                    card['drawing_code'] = f'{"ABC"[volume-1]}-P{slot//2+1:02}'
+                    card['drawing_column'] = slot % 2
             return {'units':'mm','revision':p['revision'],'study_revision':cfg['revision'],
                     'sources':hashes,'parameters':p,'mechanism':cfg,'coverage':coverage,
                     'cards':cards,'assemblies':assemblies,

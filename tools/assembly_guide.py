@@ -37,7 +37,6 @@ CATALOG = [
     ('E01', 1, '控制旋钮与底座', ['ControlKnob', 'ControlBase'], '各 1 件', '实心外观占位；控制接口待确认'),
     ('W03', 2, '底板', ['Bottom'], '1 块', '木质板材；基材待定'),
     ('W04', 2, '后板', ['Back'], '1 块', '木质板材；基材待定'),
-    ('W05', 2, '格栅下横梁', ['LowerRail'], '1 件', '木质横梁；基材待定'),
     ('W06', 2, '倾斜扬声器障板', ['Baffle'], '1 块', '木质板材；斜口按精确轮廓修切'),
     ('W07', 2, '三音腔共用顶板', ['AcousticRoof'], '1 块', '木质板材；基材待定'),
     ('W08', 2, '左右全频腔后板', ['AcousticRear'], '2 块', '一个 CAD 对象内的两块独立木板'),
@@ -60,13 +59,13 @@ CATALOG = [
 
 
 def catalog_from_drawings(data):
-    """Derive drawing references from the same card ordering as drawing_pack."""
+    """Use the stable drawing references assigned by the CAD exporter."""
     references = {}
     cards_by_id = {}
     for volume in (1, 2, 3):
         cards = [c for c in data['cards'] if c['volume'] == volume]
-        for i, card in enumerate(cards):
-            ref = f'{"ABC"[volume - 1]}-P{i // 2 + 1:02}'
+        for card in cards:
+            ref = card['drawing_code']
             for name in card['ids']:
                 references.setdefault(name, set()).add(ref)
                 cards_by_id[name] = card
@@ -254,7 +253,7 @@ def render(root=ROOT):
                        'ACInlet': (100, 100, -40), 'ConnectorPlate': (100, 100, -40),
                        'Baffle': (0, -95, 20), 'TweeterLeft': (0, -95, 20),
                        'TweeterRight': (0, -95, 20), 'GrilleCloth': (0, -175, -45),
-                       'LowerRail': (0, -95, -35), 'LightChannel': (0, -110, 70),
+                       'LightChannel': (0, -110, 70),
                        'LightDiffuser': (0, -135, 50), 'RearSupport': (-230, 200, 140),
                        'Isolator0': (-300, -380, 295), 'Isolator1': (-300, -380, 295),
                        'Isolator2': (-300, -380, 295), 'AcousticRear': (-40, 20, 90),

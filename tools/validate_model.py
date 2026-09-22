@@ -55,7 +55,7 @@ def _validate_document(doc,p):
         required[name]=['Shape']
     # Slat clearance checks dereference these neighbors; reject missing parts
     # here so the failure report replaces any previous successful validation.
-    for name in ['GrilleCloth','Fascia','LowerRail','LightChannel','LightDiffuser']:
+    for name in ['GrilleCloth','Fascia','LightChannel','LightDiffuser']:
         required[name]=['Shape']
     for name in ['Woofer','TweeterLeft','TweeterRight']:
         required[name]=['Shape','DriverRole','FlangeDiameter','CutoutDiameter','ReservedDepth',
@@ -401,7 +401,7 @@ def check_woodworking(doc,p):
     """Check real saved solids against nominal thickness and rectangular stock."""
     normal=App.Vector(0,math.sin(math.radians(p['front_angle'])),-math.cos(math.radians(p['front_angle'])))
     metrics={}; thickness_ok=True; stock_ok=True
-    expected=['SideLeft','SideRight','Bottom','Back','LowerRail','Baffle','AcousticRoof',
+    expected=['SideLeft','SideRight','Bottom','Back','Baffle','AcousticRoof',
               'AcousticRear','AcousticDividerLeft','AcousticDividerRight','RearSupport','FloatingDeck']
     expected += [f'Slat{i+1:02}' for i in range(p['slat_count'])]
     for name in expected:
@@ -432,7 +432,7 @@ def check_woodworking(doc,p):
         regular=all(abs(s.Shape.Volume-(p['width']-2*p['wall'])*p['slat_face_width']*p['slat_thickness'])<1e-5 for s in slats)
         regular &= all(abs(slats[i].Shape.CenterOfMass.z-slats[i-1].Shape.CenterOfMass.z-p['slat_pitch'])<1e-6 for i in range(1,len(slats)))
         for slat in slats:
-            for other in [doc.GrilleCloth,doc.Fascia,doc.LowerRail,doc.Baffle,doc.LightChannel,doc.LightDiffuser]+slats:
+            for other in [doc.GrilleCloth,doc.Fascia,doc.Bottom,doc.Baffle,doc.LightChannel,doc.LightDiffuser]+slats:
                 if slat.Name!=other.Name:
                     regular &= slat.Shape.common(other.Shape).Volume<1e-5
     return {'wood_panel_normal_thickness_matches':bool(thickness_ok),

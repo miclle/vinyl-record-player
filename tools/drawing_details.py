@@ -110,7 +110,7 @@ def panel_details(doc, p, project_shape, project=True):
 def baffle_section(doc, p, project_shape, project=True):
     x = p['width']/2
     clip = Part.makeBox(2, 90, p['cabinet_top']+1, V(x-1, 0, 0))
-    names = ['Bottom', 'Baffle', 'AcousticRoof', 'GrilleCloth', 'LowerRail', 'Fascia',
+    names = ['Bottom', 'Baffle', 'AcousticRoof', 'GrilleCloth', 'Fascia',
              'LightChannel', 'LightDiffuser'] + [f'Slat{i:02}' for i in range(1, p['slat_count']+1)]
     parts = []
     for name in names:
