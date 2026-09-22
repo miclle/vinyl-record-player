@@ -77,7 +77,10 @@ def render_foot_detail(source):
                 obj.ViewObject.DiffuseColor=[(0.73,0.75,0.77) if face.CenterOfMass.z>=p['feet']['rubber_height'] else color
                                             for face in obj.Shape.Faces]
         detail.recompute()
-        view=Gui.activeDocument().activeView()
+        view=Gui.getDocument(detail.Name).activeView()
+        # Export immediately, without an animated camera transition in progress.
+        view.stopAnimating()
+        view.setAnimationEnabled(False)
         view.setCameraType('Orthographic')
         view.setCameraOrientation(App.Rotation(App.Vector(1,1,0),App.Vector(-1,1,2),App.Vector(1,-1,1),'ZXY').Q)
         view.fitAll();Gui.updateGui()

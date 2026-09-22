@@ -6,6 +6,7 @@ FreeCAD concept model of a turntable with one downward-facing woofer, two front 
 
 - `tools/build_model.py`: geometry generation and CAD export; `tools/ac_inlet.py`: rear AC inlet opening and conservative installation/wiring volumes.
 - `tools/feet.py`: purchased foot assemblies, upward-barrel mounts, bottom-panel through holes and assumed blind screw pilots; `tests/test_feet.py`: saved geometry, collisions and chamber-leak regression checks.
+- `tools/fascia.py`: selected T extrusion and the acoustic-roof front rebate; `tests/test_fascia.py`: saved section, residual shelf, neighbor clearance and chamber-seal regressions. Vendor dimensions and installation assumptions are in `references/fascia/README.md`.
 - `tools/build.FCMacro`: GUI entry point; invokes generation, rendering, and dimension-sheet creation.
 - `tools/render_views.py` and `tools/dimension_sheet.py`: viewport previews, a temporary foot-installation cutaway, and projected drawings. The cutaway is never saved into the source CAD.
 - `tools/drawing_data.py` and `tools/drawing_pack.py`: saved-solid projection data and three grouped A3 PDF books under `output/pdf/`; see `docs/drawing-pack.md` for the separate FreeCAD/PDF runtimes.
@@ -13,7 +14,7 @@ FreeCAD concept model of a turntable with one downward-facing woofer, two front 
 - `tools/assembly-guide.FCMacro`, `tools/assembly_guide.py`, and `tools/assembly_guide_pdf.py`: read-only CAD rendering and the two-page A2 numbered guide; see `docs/assembly-guide.md`. Covers the selected study's physical objects exactly once; exploded placements are temporary and never saved over source CAD.
 - `tools/validate_model.py`: baseline geometry and STEP validation; `tests/test_regressions.py`: regression tests; `tests/test_ac_inlet.py`: rear inlet opening and wiring-space checks.
 - `tools/mechanism_study.py` and `tools/mechanism-study.FCMacro`: selected-mechanism assembly, fit report, and GUI previews; `tests/test_mechanism_study.py`: fit-study regression tests.
-- `cad/parameters.json`: cabinet, drivers, transformer, amplifier, AC inlet and foot-installation inputs; `lumi-three-driver.FCStd` / `.step`, `parts.csv`, and `validation.json` are baseline outputs.
+- `cad/parameters.json`: cabinet, drivers, transformer, amplifier, AC inlet, feet and T-fascia installation inputs; `lumi-three-driver.FCStd` / `.step`, `parts.csv`, and `validation.json` are baseline outputs.
 - `cad/wood-cut-list.csv`: generated integer rectangular stock sizes and quantities. `StockLength` / `StockWidth` / `StockThickness` are board-local dimensions; tilted XYZ envelopes and finished bevels may remain fractional.
 - `cad/selected-mechanism.json`: mechanism assumptions; `lumi-selected-mechanism-fit.FCStd` / `.step` and `mechanism-fit-report.json` are fit-study outputs. The study reads the saved baseline FCStd. Historical `lumi-dual-driver.*` files are available only in Git history.
 - `previews/`: generated PNG and SVG assets.
@@ -24,7 +25,7 @@ FreeCAD concept model of a turntable with one downward-facing woofer, two front 
 
 Use FreeCAD 1.1.1. Run commands from the repository root.
 
-For macOS terminal commands, set `FREECAD_RESOURCES` to the installed FreeCAD application's `Contents/Resources` directory, containing `bin/python` and `lib`; see [README](README.md#v07-基线重建). Use repository-relative paths for project files and links. Keep machine-specific installation paths out of documentation; use runtime variables for external tools.
+For macOS terminal commands, set `FREECAD_RESOURCES` to the installed FreeCAD application's `Contents/Resources` directory, containing `bin/python` and `lib`; see [README](README.md#v08-基线重建). Use repository-relative paths for project files and links. Keep machine-specific installation paths out of documentation; use runtime variables for external tools.
 
 ```sh
 open -a FreeCAD --args "$PWD/tools/build.FCMacro"
@@ -71,3 +72,5 @@ Keep inlet and power-cord purchase URLs and SKU IDs in `references/ac-inlet/READ
 The v0.7 feet use purchased Ø30 × 20 rubber feet with M8 × 23 exposed studs and Ø37 × 2.5 flanges with Ø12 × 14.5 upward barrels. `tools/feet.py` drives four assemblies and bottom-panel holes. Nominal uncompressed floor height is 22.5 mm; cabinet height remains 124 mm, closed overall height is 210.7 mm. Foot centres are X=33/417, Y=40/320. Mount PCD Ø28, panel clearance Ø12.4, and Ø3 × 8 blind wood-screw pilots are assumptions; fastener head clearance, thread engagement, sealing and load remain unverified. Preserve the vendor images, purchase URLs and SKU IDs in `references/feet/README.md`. The 19.5 mm woofer ground clearance is below the previous 20 mm trial target; geometry validation records this separately and does not establish acoustic adequacy.
 
 `foot_height` must equal `feet.rubber_height + feet.flange_thickness` for the supported flush-contact installation. Changing foot dimensions does not automatically translate the other absolute Z parameters; update the linked heights described in `references/feet/README.md` and rebuild both CAD files and their drawings. Spacers or a different mount orientation require a geometry change, not just a new `foot_height` value. Chamber closure includes the saved foot and mount solids in ideal contact; it is not proof of real thread or panel sealing.
+
+The v0.8 fascia uses the selected 30 × 30 × 5 mm aluminium T extrusion, broad face forward and centred web rearward. `tools/fascia.py` drives the 425 mm strip and the roof rebate. Each end gap is 0.5 mm; fit/bedding clearance is 0.2 mm (assumptions). Roof front Y=5.2, rebate rear Y=30.2, depth 3.7, residual thickness 4.3 mm. Preserve the baffle seal behind the rebate. Roof drilling datums follow the new formed front edge (bearing local Y=166.8, global Y=172). Keep drawing IDs A-P02 (fascia), B-P01 (roof), A-03 (section) and B-H02 (roof drilling/rebate). Clearance is not a modeled adhesive layer or a confirmed root-radius allowance. Keep vendor image, URL and SKU in `references/fascia/README.md`; root radii, adhesive and retention remain unconfirmed.

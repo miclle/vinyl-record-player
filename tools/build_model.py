@@ -12,6 +12,7 @@ import FreeCAD as App
 import Part
 from ac_inlet import installation as inlet_installation
 from feet import installation as feet_installation
+from fascia import dimensions as fascia_dimensions, installation as fascia_installation
 
 ROOT = Path(__file__).resolve().parents[1]
 V = App.Vector
@@ -29,6 +30,8 @@ def build():
     W, D, H = p['width'], p['depth'], p['cabinet_top']
     t, z0 = p['wall'], p['foot_height']
     foot_parts = feet_installation(p)
+    fascia_shape, fascia_cuts = fascia_installation(p)
+    fd = fascia_dimensions(p)
     a = math.radians(p['front_angle'])
     inward = V(0, math.sin(a), -math.cos(a))
     front_y = lambda z: 8 + (z - (z0+t)) / math.tan(a)
@@ -109,7 +112,11 @@ def build():
     tube=tube.cut(Part.makeCylinder(pr,port['length']+2,V(px,D-port['length']-1,pz),V(0,1,0)))
     add('BassPort',f"后置倒相管 · Ø{port['inner_diameter']:g} × {port['length']:g} 可换试验件",tube,'Audio',(0.22,0.48,0.62),
         basis='按可用空间设计的试验初值；非 SC-2103 原厂调谐，密封固定及端口圆角待细化')
-    box('Fascia','前沿银色饰条',t,0,H-20,W-2*t,6,20,'Front',SILVER,material='铝饰面 / 厚度估算')
+    fs=p['fascia']
+    fascia=add('Fascia','前沿银色 T 型铝饰条',fascia_shape,'Front',SILVER,
+               basis='用户选定 30×30×5 商家图；按总外廓、等厚居中 T 截面解释，圆角及公差待实测',
+               material=f"铝合金 T 型材 {fs['face_height']:g}×{fs['overall_depth']:g}×{fs['thickness']:g}；安装长 {fd['length']:g} mm")
+    fascia.addProperty('App::PropertyBool','InstallationReleased','Installation').InstallationReleased=False
     # Thin cloth proxy; actual cloth is acoustically open, unlike this visual solid.
     cloth = add('GrilleCloth','透声布外观占位（非实心材料）',slope(z0+t,H-22,4,0.5),'Front',BLACK,material='透声织物（薄实体仅用于显示）')
     n=p['slat_count']
@@ -143,6 +150,8 @@ def build():
     # A sealed local recess clears the generic bearing without opening the low chamber.
     bx,by=p['platter_x'],p['platter_y']
     roof=roof.cut(Part.makeCylinder(14,ac['roof_thickness']+2,V(bx,by,zhi-1)))
+    for cutter in fascia_cuts:
+        roof=roof.cut(cutter)
     add('AcousticRoof','三音腔共用顶板 · 中部延伸至后板',roof,'Audio',GRAY)
     pocket_bottom=H-40
     pocket=Part.makeCylinder(14,zhi+ac['roof_thickness']-pocket_bottom,V(bx,by,pocket_bottom)).cut(
@@ -286,7 +295,7 @@ def build():
         'Bottom':(V(0,0,1),t,f"矩形板；低音通孔；4×Ø{p['feet']['panel_hole_diameter_assumption']:g} 脚座通孔、12×Ø{p['feet']['pilot_diameter_assumption']:g} 深{p['feet']['pilot_depth_assumption']:g} 底面盲预孔（安装假设）"),
         'Back':(V(0,1,0),t,'矩形板；倒相孔及沉台；AC 横孔 48×28 R3、上下 2×Ø4.5 孔距 40'),
         'Baffle':(inward,ac['baffle_thickness'],f'整数矩形备料；上下两边修 {90-p["front_angle"]:g}° 斜口至安装竖高 {zhi-zlo:g}；另开法向孔'),
-        'AcousticRoof':(V(0,0,1),ac['roof_thickness'],'矩形备料；切 T 形轮廓并开轴承孔'),
+        'AcousticRoof':(V(0,0,1),ac['roof_thickness'],f"T 形板；成形前缘 Y={fd['roof_front']:g}；顶面前缘台阶宽 {fd['rebate_rear']-fd['roof_front']:g}、深 {fd['rebate_depth']:g}、余厚 {fd['remaining_roof']:g}；Ø28 轴承孔"),
         'AcousticRear':(V(0,1,0),pt,'两块独立矩形板'),
         'AcousticDividerLeft':(V(1,0,0),pt,'整数矩形备料；前缘按精确斜线修切'),
         'AcousticDividerRight':(V(1,0,0),pt,'整数矩形备料；前缘按精确斜线修切'),

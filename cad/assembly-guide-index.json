@@ -1,8 +1,8 @@
 {
-  "revision": "v0.7-purchased-feet",
+  "revision": "v0.8-t-fascia",
   "sources": {
-    "lumi-three-driver.FCStd": "15bb2c895cb4609733331e06bc4cdc4d74852d77f33aa5a4f5b1c6efdadd83fb",
-    "lumi-selected-mechanism-fit.FCStd": "bda7adb85296985ee59526f54d65ad723b0b3afd9b5273ee83b5be6ecdbe2e49"
+    "lumi-three-driver.FCStd": "e8343a970ccaeff9774bdc5ed970262d0e975e1dcebb9936457a3b2a4d8943fd",
+    "lumi-selected-mechanism-fit.FCStd": "891bb1d09d4b817195a827e41784e9ab3ee6ed1e49d0900f63895920f8135798"
   },
   "entries": [
     {
@@ -62,19 +62,19 @@
     {
       "code": "F01",
       "page": 1,
-      "title": "前沿银色饰条",
+      "title": "前沿银色 T 型铝饰条",
       "ids": [
         "Fascia"
       ],
       "quantity": "1 件",
-      "material": "铝饰面；厚度暂估",
+      "material": "铝合金 T 型材 30×30×5；固定待实测",
       "drawings": [
         "A-P02"
       ],
       "size_mm": [
-        426.0,
-        6.0,
-        20.0
+        425.0,
+        30.0,
+        30.0
       ]
     },
     {
@@ -390,12 +390,12 @@
       ],
       "size_mm": [
         426.0,
-        338.0,
+        332.8,
         8.0
       ],
       "stock_mm": [
         426.0,
-        338.0,
+        333.0,
         8.0
       ]
     },

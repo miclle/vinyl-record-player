@@ -4,6 +4,7 @@ import math
 import FreeCAD as App
 import Part
 from feet import positions as foot_positions
+from fascia import dimensions as fascia_dimensions
 
 V = App.Vector
 
@@ -16,7 +17,7 @@ def panel_details(doc, p, project_shape, project=True):
         ('Bottom', 1, 'A-H01', '底板 / 通孔与底面盲预孔', 'bottom', ('X', 'Y')),
         ('Back', 1, 'A-H02', '后板 / 倒相孔、沉台与 AC 开孔', 'front', ('X', 'Z')),
         ('Baffle', 2, 'B-H01', '倾斜扬声器障板 / 前表面法向开孔', 'baffle_face', ('X', 'S')),
-        ('AcousticRoof', 2, 'B-H02', '音腔顶板 / 轴承避让孔', 'top', ('X', 'Y')),
+        ('AcousticRoof', 2, 'B-H02', '音腔顶板 / 轴承孔与前缘台阶', 'top', ('X', 'Y')),
         ('FloatingDeck', 2, 'B-H03', '浮动底板 / 主轴孔', 'top', ('X', 'Y')),
     ]
     for key, volume, code, title, view, axes in specs:
@@ -99,6 +100,10 @@ def panel_details(doc, p, project_shape, project=True):
                  if key == 'AcousticRoof' else '主轴孔为通用机芯暂定值；选定机芯固定孔、轮廓开口及弹性支承固定方式尚未设计。'),
                 '板件连接螺孔未定义；未标孔位不得按示意位置直接开孔。',
             ]
+            if key == 'AcousticRoof':
+                fd=fascia_dimensions(p)
+                notes[0]=f"俯视；O 为新成形左前角（整机 Y={fd['roof_front']:g}），+Y 向后；轴承孔局部 Y={holes[0]['v_mm']:g}。"
+                notes[1]=f"顶面前缘通长台阶：从 O 向后宽 {fd['rebate_rear']-fd['roof_front']:g}、深 {fd['rebate_depth']:g}、余厚 {fd['remaining_roof']:g}；截面见 A-03。"
         projection = project_shape(shape, 'front' if view == 'baffle_face' else view) if project else {}
         sheets.append(dict(key=key, code=code, title=title, volume=volume, view=view, axes=axes,
                            size_mm=size, projection=projection, holes=holes, notes=notes,

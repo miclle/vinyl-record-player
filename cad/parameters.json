@@ -1,6 +1,6 @@
 {
   "units": "mm",
-  "revision": "v0.7-purchased-feet",
+  "revision": "v0.8-t-fascia",
   "width": 450.0,
   "depth": 350.0,
   "closed_height": 210.7,
@@ -141,5 +141,14 @@
     "rear_inset": 30.0,
     "installation_released": false,
     "note": "Flange below bottom panel, barrel pointing upward through panel; uncompressed rubber touches flange underside. Vendor dimensions; pitch circle, panel clearance and blind wood screw pilots are assumptions. Threads represented by nominal cylinders. Actual sealing, fastening, load and isolation unverified."
+  },
+  "fascia": {
+    "face_height": 30.0,
+    "overall_depth": 30.0,
+    "thickness": 5.0,
+    "end_gap_assumption": 0.5,
+    "fit_clearance_assumption": 0.2,
+    "installation_released": false,
+    "note": "Selected 30 x 30 x 5 aluminium T extrusion, broad face forward and centred web rearward. Total outer dimensions and equal wall thickness assumed from vendor image. End gaps, rebate clearance, root radii, finish and fastening require physical confirmation."
   }
 }

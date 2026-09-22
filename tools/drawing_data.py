@@ -14,6 +14,7 @@ import Part
 import TechDraw
 from feet import positions as foot_positions
 from drawing_details import panel_details, baffle_section
+from fascia import dimensions as fascia_dimensions
 
 ROOT = Path(__file__).resolve().parents[1]
 V = App.Vector
@@ -149,7 +150,12 @@ def collect(root=ROOT, project=True):
                 '8-F5 两芯 C8 + 开关 + 保险座；横装，外形和端子按保守包络表示。',
                 f"法兰厚 {f(inlet['flange_thickness'])}；自前表面总深 {f(inlet['total_depth'])}；背后另留 {f(inlet['wire_clearance_assumption'])} 接线空间（暂估）。",
                 '商家资料未验证；保护接地不可用，整机绝缘、额定负载、保险及接线待确认，未放行通电。'])
-            add('Fascia',1,6,['厚度方向 Y；前沿饰条高 20。'])
+            fascia_spec=p['fascia']; fd=fascia_dimensions(p)
+            add('Fascia',1,fascia_spec['thickness'],[
+                f"T 型材外廓 {f(fascia_spec['face_height'])}×{f(fascia_spec['overall_depth'])}、等厚 {f(fascia_spec['thickness'])}；宽面朝前，居中筋板向后。",
+                f"安装长 {f(fd['length'])}；两端各留 {f(fascia_spec['end_gap_assumption'])}（假设）。上沿 Z={f(H)}，与木箱齐平。",
+                f"顶板台阶深 {f(fd['rebate_depth'])}；含 {f(fascia_spec['fit_clearance_assumption'])} 胶层/试装余量。局部剖视见 A-03。",
+                '总外廓解释、根部圆角、表面处理与紧固待实测；未定义固定孔。'])
             add('GrilleCloth',1,0.5*sin,[f'Y 向显示厚度 0.5；法向显示厚度 {f(0.5*sin)}。','透声布仅是薄实体外观占位，实物布厚未知。',f'斜面实际高度 {f((p["acoustic"]["roof_bottom_z"]-zlo)/sin)}；后倾 {f(90-p["front_angle"])}°。'])
             add('Slat01',1,p['slat_thickness'],[f'矩形截面：面宽 {f(p["slat_face_width"])} × 法向厚 {f(p["slat_thickness"])}；整体后倾 {f(90-p["front_angle"])}°。',f'竖向节距 {f(p["slat_pitch"])}；前表面下缘首条 Z={f(zlo+2)}，共 {p["slat_count"]} 条。','尺寸表为倾斜安装包络；直接下料使用上方矩形备料尺寸。'],[f'Slat{i:02}' for i in range(2,p['slat_count']+1)])
             add('LightChannel',1,2,['模型为实心薄块；未建 U 形槽，不能作为型材截面图。'])
@@ -168,6 +174,9 @@ def collect(root=ROOT, project=True):
             ac=p['acoustic']
             add('Baffle',2,ac['baffle_thickness'],[f'后倾 {f(90-p["front_angle"])}°；法向板厚 {f(ac["baffle_thickness"])}；Y 向厚度 {f(ac["baffle_thickness"]/sin)}。',f'上下两边修 {f(90-p["front_angle"])}° 斜口至安装竖高 {f(ac["roof_bottom_z"]-zlo)}；前表面斜长 {f((ac["roof_bottom_z"]-zlo)/sin)}。',f'2 × Ø{f(p["fullrange"]["cutout_diameter"])} 法向孔；中心 X={" / ".join(f(x) for x in p["fullrange"]["center_x"])}，Z={f(p["fullrange"]["center_z"])}（整机坐标）。','正视孔为椭圆；固定螺孔未知。'])
             add('AcousticRoof',2,ac['roof_thickness'],[f'前横板进深 {f(ac["satellite_rear_y"]+ac["partition_thickness"])}；中央后伸部宽 {f(p["acoustic_divider_x"][1]+ac["partition_thickness"]-p["acoustic_divider_x"][0])}。',f'后伸部左缘 X={f(p["acoustic_divider_x"][0])}；后缘 Y={f(D-t)}。',f'轴承孔 Ø28；中心 X={f(p["platter_x"])}, Y={f(p["platter_y"])}（整机坐标）。'])
+            cards[-1]['notes'][0]=f"成形前缘 Y={f(fd['roof_front'])}；前横板至 Y={f(ac['satellite_rear_y']+ac['partition_thickness'])}；中央后伸宽 {f(p['acoustic_divider_x'][1]+ac['partition_thickness']-p['acoustic_divider_x'][0])}。"
+            cards[-1]['notes'] += [f"顶面前缘台阶：宽 {f(fd['rebate_rear']-fd['roof_front'])}、深 {f(fd['rebate_depth'])}；余厚 {f(fd['remaining_roof'])}。",
+                                  f"轴承孔局部 Y={f(p['platter_y']-fd['roof_front'])}，从新成形前缘量取；见 B-H02 / A-03。"]
             add('AcousticRear',2,ac['partition_thickness'],['此对象包含左右两块独立后板，分别绘制。','两块均由原实体直接读取，不以跨空区总包络下料。'],split=True)
             front_bottom=16+ac['baffle_thickness']/sin
             add('AcousticDividerLeft',2,ac['partition_thickness'],[f'前缘倾斜 {f(90-p["front_angle"])}°；后缘 Y={f(D-t)}。',f'下前角 Y={f(front_bottom)}；上前角 Y={f(front_bottom+(ac["roof_bottom_z"]-zlo)/math.tan(math.radians(p["front_angle"])))}。','两块同形；板厚方向 X。整数备料后按斜前缘精确修切。'],['AcousticDividerRight'])

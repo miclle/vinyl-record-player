@@ -117,7 +117,7 @@ def section_page(book, section, p):
     anchors=[('AcousticRoof','音腔顶板',231,84),('Baffle','倾斜扬声器障板',231,125),
              ('Bottom','底板',231,192),('GrilleCloth','透声布',21,121),
              (f'Slat{max(1,(p["slat_count"]+1)//2):02}','木格栅',21,162),
-             ('Fascia','前沿饰条',21,73)]
+             ('Fascia','T 型铝饰条',21,73)]
     for key,label,tx,ty in anchors:
         part=by_key[key];u,v=part['origin_mm'];w,h=part['size_mm']
         ax,ay=ox+(u+w/2)*scale,base_y-(v+h/2)*scale
@@ -148,10 +148,16 @@ def section_page(book, section, p):
         points.append((px+radius*math.sin(a),py-radius*math.cos(a)))
     for first,second in zip(points,points[1:]):book.line(*first,*second,DIM)
     book.text(px+4,py-29,f'{num(angle)}°',9,DIM)
+    fs=p['fascia'];ac=p['acoustic']
+    web_bottom=p['cabinet_top']-(fs['face_height']+fs['thickness'])/2
+    recess=ac['roof_bottom_z']+ac['roof_thickness']-web_bottom+fs['fit_clearance_assumption']
+    book.text(231,61,f"T 型材 {num(fs['face_height'])} × {num(fs['overall_depth'])} × {num(fs['thickness'])}，宽面朝前",9,DIM)
+    book.text(231,68,f"顶板台阶深 {num(recess)}；余厚 {num(ac['roof_thickness']-recess)}",9,DIM)
+    book.text(231,75,f"含 {num(fs['fit_clearance_assumption'])} 胶层/试装余量，固定孔未定",8,MUTED)
     y=249
     for note in [
         '本剖面取箱体中线，避开两侧扬声器孔；用于看清格栅、透声布、障板、底板和顶板的相对位置。',
         '木格栅和透声布位于障板前方；闭盖整机图中障板受遮挡，不能从侧板外轮廓判断其倾角。',
-        '本页为装配几何说明；胶缝、密封、连接螺孔及紧固工艺尚未定义。',
+        'T 型铝条槽隙为安装假设；本页不放行加工，根部圆角避让、胶层、连接螺孔及紧固工艺待实测。',
     ]:y=book.paragraph(18,y,note,384,9,INK,4.8)+2
     book.end()

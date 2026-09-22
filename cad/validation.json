@@ -1,5 +1,5 @@
 {
-  "revision": "v0.7-purchased-feet",
+  "revision": "v0.8-t-fascia",
   "freecad": "1.1.1",
   "checks": {
     "build_parameters_match": true,
@@ -30,6 +30,9 @@
     "feet_bottom_cutouts_match": true,
     "feet_installation_clear": true,
     "feet_flanges_supported": true,
+    "fascia_t_section_matches": true,
+    "fascia_neighbors_clear": true,
+    "fascia_roof_rebate_and_shelf_match": true,
     "wood_panel_normal_thickness_matches": true,
     "integer_wood_stock_contains_finished_panels": true,
     "rectangular_slats_pitch_and_clearance": true,
@@ -247,6 +250,25 @@
       "installation_released": false,
       "note": "螺纹为名义圆柱，啮合是包络重叠长度；底盘贴板及橡胶贴底盘为理想接触，未验证真实密封或承载"
     },
+    "fascia": {
+      "length_mm": 425.0,
+      "section_height_depth_thickness_mm": [
+        30.0,
+        30.0,
+        5.0
+      ],
+      "end_gap_each_mm": 0.5,
+      "fit_clearance_assumption_mm": 0.2,
+      "roof_front_y_mm": 5.2,
+      "rebate_rear_y_mm": 30.2,
+      "rebate_depth_mm": 3.6999999999999886,
+      "remaining_roof_mm": 4.300000000000011,
+      "rebate_to_baffle_seal_mm": 15.042772660961571,
+      "closed_cover_gap_mm": 1.0,
+      "deck_gap_mm": 3.0,
+      "collisions": [],
+      "installation_released": false
+    },
     "woodworking": {
       "SideLeft": {
         "finished_local_bounds_mm": [
@@ -327,13 +349,13 @@
         "finished_local_bounds_mm": [
           [
             426.0,
-            338.0,
+            332.8,
             8.0
           ]
         ],
         "rectangular_stock_mm": [
           426.0,
-          338.0,
+          333.0,
           8.0
         ],
         "quantity": 1
@@ -579,10 +601,11 @@
     "音响与唱盘部件为概念包络；声学、隔振、连接工艺及电气均未验证",
     "原厂 214.2 mm 测量基准未明确；本版按已购脚垫名义高度调整闭盖总高",
     "脚垫未压缩；脚座孔距、板预孔及密封为安装假设；低音离地19.5 mm，低于此前20 mm试验目标，声学待测",
+    "T 型铝条按30×30×5总外廓、等厚居中截面建模；端隙、槽隙为假设，根部圆角、胶层及固定件待实测",
     "开盖按 0 至 70 度每 5 度抽样检查，非连续运动求解",
     "未对所有零件做全局干涉放行；这里只检查列出的关键部件与外壳",
     "变压器固定耳宽厚为保守占位，孔距未知；未验证散热、磁场、电气或走线"
   ],
-  "requested_revision": "v0.7-purchased-feet",
+  "requested_revision": "v0.8-t-fascia",
   "passed": true
 }

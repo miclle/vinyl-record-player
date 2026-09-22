@@ -6,6 +6,7 @@ import FreeCAD as App
 import Part
 from ac_inlet import installation as inlet_installation
 from feet import installation as feet_installation
+from fascia import dimensions as fascia_dimensions, installation as fascia_installation
 
 ROOT=Path(__file__).resolve().parents[1]
 
@@ -24,6 +25,7 @@ def _validate_document(doc,p):
         '音响与唱盘部件为概念包络；声学、隔振、连接工艺及电气均未验证',
         '原厂 214.2 mm 测量基准未明确；本版按已购脚垫名义高度调整闭盖总高',
         '脚垫未压缩；脚座孔距、板预孔及密封为安装假设；低音离地19.5 mm，低于此前20 mm试验目标，声学待测',
+        'T 型铝条按30×30×5总外廓、等厚居中截面建模；端隙、槽隙为假设，根部圆角、胶层及固定件待实测',
         '开盖按 0 至 70 度每 5 度抽样检查，非连续运动求解',
         '未对所有零件做全局干涉放行；这里只检查列出的关键部件与外壳',
         '变压器固定耳宽厚为保守占位，孔距未知；未验证散热、磁场、电气或走线'
@@ -57,6 +59,7 @@ def _validate_document(doc,p):
     # here so the failure report replaces any previous successful validation.
     for name in ['GrilleCloth','Fascia','LightChannel','LightDiffuser']:
         required[name]=['Shape']
+    required['Fascia'].append('InstallationReleased')
     for name in ['Woofer','TweeterLeft','TweeterRight']:
         required[name]=['Shape','DriverRole','FlangeDiameter','CutoutDiameter','ReservedDepth',
                         'TotalHeight','FlangeThickness','MountCentre','InwardAxis']
@@ -108,7 +111,7 @@ def _validate_document(doc,p):
     checks['pivot_distance']=abs(metrics['pivot_distance_mm']-p['pivot_distance'])<1e-6
     checks['effective_arm_length']=abs(metrics['effective_length_mm']-p['arm_effective_length'])<1e-6
     checks['platter_diameter']=abs(doc.getObject('Platter').Shape.optimalBoundingBox(False).XLength-p['platter_diameter'])<1e-6
-    stationary=doc.getObject('Cabinet').Group+doc.getObject('Mechanism').Group+doc.getObject('Deck').Group
+    stationary=doc.getObject('Cabinet').Group+doc.getObject('Mechanism').Group+doc.getObject('Deck').Group+[doc.Fascia]
     lid=doc.getObject('DustCover').Shape
     def volume(a,b):
         if not a.BoundBox.intersect(b.BoundBox):return 0.0
@@ -197,6 +200,8 @@ def _validate_document(doc,p):
     checks.update(inlet_checks);metrics['ac_inlet']=inlet_metrics
     feet_checks,feet_metrics=check_feet(doc,p)
     checks.update(feet_checks);metrics['feet']=feet_metrics
+    fascia_checks,fascia_metrics=check_fascia(doc,p)
+    checks.update(fascia_checks);metrics['fascia']=fascia_metrics
     wood_checks,wood_metrics=check_woodworking(doc,p)
     checks.update(wood_checks);metrics['woodworking']=wood_metrics
     acoustic_checks,acoustic_metrics=check_acoustics(doc,p,reserved+[(transformer.Name,envelope)])
@@ -395,6 +400,38 @@ def check_acoustics(doc,p,reserved):
         mouth=V(px,D-port['length']-1,pz)
         checks['bass_port_connects_only_woofer']=air.Solids[candidates['woofer'][0]].isInside(mouth,1e-6,False)
     return checks,metrics
+
+
+def check_fascia(doc,p):
+    """Compare saved extrusion and roof machining, including real neighbor clearances."""
+    s=p['fascia']; d=fascia_dimensions(p); roof=p['acoustic']; V=App.Vector
+    actual=doc.Fascia.Shape
+    expected,cuts=fascia_installation(p)
+    shape_ok=(len(actual.Solids)==1 and actual.isValid() and
+              actual.cut(expected).Volume<1e-5 and expected.cut(actual).Volume<1e-5)
+    hits=[]
+    for obj in doc.Objects:
+        if obj.TypeId!='Part::Feature' or obj.Name=='Fascia' or getattr(obj,'IsDiagnostic',False):
+            continue
+        if actual.BoundBox.intersect(obj.Shape.BoundBox):
+            overlap=actual.common(obj.Shape).Volume
+            if overlap>1e-5:hits.append({'part':obj.Name,'volume_mm3':overlap})
+    saved_roof=doc.AcousticRoof.Shape
+    cut_clear=all(saved_roof.common(c).Volume<1e-5 for c in cuts)
+    # Require the residual shelf, not just an empty slot (a through-cut must fail).
+    shelf=Part.makeBox(p['width']-2*p['wall'],d['rebate_rear']-d['roof_front'],d['remaining_roof'],
+                       V(p['wall'],d['roof_front'],roof['roof_bottom_z']))
+    shelf_ok=shelf.cut(saved_roof).Volume<1e-5
+    lid_gap=actual.distToShape(doc.DustCover.Shape)[0]
+    return {'fascia_t_section_matches':shape_ok,'fascia_neighbors_clear':not hits,
+            'fascia_roof_rebate_and_shelf_match':cut_clear and shelf_ok}, {
+        'length_mm':d['length'],'section_height_depth_thickness_mm':[s['face_height'],s['overall_depth'],s['thickness']],
+        'end_gap_each_mm':s['end_gap_assumption'],'fit_clearance_assumption_mm':s['fit_clearance_assumption'],
+        'roof_front_y_mm':d['roof_front'],'rebate_rear_y_mm':d['rebate_rear'],
+        'rebate_depth_mm':d['rebate_depth'],'remaining_roof_mm':d['remaining_roof'],
+        'rebate_to_baffle_seal_mm':d['seal_margin'],'closed_cover_gap_mm':lid_gap,
+        'deck_gap_mm':actual.distToShape(doc.FloatingDeck.Shape)[0],
+        'collisions':hits,'installation_released':False}
 
 
 def check_woodworking(doc,p):

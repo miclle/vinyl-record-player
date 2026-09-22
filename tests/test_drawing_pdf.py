@@ -97,7 +97,10 @@ class PDFProjectionTests(unittest.TestCase):
             path=Path(tmp)/'section.pdf'
             book=drawing_pack.Book(path,'剖视',{'revision':'test'},'STSong-Light')
             drawing_pack.section_page(book,dict(x_mm=225,y_limit_mm=90,parts=parts),
-                                      dict(front_angle=72,slat_count=8,acoustic={'baffle_thickness':8}))
+                                      dict(front_angle=72,slat_count=8,cabinet_top=146.5,
+                                           acoustic={'baffle_thickness':8,'roof_bottom_z':124.5,'roof_thickness':8},
+                                           fascia={'face_height':30,'overall_depth':30,'thickness':5,
+                                                   'fit_clearance_assumption':0.2}))
             book.save()
             with pdfplumber.open(path) as pdf:
                 false_edges=[line for line in pdf.pages[0].lines

@@ -33,6 +33,7 @@ class ParameterValidationTests(unittest.TestCase):
             shutil.copy2(ROOT / 'tools/validate_model.py', root / 'tools/validate_model.py')
             shutil.copy2(ROOT / 'tools/ac_inlet.py', root / 'tools/ac_inlet.py')
             shutil.copy2(ROOT / 'tools/feet.py', root / 'tools/feet.py')
+            shutil.copy2(ROOT / 'tools/fascia.py', root / 'tools/fascia.py')
             for case in cases:
                 with self.subTest(case=case):
                     with patch.object(build_model, 'ROOT', root):
@@ -253,13 +254,14 @@ class MacroReloadTests(unittest.TestCase):
             def write_sources(version):
                 (root / 'ac_inlet.py').write_text(f'value = {version}\n')
                 (root / 'feet.py').write_text(f'value = {version}\n')
+                (root / 'fascia.py').write_text(f'value = {version}\n')
                 (root / 'build_model.py').write_text(f'def deliver():\n    return {version}, {version}, {version}\n')
                 (root / 'render_views.py').write_text(f'def render(*args):\n    return {version}\n')
                 (root / 'dimension_sheet.py').write_text(f'def create(*args):\n    return {version}\n')
             saved_path = sys.path[:]
             try:
                 with patch.dict(sys.modules, {'FreeCADGui': types.ModuleType('FreeCADGui')}):
-                    for name in ['ac_inlet', 'feet', 'build_model', 'render_views', 'dimension_sheet']:
+                    for name in ['ac_inlet', 'feet', 'fascia', 'build_model', 'render_views', 'dimension_sheet']:
                         sys.modules.pop(name, None)
                     env = {'__file__': str(macro), '__name__': '__main__'}
                     write_sources(1)

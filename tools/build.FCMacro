@@ -20,6 +20,7 @@ def load_local_module(name):
 
 ac_inlet = load_local_module('ac_inlet')
 feet = load_local_module('feet')
+fascia = load_local_module('fascia')
 build_model = load_local_module('build_model')
 render_views = load_local_module('render_views')
 dimension_sheet = load_local_module('dimension_sheet')
