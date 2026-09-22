@@ -16,6 +16,7 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib.colors import HexColor
 from reportlab.graphics import renderPDF
 from svglib.svglib import svg2rlg
+from drawing_detail_pages import hole_sheet_page, section_page
 
 ROOT=Path(__file__).resolve().parents[1]
 MM=72/25.4
@@ -24,9 +25,9 @@ INK='#1E2930'
 DIM='#805536'
 MUTED='#64727B'
 LIGHT='#D5DDE0'
-VIEW_LABELS={'top':'俯视 / X-Y','front':'正视 / X-Z','right':'右视 / Y-Z',
+VIEW_LABELS={'baffle_face':'前表面法向 / X-S','top':'俯视 / X-Y','front':'正视 / X-Z','right':'右视 / Y-Z',
              'rear':'后视 / -X-Z','left':'左视 / -Y-Z','bottom':'仰视 / X--Y'}
-VIEW_AXES={'top':('X','Y'),'front':('X','Z'),'right':('Y','Z'),
+VIEW_AXES={'baffle_face':('X','S'),'top':('X','Y'),'front':('X','Z'),'right':('Y','Z'),
            'rear':('X','Z'),'left':('Y','Z'),'bottom':('X','Y')}
 
 
@@ -125,6 +126,14 @@ class Book:
         ox=x+(w-dw)/2+4;oy=y+9+(h-23-dh)/2
         ratio=f'{num(scale)}:1' if scale>=1 else f'1:{num(1/scale)}'
         self.text(x+2,y+3,VIEW_LABELS[key]+'   '+ratio,8,MUTED)
+        self.projection(view,ox,oy,scale)
+        if dimension:
+            ha,va=VIEW_AXES[key]
+            self.hdim(ox,oy+dh+7,dw,f'{ha} {num(vw)}',oy+dh)
+            self.vdim(ox-7,oy,dh,f'{va} {num(vh)}',ox)
+        return ox,oy,scale
+
+    def projection(self,view,ox,oy,scale):
         drawing=load_projection(view)
         # SVG units are model mm. Compensate stroke width for paper readability.
         def stroke(node):
@@ -133,21 +142,19 @@ class Book:
             for child in getattr(node,'contents',[]):stroke(child)
         stroke(drawing)
         self.c.saveState()
-        self.c.translate(ox*MM,(PAGE_H-oy-dh)*MM)
+        self.c.translate(ox*MM,(PAGE_H-oy-view["size_mm"][1]*scale)*MM)
         self.c.scale(scale*MM,scale*MM)
         renderPDF.draw(drawing,self.c,0,0)
         self.c.restoreState()
-        if dimension:
-            ha,va=VIEW_AXES[key]
-            self.hdim(ox,oy+dh+7,dw,f'{ha} {num(vw)}',oy+dh)
-            self.vdim(ox-7,oy,dh,f'{va} {num(vh)}',ox)
-        return ox,oy,scale
 
     def card(self,card,x,y,w=194):
         self.rect(x,y,w,246)
         title=card['title'].split(' · ')[0]
         self.text(x+5,y+7,title,11)
         self.text(x+5,y+13,card['key']+f'   数量 {card["quantity"]}',8,MUTED)
+        refs={'Bottom':'A-H01','Back':'A-H02','Baffle':'B-H01 / A-03','AcousticRoof':'B-H02','FloatingDeck':'B-H03'}
+        if card['key'] in refs:
+            self.text(x+w-5,y+13,'开孔定位 '+refs[card['key']],8,DIM,'right')
         main=card['primary']
         ox,oy,scale=self.view(card['views'][main],main,x+5,y+19,w-10,100)
         for feature in card.get('holes',[]):
@@ -193,9 +200,9 @@ def assembly_page(book,assembly,views,title,code,notes):
 def intro(book,data):
     book.start('图册索引与读图约定','A-00','3 份 PDF / 当前保存模型 / 非展开下料图')
     book.text(18,43,'图册 01  整机与外壳',17)
-    book.text(18,52,'闭盖六面图、侧板、底板、后板、格栅、灯带、防尘盖、铰链与脚垫。',10)
+    book.text(18,52,'闭盖六面图、障板局部剖视、外壳零件；底板与后板开孔定位图。',10)
     book.text(18,70,'图册 02  音腔与内部结构',17)
-    book.text(18,79,'内部布置、斜障板、音腔顶板与隔板、倒相管、轴承杯、浮动台面与支承。',10)
+    book.text(18,79,'内部布置、斜障板与音腔结构；障板、音腔顶板和浮动底板开孔定位图。',10)
     book.text(18,97,'图册 03  机芯与电子部件',17)
     book.text(18,106,'扬声器、功放、变压器、电子预留、选定弯臂机芯；附基线通用机芯对照。',10)
     book.line(18,116,402,116)
@@ -252,6 +259,7 @@ def stock_page(book,data):
     for key,(card,quantity) in rows.items():
         title=labels.get(key,card['title'].split(' · ')[0].split(' / ')[0])
         book.line(18,y+7,402,y+7)
+        if key=='Baffle':title+='（B-H01 / A-03）'
         book.text(18,y,title,9)
         book.text(116,y,str(quantity),10)
         for x,value in zip((141,177,213),card['stock_mm']):book.text(x,y,num(value),11,DIM)
@@ -285,12 +293,13 @@ def make_books(data,out,font):
             stock_page(book,data)
             assembly_page(book,assemblies['selected-closed'],['top','front','right'],'整机闭盖 / 俯、正、右视','A-01',[
                 f'机壳名义长 X {num(W)} × 宽 Y {num(D)} × 高 Z {num(p["closed_height"])}；含 AC 法兰总深 {num(D+p["ac_inlet"]["flange_thickness"])}；木壳板厚 {num(p["wall"])}。',
-                '防尘盖按闭合状态投影；不透明技术线稿中不显示盖内机芯。机芯独立视图见图册 03。',
+                '障板位于前格栅与透声布后方，本页被遮挡；局部剖视见 A-03，开孔定位见第 02 册 B-H01。机芯见图册 03。',
                 f'木壳底面 Z={num(p["foot_height"])}，壳体顶面 Z={num(H)}；盖底 Z={num(p["cover_bottom"])}，盖顶 Z={num(p["closed_height"])}；坐标均以桌面为 Z=0。'])
             assembly_page(book,assemblies['selected-closed'],['bottom','rear','left'],'整机闭盖 / 仰、后、左视','A-02',[
                 '仰视包含底部朝下的低音单元；后视可见倒相管安装开口。',
-                f'低音轴心 ({num(p["woofer"]["center_x"])}, {num(p["woofer"]["center_y"])}）；四脚轴心 (33,30)、({num(W-33)},30)、(33,{num(D-30)})、({num(W-33)},{num(D-30)})。',
+                f'低音轴心 ({num(p["woofer"]["center_x"])}, {num(p["woofer"]["center_y"])}）；四脚轴心 X={num(p["feet"]["side_inset"])}/{num(W-p["feet"]["side_inset"])}，Y={num(p["feet"]["front_y"])}/{num(D-p["feet"]["rear_inset"])}。底板孔位见 A-H01。',
                 '接口板目前无 RCA 等实际孔位；后板与所有固定孔须在零件实测后确认。'])
+            section_page(book,data['baffle_section'],p)
         elif volume==2:
             assembly_page(book,assemblies['internal'],['top','front','right'],'三音腔与后部电子区 / 去盖内部布置','B-00',[
                 '为读图隐藏两侧木板、后板、音腔顶板、前障板及两块全频腔后板；零件结构详见后页。',
@@ -307,6 +316,9 @@ def make_books(data,out,font):
             book.start(page_title,f'{prefix}-P{i//2+1:02}','尺寸表：长 X / 宽 Y / 高 Z / 厚度')
             for j,card in enumerate(cards[i:i+2]):book.card(card,12+j*202,32)
             book.end()
+        for sheet in data['hole_sheets']:
+            if sheet['volume']==volume:
+                hole_sheet_page(book,sheet)
         if any(c['quantity']>1 for c in cards):
             positions_page(book,cards,f'{prefix}-POS','同形零件安装位置表')
         if volume==3:

@@ -13,6 +13,7 @@ import FreeCAD as App
 import Part
 import TechDraw
 from feet import positions as foot_positions
+from drawing_details import panel_details, baffle_section
 
 ROOT = Path(__file__).resolve().parents[1]
 V = App.Vector
@@ -121,6 +122,8 @@ def collect(root=ROOT, project=True):
                             holes.append({'u_mm':hx-pos[0],'v_mm':p['fullrange']['center_z']-pos[2],
                                           'label':f"Ø{p['fullrange']['cutout_diameter']:g} 法向"})
                     card['holes']=holes
+                    if name in ('SideLeft','LowerRail','Slat01','AcousticRear','AcousticDividerLeft','RearSupport'):
+                        card['notes'].append('当前实体无开孔；连接孔须待装配工艺确认。')
                     if hasattr(obj,'StockLength'):
                         card['stock_mm']=[float(getattr(obj,key)) for key in ('StockLength','StockWidth','StockThickness')]
                         card['stock_note']=obj.StockNote
@@ -238,7 +241,9 @@ def collect(root=ROOT, project=True):
                                    'views':{v:project_shape(shape,v) for v in views} if project else {}})
             return {'units':'mm','revision':p['revision'],'study_revision':cfg['revision'],
                     'sources':hashes,'parameters':p,'mechanism':cfg,'coverage':coverage,
-                    'cards':cards,'assemblies':assemblies}
+                    'cards':cards,'assemblies':assemblies,
+                    'hole_sheets':panel_details(base,p,project_shape,project),
+                    'baffle_section':baffle_section(base,p,project_shape,project)}
     finally:
         for doc in docs:
             App.closeDocument(doc.Name)

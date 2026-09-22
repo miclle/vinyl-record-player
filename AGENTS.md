@@ -9,6 +9,7 @@ FreeCAD concept model of a turntable with one downward-facing woofer, two front 
 - `tools/build.FCMacro`: GUI entry point; invokes generation, rendering, and dimension-sheet creation.
 - `tools/render_views.py` and `tools/dimension_sheet.py`: viewport previews, a temporary foot-installation cutaway, and projected drawings. The cutaway is never saved into the source CAD.
 - `tools/drawing_data.py` and `tools/drawing_pack.py`: saved-solid projection data and three grouped A3 PDF books under `output/pdf/`; see `docs/drawing-pack.md` for the separate FreeCAD/PDF runtimes.
+- `tools/drawing_details.py`: five panel hole schedules, the baffle front-face projection and a temporary midline assembly section; `tools/drawing_detail_pages.py`: their PDF layouts. Preserve existing part drawing IDs when adding detail pages. Section geometry is never saved into source CAD.
 - `tools/assembly-guide.FCMacro`, `tools/assembly_guide.py`, and `tools/assembly_guide_pdf.py`: read-only CAD rendering and the two-page A2 numbered guide; see `docs/assembly-guide.md`. Covers the selected study's physical objects exactly once; exploded placements are temporary and never saved over source CAD.
 - `tools/validate_model.py`: baseline geometry and STEP validation; `tests/test_regressions.py`: regression tests; `tests/test_ac_inlet.py`: rear inlet opening and wiring-space checks.
 - `tools/mechanism_study.py` and `tools/mechanism-study.FCMacro`: selected-mechanism assembly, fit report, and GUI previews; `tests/test_mechanism_study.py`: fit-study regression tests.
@@ -46,6 +47,8 @@ Use four-space Python indentation, `snake_case` functions and JSON keys, and sta
 ## Testing Guidelines
 
 Use FreeCAD’s Python to run `-m unittest discover -s tests -v`. Tests use temporary directories. Validation uses FreeCAD and Open CASCADE; no coverage threshold is configured. Add descriptive boolean checks for changed dimensions, mounting clearances, chamber closure, port airflow, or export behavior. Read exact dimensions with `optimalBoundingBox(False)` so GUI tessellation does not change dimension checks. After geometry changes, regenerate deliverables, run validation, and visually inspect affected previews. Export leaf `Part::Feature` objects only to avoid duplicated group geometry.
+
+Drawing changes require `tests/test_drawing_pack.py` in FreeCAD and `tests/test_drawing_pdf.py` in a regular Python runtime with `reportlab`, `svglib`, `pypdf` and `pdfplumber`. Run `-m unittest discover -s tests -p '*_pdf.py' -v` there to include the assembly guide checks. Regenerate drawing data before composing PDFs after extraction changes; inspect affected pages with Poppler. Hole schedules use formed-panel datums: baffle S is distance along the front face, while the bottom view displays +Y downward. Preserve blind-hole depth, recess machining face and unconfirmed mounting-hole notes.
 
 ## Commit & Pull Request Guidelines
 
