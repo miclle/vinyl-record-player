@@ -103,6 +103,14 @@ def collect(root=ROOT, project=True):
                         holes.append({'u_mm':p['bass_port']['center_x']-pos[0],
                                       'v_mm':p['bass_port']['center_z']-pos[2],
                                       'label':f"Ø{p['bass_port']['inner_diameter']+2*p['bass_port']['wall_thickness']:g}"})
+                        inlet=p['ac_inlet']
+                        holes.append({'u_mm':inlet['center_x']-pos[0],
+                                      'v_mm':inlet['center_z']-pos[2],
+                                      'label':f"AC {inlet['cutout_width']:g}×{inlet['cutout_height']:g} R{inlet['cutout_radius']:g}"})
+                        for sign in (-1,1):
+                            holes.append({'u_mm':inlet['center_x']-pos[0],
+                                          'v_mm':inlet['center_z']+sign*inlet['mount_hole_pitch']/2-pos[2],
+                                          'label':f"Ø{inlet['mount_hole_diameter']:g}"})
                     elif name=='Baffle':
                         for hx in p['fullrange']['center_x']:
                             holes.append({'u_mm':hx-pos[0],'v_mm':p['fullrange']['center_z']-pos[2],
@@ -120,6 +128,14 @@ def collect(root=ROOT, project=True):
             add('SideLeft',1,t,['长边沿 Y，板高沿 Z；两侧板同形，数量 2。'],['SideRight'])
             add('Bottom',1,t,[f"通孔 Ø{f(p['woofer']['cutout_diameter'])}（暂定低音开孔）。",hole(p['woofer']['center_x']-t,p['woofer']['center_y'])])
             add('Back',1,t,[f"通孔 Ø{f(p['bass_port']['inner_diameter']+2*p['bass_port']['wall_thickness'])}；后侧沉台 Ø{f(p['bass_port']['flange_diameter'])}，深 {f(p['bass_port']['flange_thickness'])}。",f"孔中心：距左边 {f(p['bass_port']['center_x']-t)}，距下边 {f(p['bass_port']['center_z']-zlo)}。"])
+            inlet=p['ac_inlet']
+            cards[-1]['notes'] += [
+                f"AC 横装：{f(inlet['cutout_width'])}×{f(inlet['cutout_height'])}，R{f(inlet['cutout_radius'])}；中心局部 X/Z=({f(inlet['center_x']-t)}, {f(inlet['center_z']-zlo)})。",
+                f"2×Ø{f(inlet['mount_hole_diameter'])}，上下孔距 {f(inlet['mount_hole_pitch'])}；先实物试孔，螺钉长度与板厚适配未确认。"]
+            add('ACInlet',3,None,[
+                '8-F5 两芯 C8 + 开关 + 保险座；横装，外形和端子按保守包络表示。',
+                f"法兰厚 {f(inlet['flange_thickness'])}；自前表面总深 {f(inlet['total_depth'])}；背后另留 {f(inlet['wire_clearance_assumption'])} 接线空间（暂估）。",
+                '商家资料未验证；保护接地不可用，整机绝缘、额定负载、保险及接线待确认，未放行通电。'])
             add('Fascia',1,6,['厚度方向 Y；前沿饰条高 20。'])
             add('LowerRail',1,8,['厚度方向 Y；梁高取模型 Z 尺寸。'])
             add('GrilleCloth',1,0.5*sin,[f'Y 向显示厚度 0.5；法向显示厚度 {f(0.5*sin)}。','透声布仅是薄实体外观占位，实物布厚未知。',f'斜面实际高度 {f((p["acoustic"]["roof_bottom_z"]-zlo)/sin)}；后倾 {f(90-p["front_angle"])}°。'])
@@ -199,7 +215,7 @@ def collect(root=ROOT, project=True):
                     objects=[o for o in objects if o.Name not in ['AcousticRoof','SideRight','SideLeft','Back','Baffle','AcousticRear']]
                 # Bottom view of the full assembly includes the downward-facing woofer.
                 if key=='selected-closed':
-                    objects += [study.getObject('Woofer')]
+                    objects += [study.getObject('Woofer'),study.getObject('ACInlet')]
                 shape=Part.makeCompound([o.Shape for o in objects])
                 assemblies.append({'key':key,'title':title,'size_mm':bounds(shape)[0],
                                    'views':{v:project_shape(shape,v) for v in views} if project else {}})

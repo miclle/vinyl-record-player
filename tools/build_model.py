@@ -10,6 +10,7 @@ from pathlib import Path
 
 import FreeCAD as App
 import Part
+from ac_inlet import installation as inlet_installation
 
 ROOT = Path(__file__).resolve().parents[1]
 V = App.Vector
@@ -86,7 +87,16 @@ def build():
     back=back.cut(Part.makeCylinder(outer_r,t+2,V(px,D-t-1,pz),V(0,1,0)))
     back=back.cut(Part.makeCylinder(port['flange_diameter']/2,port['flange_thickness']+1,
                                   V(px,D-port['flange_thickness'],pz),V(0,1,0)))
-    add('Back','后板 · 可换倒相管沉台',back,'Cabinet',WOOD)
+    inlet_opening, inlet_bolts, inlet_shape, _ = inlet_installation(p)
+    back = back.cut(inlet_opening)
+    for bolt in inlet_bolts:
+        back = back.cut(bolt)
+    add('Back','后板 · 倒相管沉台与 AC 插座安装孔',back,'Cabinet',WOOD)
+    inlet = add('ACInlet','8 字 AC 插座 · 开关保险一体式安装包络',inlet_shape,'Electronics',BLACK,
+                basis='用户提供 8-F5 商家图；横装开孔 48×28 R3、2×Ø4.5 孔距 40；外形及端子为保守包络',
+                material='采购件占位；接线、绝缘、螺钉及适用板厚待实物确认，未放行通电')
+    inlet.addProperty('App::PropertyBool','ElectricalReleased','Installation').ElectricalReleased=False
+    inlet.addProperty('App::PropertyBool','InstallationReleased','Installation').InstallationReleased=False
     tube=Part.makeCylinder(outer_r,port['length']-port['flange_thickness'],V(px,D-port['length'],pz),V(0,1,0))
     tube=tube.fuse(Part.makeCylinder(port['flange_diameter']/2,port['flange_thickness'],
                                    V(px,D-port['flange_thickness'],pz),V(0,1,0)))
@@ -259,7 +269,7 @@ def build():
     stock_specs={
         'SideLeft':(V(1,0,0),t,'矩形板'), 'SideRight':(V(1,0,0),t,'矩形板'),
         'Bottom':(V(0,0,1),t,'矩形板；另开低音通孔'),
-        'Back':(V(0,1,0),t,'矩形板；另开倒相通孔及沉台'),
+        'Back':(V(0,1,0),t,'矩形板；倒相孔及沉台；AC 横孔 48×28 R3、上下 2×Ø4.5 孔距 40'),
         'LowerRail':(V(0,1,0),8,'矩形横梁'),
         'Baffle':(inward,ac['baffle_thickness'],f'整数矩形备料；上下两边修 {90-p["front_angle"]:g}° 斜口至安装竖高 {zhi-zlo:g}；另开法向孔'),
         'AcousticRoof':(V(0,0,1),ac['roof_thickness'],'矩形备料；切 T 形轮廓并开轴承孔'),

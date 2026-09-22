@@ -4,13 +4,13 @@
 
 FreeCAD concept model of a turntable with one downward-facing woofer, two front full-range satellites, a shared transformer, and an amplifier including its heatsink. The selected curved-arm mechanism has a separate fit-study assembly; installation is not released.
 
-- `tools/build_model.py`: geometry generation and CAD export.
+- `tools/build_model.py`: geometry generation and CAD export; `tools/ac_inlet.py`: rear AC inlet opening and conservative installation/wiring volumes.
 - `tools/build.FCMacro`: GUI entry point; invokes generation, rendering, and dimension-sheet creation.
 - `tools/render_views.py` and `tools/dimension_sheet.py`: viewport previews and projected drawings.
 - `tools/drawing_data.py` and `tools/drawing_pack.py`: saved-solid projection data and three grouped A3 PDF books under `output/pdf/`; see `docs/drawing-pack.md` for the separate FreeCAD/PDF runtimes.
-- `tools/validate_model.py`: baseline geometry and STEP validation; `tests/test_regressions.py`: regression tests.
+- `tools/validate_model.py`: baseline geometry and STEP validation; `tests/test_regressions.py`: regression tests; `tests/test_ac_inlet.py`: rear inlet opening and wiring-space checks.
 - `tools/mechanism_study.py` and `tools/mechanism-study.FCMacro`: selected-mechanism assembly, fit report, and GUI previews; `tests/test_mechanism_study.py`: fit-study regression tests.
-- `cad/parameters.json`: cabinet, drivers, transformer, and amplifier inputs; `lumi-three-driver.FCStd` / `.step`, `parts.csv`, and `validation.json` are baseline outputs.
+- `cad/parameters.json`: cabinet, drivers, transformer, amplifier, and AC inlet inputs; `lumi-three-driver.FCStd` / `.step`, `parts.csv`, and `validation.json` are baseline outputs.
 - `cad/wood-cut-list.csv`: generated integer rectangular stock sizes and quantities. `StockLength` / `StockWidth` / `StockThickness` are board-local dimensions; tilted XYZ envelopes and finished bevels may remain fractional.
 - `cad/selected-mechanism.json`: mechanism assumptions; `lumi-selected-mechanism-fit.FCStd` / `.step` and `mechanism-fit-report.json` are fit-study outputs. The study reads the saved baseline FCStd. Historical `lumi-dual-driver.*` files are available only in Git history.
 - `previews/`: generated PNG and SVG assets.
@@ -54,3 +54,7 @@ Follow the existing concise English Angular-style commit messages, such as `feat
 Edit `cad/parameters.json` and rebuild: saved `Part::Feature` solids do not update automatically. Validation rejects mismatched or missing parameter snapshots. The SC-2103 layout has three independent chambers and a replaceable rear port; `fullrange` is the parameter/role name, while `TweeterLeft` / `TweeterRight` remain stable legacy object IDs. CAD cavity volumes and trial port dimensions are not verified acoustic tuning. Driver `total_height` includes `flange_thickness`; inward depth is their difference. Amplifier dimensions already include the heatsink. Transformer ear width/thickness, speaker cutouts, mounting holes, and amplifier floor clearance remain assumptions. Distinguish user-provided dimensions from estimates. Passing geometry checks does not establish acoustic performance or manufacturing readiness. Reference photos retain their owners' copyright; the repository license does not cover them.
 
 The v0.5 woodworking layout uses a 450 × 350 mm footprint. `acoustic.baffle_thickness` and `slat_thickness` are true normal thicknesses; baffle horizontal cuts and adjoining divider fronts must stay geometrically coincident. Slats have rectangular `slat_face_width` × `slat_thickness` sections and a vertical `slat_pitch`. Integer stock dimensions do not define kerf, measured sheet thickness, finish allowances, or joint clearances; do not round mating geometry independently.
+
+The v0.6 AC inlet is a horizontally mounted 8-F5 candidate: 48 × 28 mm R3 opening, two Ø4.5 holes with vertical pitch 40 mm, centre X=70/Z=108. The flange extends 1.88 mm beyond the 350 mm cabinet depth. Original vendor images and unverified electrical/installation conditions are in `references/ac-inlet/README.md`; the combined image is a reading aid, not dimension authority. C8 provides no protective earth. Geometry validation does not release mains wiring or the 12 mm panel fastening design.
+
+Keep inlet and power-cord purchase URLs and SKU IDs in `references/ac-inlet/README.md`. Recording a product link does not verify its specifications. The power cord and external plug are not modeled or included in the current overall dimensions.

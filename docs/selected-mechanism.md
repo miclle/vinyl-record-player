@@ -16,7 +16,7 @@
 
 ## CAD 与核对结果
 
-[FreeCAD 核对装配](../cad/lumi-selected-mechanism-fit.FCStd) 和 [STEP](../cad/lumi-selected-mechanism-fit.step) 沿用 v0.5 整数备料 的外壳与电子、音响布局，并替换上部机芯外观。[三单元基线](../cad/lumi-three-driver.FCStd) 保持独立，是本核对版的生成输入，须保留。两份文件可独立打开，但修改基线不会自动更新本核对版；需要按下方步骤重新生成。
+[FreeCAD 核对装配](../cad/lumi-selected-mechanism-fit.FCStd) 和 [STEP](../cad/lumi-selected-mechanism-fit.step) 沿用 v0.6 AC 插座预留版的外壳与电子、音响布局，并替换上部机芯外观。[三单元基线](../cad/lumi-three-driver.FCStd) 保持独立，是本核对版的生成输入，须保留。两份文件可独立打开，但修改基线不会自动更新本核对版；需要按下方步骤重新生成。
 
 | 继承部件 | 用户提供的外廓 | 仍待确认 |
 |---|---|---|
@@ -59,6 +59,6 @@ PYTHONPATH=/Applications/FreeCAD.app/Contents/Resources/lib \
   /Applications/FreeCAD.app/Contents/Resources/bin/python tools/mechanism_study.py
 ```
 
-该入口生成 CAD 与报告，不刷新 GUI 颜色和预览。`tools/validate_model.py` 的 33 项检查只针对 v0.5 基线，不能用来宣称此款机芯已适配。
+该入口生成 CAD 与报告，不刷新 GUI 颜色和预览。`tools/validate_model.py` 的 38 项检查只针对 v0.6 基线，不能用来宣称此款机芯已适配。
 
 音响布局详见 [SC-2103 三音腔设计](audio-layout.md)。低音腔向后延伸后，顶板与倒相管仍需按弯臂机芯真实底部重新核对。`BearingPocket` 是基线通用轴承的密封避让杯，在核对版中作为现有结构保留，不代表适配了选定机芯。

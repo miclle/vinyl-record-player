@@ -4,6 +4,7 @@ import math
 from pathlib import Path
 import FreeCAD as App
 import Part
+from ac_inlet import installation as inlet_installation
 
 ROOT=Path(__file__).resolve().parents[1]
 
@@ -45,6 +46,7 @@ def _validate_document(doc,p):
         'GeometryDatums': ['BuildParametersJSON','PivotPoint','SpindlePoint','StylusPoint','CoverHinge'],
         'PowerTransformer': ['Shape'],
         'Amplifier': ['Shape'],
+        'ACInlet': ['Shape','ElectricalReleased','InstallationReleased'],
     }
     for name in ['BassPort','BearingPocket','AcousticRoof','AcousticRear','AcousticDividerLeft','AcousticDividerRight','Baffle','Bottom','Back']:
         required[name]=['Shape']
@@ -75,7 +77,8 @@ def _validate_document(doc,p):
     compound=Part.makeCompound([o.Shape for o in objects]);bb=compound.BoundBox
     metrics['part_count']=len(objects);metrics['solid_count']=len(compound.Solids)
     metrics['overall_mm']=[bb.XLength,bb.YLength,bb.ZLength]
-    checks['overall_matches_parameters']=all(abs(v-p[k])<1e-5 for v,k in zip(metrics['overall_mm'],['width','depth','closed_height']))
+    expected_overall=[p['width'],p['depth']+p['ac_inlet']['flange_thickness'],p['closed_height']]
+    checks['overall_matches_parameters']=all(abs(v-e)<1e-5 for v,e in zip(metrics['overall_mm'],expected_overall))
     drivers=[o for o in objects if hasattr(o,'DriverRole')]
     checks['one_woofer_two_fullrange']=len(drivers)==3 and sorted(o.DriverRole for o in drivers)==['fullrange','fullrange','woofer']
     metrics['driver_reservations_mm']={o.Name:{'role':o.DriverRole,'flange_diameter':float(o.FlangeDiameter),'cutout_diameter':float(o.CutoutDiameter),'depth':float(o.ReservedDepth),'total_height':float(o.TotalHeight),'flange_thickness':float(o.FlangeThickness)} for o in drivers}
@@ -184,6 +187,8 @@ def _validate_document(doc,p):
     metrics['amplifier_reservation_collisions']=amplifier_hits
     metrics['amplifier_clearances_mm']=amplifier_gaps
     checks['amplifier_reservation_clear']=not amplifier_hits
+    inlet_checks,inlet_metrics=check_ac_inlet(doc,p)
+    checks.update(inlet_checks);metrics['ac_inlet']=inlet_metrics
     wood_checks,wood_metrics=check_woodworking(doc,p)
     checks.update(wood_checks);metrics['woodworking']=wood_metrics
     acoustic_checks,acoustic_metrics=check_acoustics(doc,p,reserved+[(transformer.Name,envelope)])
@@ -197,6 +202,51 @@ def _validate_document(doc,p):
     checks['step_volume']=abs(readback.Volume-compound.Volume)/compound.Volume<1e-7
     checks['step_bounds']=all(abs(a-b)<1e-5 for a,b in zip([readback.BoundBox.XLength,readback.BoundBox.YLength,readback.BoundBox.ZLength],metrics['overall_mm']))
     return finish()
+
+def check_ac_inlet(doc,p):
+    opening, bolts, expected, wiring = inlet_installation(p)
+    actual = doc.getObject('ACInlet').Shape
+    back = doc.getObject('Back').Shape
+    s = p['ac_inlet']
+    # Compare all removed material inside a local region: catches filled,
+    # oversize and misplaced holes, as well as accidentally squared R3 corners.
+    region = Part.makeBox(s['flange_width']+2, p['wall'], s['flange_height']+2,
+                         App.Vector(s['center_x']-s['flange_width']/2-1, p['depth']-p['wall'],
+                                    s['center_z']-s['flange_height']/2-1))
+    desired = region.cut(opening)
+    for bolt in bolts:
+        desired = desired.cut(bolt)
+    saved = back.common(region)
+    cutouts_match = saved.cut(desired).Volume + desired.cut(saved).Volume < 1e-5
+    hits, wire_hits, gaps = [], [], {}
+    for obj in doc.Objects:
+        if obj.TypeId != 'Part::Feature' or obj.Name == 'ACInlet':
+            continue
+        if actual.common(obj.Shape).Volume > 1e-5:
+            hits.append(obj.Name)
+        if wiring.common(obj.Shape).Volume > 1e-5:
+            wire_hits.append(obj.Name)
+        if obj.Name in ('PowerTransformer','RearSupport','FloatingDeck','AcousticDividerLeft'):
+            gaps[obj.Name] = wiring.distToShape(obj.Shape)[0]
+    checks = {
+        'ac_inlet_panel_cutouts_match': cutouts_match,
+        'ac_inlet_envelope_matches': actual.cut(expected).Volume + expected.cut(actual).Volume < 1e-5,
+        'ac_inlet_envelope_clear': not hits,
+        'ac_inlet_wiring_space_clear': not wire_hits,
+        'ac_inlet_flange_supported': desired.Volume > 0 and region.common(back).Volume > 0
+            and s['center_x']-s['flange_width']/2 > p['wall']
+            and s['center_x']+s['flange_width']/2 < p['width']-p['wall']
+            and s['center_z']-s['flange_height']/2 > p['foot_height']+p['wall']
+            and s['center_z']+s['flange_height']/2 < p['cabinet_top'],
+    }
+    return checks, {'center_xz_mm':[s['center_x'],s['center_z']],
+                    'cutout_width_height_radius_mm':[s['cutout_width'],s['cutout_height'],s['cutout_radius']],
+                    'bolt_centers_xz_mm':[[s['center_x'],s['center_z']+sign*s['mount_hole_pitch']/2] for sign in (-1,1)],
+                    'collisions':hits,'wire_reservation_collisions':wire_hits,
+                    'wire_reservation_clearances_mm':gaps,
+                    'wire_clearance_assumption_mm':s['wire_clearance_assumption'],
+                    'electrical_released':False,'installation_released':False}
+
 
 def check_acoustics(doc,p,reserved):
     """Measure enclosed saved geometry with only the intended driver/port holes capped.

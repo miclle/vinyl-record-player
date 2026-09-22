@@ -18,6 +18,7 @@ def load_local_module(name):
     sys.modules[name] = module
     return module
 
+ac_inlet = load_local_module('ac_inlet')
 build_model = load_local_module('build_model')
 render_views = load_local_module('render_views')
 dimension_sheet = load_local_module('dimension_sheet')

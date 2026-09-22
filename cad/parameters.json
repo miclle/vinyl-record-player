@@ -1,6 +1,6 @@
 {
   "units": "mm",
-  "revision": "v0.5-integer-woodwork",
+  "revision": "v0.6-ac-inlet",
   "width": 450.0,
   "depth": 350.0,
   "closed_height": 214.2,
@@ -96,5 +96,30 @@
   },
   "slat_face_width": 7.0,
   "slat_thickness": 3.0,
-  "slat_pitch": 11.0
+  "slat_pitch": 11.0,
+  "ac_inlet": {
+    "model": "8-F5 C8 inlet + switch + fuse holder",
+    "orientation": "horizontal; vendor front drawing rotated 90 degrees",
+    "center_x": 70.0,
+    "center_z": 108.0,
+    "cutout_width": 48.0,
+    "cutout_height": 28.0,
+    "cutout_radius": 3.0,
+    "mount_hole_diameter": 4.5,
+    "mount_hole_pitch": 40.0,
+    "flange_width": 58.0,
+    "flange_height": 49.0,
+    "flange_thickness": 1.88,
+    "body_width": 47.6,
+    "body_height": 27.2,
+    "total_depth": 30.66,
+    "flange_corner_radius_assumption": 3.0,
+    "body_corner_radius_assumption": 3.0,
+    "wire_clearance_assumption": 20.0,
+    "rated_current_a_vendor": 2.5,
+    "rated_voltage_vac_vendor": 250,
+    "electrical_released": false,
+    "installation_released": false,
+    "note": "User supplied vendor images; body and terminal region are one conservative envelope. 30.66 mm chosen over 30.62 mm. Panel thickness, fasteners, insulation, wiring, ratings and fuse selection need verification."
+  }
 }

@@ -30,6 +30,9 @@ def render(doc,p,groups):
     view.setCameraOrientation(App.Rotation(App.Vector(1,0,0),90).Q);view.fitAll();save('front.png')
     view.setCameraOrientation(App.Rotation(App.Vector(0,1,0),App.Vector(0,0,1),App.Vector(1,0,0),'ZXY').Q);view.fitAll();save('right.png')
     view.viewRear();view.fitAll();save('rear.png')
+    doc.getObject('ACInlet').ViewObject.Visibility=False
+    save('rear-cutouts.png')
+    doc.getObject('ACInlet').ViewObject.Visibility=True
     view.setCameraOrientation(App.Rotation(App.Vector(1,0,0),180).Q);view.fitAll();save('bottom.png')
     # Top view intentionally omits the cover to show mechanical layout.
     for obj in groups['Cover'].Group:obj.ViewObject.Visibility=False

@@ -284,7 +284,7 @@ def make_books(data,out,font):
             intro(book,data)
             stock_page(book,data)
             assembly_page(book,assemblies['selected-closed'],['top','front','right'],'整机闭盖 / 俯、正、右视','A-01',[
-                f'整机名义长 X {num(W)} × 宽 Y {num(D)} × 高 Z {num(p["closed_height"])}；木壳板厚 {num(p["wall"])}；浮动台面厚 {num(p["deck_thickness"])}；防尘罩壁厚 {num(p["cover_wall"])}。',
+                f'机壳名义长 X {num(W)} × 宽 Y {num(D)} × 高 Z {num(p["closed_height"])}；含 AC 法兰总深 {num(D+p["ac_inlet"]["flange_thickness"])}；木壳板厚 {num(p["wall"])}。',
                 '防尘盖按闭合状态投影；不透明技术线稿中不显示盖内机芯。机芯独立视图见图册 03。',
                 f'木壳底面 Z={num(p["foot_height"])}，壳体顶面 Z={num(H)}；盖底 Z={num(p["cover_bottom"])}，盖顶 Z={num(p["closed_height"])}；坐标均以桌面为 Z=0。'])
             assembly_page(book,assemblies['selected-closed'],['bottom','rear','left'],'整机闭盖 / 仰、后、左视','A-02',[
