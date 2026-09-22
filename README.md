@@ -102,13 +102,14 @@ FCStd 保留独立的 `Part::Feature` 实体；主参数由 JSON 驱动脚本重
 
 ## v0.7 基线重建
 
-使用 FreeCAD **1.1.1** 验证。输出写回当前仓库的 `cad/` 和 `previews/`。
+使用 FreeCAD **1.1.1**。以下终端命令从仓库根目录执行；基线生成输出写回 `cad/` 和 `previews/`，PDF 另行生成到 `output/pdf/`。
 
 1. 按需修改 `cad/parameters.json`。脚垫高度须满足 `foot_height = feet.rubber_height + feet.flange_thickness`；改变离地高度时还需同步关联的绝对 Z 参数，见[脚垫参数与重建](references/feet/README.md#参数与重建)。
 2. 将手动改动另存后，关闭基线文件，包括重新打开后名称为 `lumi_three_driver` 等的文档。基线脚本仅按 `LumiThreeDriver` 文档名阻止重建，不检查重新打开的文件路径。
 3. 在 FreeCAD 的「宏 → 宏」中选择并执行 `tools/build.FCMacro`。它依次生成 FCStd、STEP、清单、预览（含脚座安装剖视）和尺寸图；剖视只裁切临时文档，不修改装配实体。
 4. 重新执行下方验证命令，使报告与修改后的模型保持一致。
-5. 如需同步弯臂机芯装配，接着按[专题说明](docs/selected-mechanism.md#后续适配与重建)运行 `tools/mechanism-study.FCMacro`。它依赖刚保存的基线，不会自动重建基线。
+5. 基线变更后，按[专题说明](docs/selected-mechanism.md#后续适配与重建)重新生成弯臂机芯核对版。先另存手动修改并关闭核对版，再运行 `tools/mechanism-study.FCMacro`；它依赖刚保存的基线，不会自动重建基线。
+6. 交付图纸时，按[图册说明](docs/drawing-pack.md#重新生成)先提取两套 CAD 的最新数据，再排版三份 A3 PDF；随后按[导览说明](docs/assembly-guide.md#重新生成)运行导览宏并排版两页 A2 PDF。基线宏不会更新这些 PDF 或导览索引。
 
 宏每次直接读取 `ac_inlet`、`feet`、`build_model`、`render_views` 和 `dimension_sheet` 五个本地模块的源代码，支持同一 FreeCAD 会话中修改脚本后重跑。生成参数快照保存在 `GeometryDatums.BuildParametersJSON` 中；改动参数却未重建、或模型缺少快照、预检查所列的尺寸基准及安装对象/属性时，验证会先写入 `passed: false` 和具体原因，覆盖旧报告并提示重新生成模型；命令以非零状态退出，验证打开的文档会关闭。报告分别记录模型版本 `revision` 与请求版本 `requested_revision`。
 
@@ -120,22 +121,24 @@ open -a FreeCAD --args "$PWD/tools/build.FCMacro"
 
 命令适用于 FreeCAD 尚未运行时；已经运行时直接在宏窗口执行。脚本使用宏本身所在位置寻找仓库，不依赖终端工作目录。
 
-无图形界面时可只生成几何与 STEP：
+无图形界面时可生成基线 FCStd、STEP、零件清单与木板备料清单：
+
+macOS 终端命令使用环境变量 `FREECAD_RESOURCES`，请将其设为本机 FreeCAD 1.1.1 应用包内的 `Contents/Resources` 目录，并在同一终端会话中执行命令。该目录应包含 `bin/python` 和 `lib`；它是外部运行环境，不是项目目录。下方命令及各专题文档均使用此变量，未设置时会提示并停止。
 
 ```sh
-PYTHONPATH=/Applications/FreeCAD.app/Contents/Resources/lib \
-  /Applications/FreeCAD.app/Contents/Resources/bin/python tools/build_model.py
+PYTHONPATH="${FREECAD_RESOURCES:?请先设置 FreeCAD 运行环境}/lib" \
+  "$FREECAD_RESOURCES/bin/python" tools/build_model.py
 ```
 
-该方式不输出渲染、颜色和图形视图；要获得完整交付，请执行 GUI 宏。
+该方式不生成 GUI 颜色、预览或尺寸图，也不刷新验证报告；需要这些视图时执行基线 GUI 宏，再继续上述验证、机芯核对版及图纸流程。
 
 ## 验证范围
 
 2026-09-22 障板与开孔图补充后，26 项 CAD 相关用例通过，另在独立 PDF 环境通过 4 项用例；具体执行批次及模型报告范围见[验证证据](docs/current-work-handoff.md#验证证据)。测试覆盖宏重载、参数快照、保存实体尺寸、变压器与功放干涉、非默认尺寸标注，音腔泄漏、缩短全频腔、电子件入腔后的净容积扣除、倒相管堵塞、120／160／200 mm 三种试验管长，以及机芯核对版的覆盖保护和下探深度。新增脚垫尺寸、穿板孔、固定座移位和音腔泄漏回归。导览覆盖对象映射、图号关联、1／3／8 根格栅的标注目标及缺失／遮挡标注拒绝检查。旧模型、缺少属性及无效快照的测试同时核对失败报告覆盖、命令行退出和文档关闭。几何变更测试在临时目录生成模型；图册与导览测试另会只读检查仓库当前交付物，因此需先完成两套 CAD 的重建。新增出图检查覆盖板孔局部坐标、底面盲孔深度、障板法向投影与非默认参数，以及 PDF 孔表和虚构截面边回归。测试不会改写原交付文件：
 
 ```sh
-PYTHONPATH=/Applications/FreeCAD.app/Contents/Resources/lib \
-  /Applications/FreeCAD.app/Contents/Resources/bin/python -m unittest discover -s tests -v
+PYTHONPATH="${FREECAD_RESOURCES:?请先设置 FreeCAD 运行环境}/lib" \
+  "$FREECAD_RESOURCES/bin/python" -m unittest discover -s tests -v
 
 # 普通 Python 环境需 reportlab、svglib、pypdf、pdfplumber，补跑：
 python3 -m unittest discover -s tests -p '*_pdf.py' -v
@@ -144,12 +147,12 @@ python3 -m unittest discover -s tests -p '*_pdf.py' -v
 v0.7 基线的几何验证（不覆盖选定机芯核对版）：
 
 ```sh
-PYTHONPATH=/Applications/FreeCAD.app/Contents/Resources/lib \
-  /Applications/FreeCAD.app/Contents/Resources/bin/python tools/validate_model.py
+PYTHONPATH="${FREECAD_RESOURCES:?请先设置 FreeCAD 运行环境}/lib" \
+  "$FREECAD_RESOURCES/bin/python" tools/validate_model.py
 ```
 
 v0.7 报告通过全部 **42 项检查**，包括：实体有效性、一低音两全频数量与参数、沿各单元轴线回读的实际外径与总高、生成参数快照一致性、必需模型属性、外廓、唱盘直径、唱臂轴距及有效长度、三音腔独立封闭性、倒相管尺寸与气路、闭盖净空、开盖抽样、关键内部包络、实心安装空间、低音离桌面间隙、变压器本体及固定耳包络尺寸、底板支承与空间避让、功放板含散热片尺寸与避让、STEP 回读实体数、体积与边界一致性，新增脚垫／脚座形状、底板通孔与盲预孔、干涉和法兰支承检查，另含插座孔形、包络、干涉、接线预留与法兰支承检查，以及木板真实法向厚度、整数备料包容关系和矩形格栅节距与间隙。闭盖到机芯包络的最小距离为 **11 mm**。
 
 开盖以 5° 步长检查 0–70° 的位置，不是连续运动学验证。内部检查覆盖喇叭实心圆柱安装包络与机芯、电路板、隔板及外壳，另检查轴承、马达和电子板的指定边界，不代表所有装配细节已放行。音腔已用保存的几何检查独立封闭性与保守净容积，但实际声学容积、扬声器参数匹配、声反馈、隔振性能、驱动与电气功能尚未验证。
 
-具体未完成安装工作见[后续适配](docs/selected-mechanism.md#后续适配与重建)，加工前资料清单见[设计依据](docs/design-basis.md#进入加工前必须补齐)。SC-2103 具体版本、原功放分频和单元参数仍需核实。现有图纸已标出暂定声孔，进入加工前仍需实测确认声孔直径，并补齐扬声器固定螺孔和安装图，并补齐已选弯臂机芯的真实安装图、材料、连接方式和公差。**本版不能直接作为原厂精确复刻或生产加工图。**
+具体未完成安装工作见[后续适配](docs/selected-mechanism.md#后续适配与重建)，加工前资料清单见[设计依据](docs/design-basis.md#进入加工前必须补齐)。SC-2103 具体版本、原功放分频和单元参数仍需核实。现有图纸已标出暂定声孔，进入加工前仍需实测确认声孔直径，补齐扬声器固定螺孔、扬声器与已选弯臂机芯的真实安装图，并确定材料、连接方式和公差。**本版不能直接作为原厂精确复刻或生产加工图。**

@@ -27,18 +27,18 @@
 
 先确保两套保存的 CAD、JSON 参数及原尺寸图册同步，随后在 FreeCAD 1.1.1 的宏对话框执行 `tools/assembly-guide.FCMacro`。宏读取临时副本，校验参数快照及基线哈希，并将三张原始视图与标注投影写入忽略的 `tmp/assembly-guide/`，不保存修改后的模型。
 
-使用含 ReportLab 和 Poppler 的普通 Python 排版，默认输出一份两页 PDF、两张 180 dpi PNG 和编号索引：
+在仓库根目录使用含 ReportLab 和 Poppler 的普通 Python 排版，默认输出一份两页 PDF、两张 180 dpi PNG 和编号索引。字体示例 `tmp/fonts/chinese-font.ttf` 是项目相对路径占位，需自行准备字体或替换为已有字体的相对路径：
 
 ```sh
-python3 tools/assembly_guide_pdf.py --font /path/to/chinese-font.ttf
+python3 tools/assembly_guide_pdf.py --font tmp/fonts/chinese-font.ttf
 ```
 
 字体默认为本机阿里巴巴普惠体，异机须指定可嵌入的中文 TrueType 字体。PDF 中嵌入字体；A2 原幅为 594 × 420 mm，PNG 约 4210 × 2977 像素。源码参数改变后需先重建 CAD，再重跑宏；若 CAD 在渲染后发生变化，排版脚本会拒绝使用过期视图。
 
-验证包括对象覆盖、重复映射拒绝、当前图号关联、1／3／8 根格栅的标注目标有效性、复合板件数量及源 CAD 未改写的回归用例。渲染时沿相机方向检查引出线端点是否被其他不透明零件挡住；排版拒绝缺失或被遮挡的实际使用标注。生成后还需目视检查两页的引出线、可见部件与文字排版。
+验证包括对象覆盖、重复映射拒绝、当前图号关联、1／3／8 根格栅的标注目标有效性、复合板件数量及源 CAD 未改写的回归用例。渲染时沿相机方向检查引出线端点是否被其他不透明零件挡住；排版拒绝缺失或被遮挡的实际使用标注。生成后还需目视检查两页的引出线、可见部件与文字排版。终端执行前按 [README](../README.md#v07-基线重建) 设置 `FREECAD_RESOURCES`。
 
 ```sh
-PYTHONPATH=/Applications/FreeCAD.app/Contents/Resources/lib \
-  /Applications/FreeCAD.app/Contents/Resources/bin/python -m unittest discover -s tests -v
+PYTHONPATH="${FREECAD_RESOURCES:?请先设置 FreeCAD 运行环境}/lib" \
+  "$FREECAD_RESOURCES/bin/python" -m unittest discover -s tests -v
 python3 -m unittest discover -s tests -p '*_pdf.py' -v
 ```

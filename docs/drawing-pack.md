@@ -52,15 +52,15 @@
 
 `drawing_data.py` 调用 `drawing_details.py` 提取五种板件的孔表、障板前表面法向投影及箱体中线临时剖面；`drawing_pack.py` 调用 `drawing_detail_pages.py` 排版。剖面只表示实际截面轮廓，不把包围盒边当作实体边。
 
-下面的相对路径命令在仓库根目录执行；使用脚本绝对路径时可从其他目录运行，默认输入输出仍相对脚本所在仓库解析：
+下面的命令在仓库根目录执行；先按 [README](../README.md#v07-基线重建) 设置 `FREECAD_RESOURCES`。默认输入输出相对脚本所在仓库解析。字体示例 `tmp/fonts/chinese-font.ttf` 是项目相对路径占位，需自行准备可嵌入的中文字体或替换为已有字体的相对路径：
 
 ```sh
 # 在仓库根目录：提取 CAD 实体、精确尺寸与矢量投影。
-PYTHONPATH=/Applications/FreeCAD.app/Contents/Resources/lib \
-  /Applications/FreeCAD.app/Contents/Resources/bin/python tools/drawing_data.py
+PYTHONPATH="${FREECAD_RESOURCES:?请先设置 FreeCAD 运行环境}/lib" \
+  "$FREECAD_RESOURCES/bin/python" tools/drawing_data.py
 
 # 普通 Python 环境需要 reportlab、svglib；使用可嵌入的中文 TrueType 字体。
-python3 tools/drawing_pack.py --font /path/to/chinese-font.ttf
+python3 tools/drawing_pack.py --font tmp/fonts/chinese-font.ttf
 ```
 
 提取逻辑或数据结构变化后，须先重跑 `drawing_data.py`，不要直接用旧 JSON 排版。中间数据保存在忽略的 `tmp/pdfs/drawing-data.json`；最终目录为 `output/pdf/`。`--data`、`--output` 可覆盖默认路径。本机字体默认使用阿里巴巴普惠体常规字重；异机请明确指定字体。图中文字嵌入 PDF，阅读者不需要安装同一字体。
@@ -70,8 +70,8 @@ python3 tools/drawing_pack.py --font /path/to/chinese-font.ttf
 验证：
 
 ```sh
-PYTHONPATH=/Applications/FreeCAD.app/Contents/Resources/lib \
-  /Applications/FreeCAD.app/Contents/Resources/bin/python -m unittest discover -s tests -v
+PYTHONPATH="${FREECAD_RESOURCES:?请先设置 FreeCAD 运行环境}/lib" \
+  "$FREECAD_RESOURCES/bin/python" -m unittest discover -s tests -v
 
 # 在具有上述 PDF 依赖的普通 Python 中执行图册回归。
 python3 -m unittest discover -s tests -p test_drawing_pdf.py -v

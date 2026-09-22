@@ -52,11 +52,11 @@
 
 核对版读取已保存的 `lumi-three-driver.FCStd`，不会自动读取最新基线 JSON 重建外壳，也不包含基线 GUI 内尚未保存的修改。报告的 `base_sha256` 绑定输入 FCStd；基线保存后若字节变化，应重建核对版再使用报告。
 
-无 GUI 时可在仓库根目录运行：
+无 GUI 时可在仓库根目录运行；先按 [README](../README.md#v07-基线重建) 设置 `FREECAD_RESOURCES`：
 
 ```sh
-PYTHONPATH=/Applications/FreeCAD.app/Contents/Resources/lib \
-  /Applications/FreeCAD.app/Contents/Resources/bin/python tools/mechanism_study.py
+PYTHONPATH="${FREECAD_RESOURCES:?请先设置 FreeCAD 运行环境}/lib" \
+  "$FREECAD_RESOURCES/bin/python" tools/mechanism_study.py
 ```
 
 该入口生成 CAD 与报告，不刷新 GUI 颜色和预览。`tools/validate_model.py` 的 42 项检查只针对 v0.7 基线，不能用来宣称此款机芯已适配。

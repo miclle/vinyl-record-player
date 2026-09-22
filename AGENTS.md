@@ -24,6 +24,8 @@ FreeCAD concept model of a turntable with one downward-facing woofer, two front 
 
 Use FreeCAD 1.1.1. Run commands from the repository root.
 
+For macOS terminal commands, set `FREECAD_RESOURCES` to the installed FreeCAD application's `Contents/Resources` directory, containing `bin/python` and `lib`; see [README](README.md#v07-基线重建). Use repository-relative paths for project files and links. Keep machine-specific installation paths out of documentation; use runtime variables for external tools.
+
 ```sh
 open -a FreeCAD --args "$PWD/tools/build.FCMacro"
 ```
@@ -31,8 +33,8 @@ open -a FreeCAD --args "$PWD/tools/build.FCMacro"
 On macOS, this starts generation when FreeCAD is closed. Otherwise, execute the macro through FreeCAD's Macro dialog. Save manual edits separately and close the baseline file before rebuilding, including reopened files whose document names differ from `LumiThreeDriver`; the baseline generator only guards that document name. The macro does not run validation; run it separately afterward.
 
 ```sh
-PYTHONPATH=/Applications/FreeCAD.app/Contents/Resources/lib \
-  /Applications/FreeCAD.app/Contents/Resources/bin/python tools/validate_model.py
+PYTHONPATH="${FREECAD_RESOURCES:?请先设置 FreeCAD 运行环境}/lib" \
+  "$FREECAD_RESOURCES/bin/python" tools/validate_model.py
 git diff --check
 ```
 
