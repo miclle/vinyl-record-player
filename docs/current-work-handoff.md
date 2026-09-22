@@ -1,14 +1,14 @@
 # 当前工作交接
 
-- **状态：** complete。本轮 SC-2103 音腔布局、审查修复与实现交付已完成，没有待接续的代码修改；整机加工与声学验收未完成。
-- **状态核对时间：** 2026-09-22T00:27:22+08:00。
+- **状态：** 旧模型清理与相关文档同步已完成，由本次清理提交承载；发布状态以实际远端核对为准。SC-2103 音腔布局及审查修复此前已交付；整机加工与声学验收未完成。
+- **提交前状态核对时间：** 2026-09-22T09:03:15+08:00。
 - **仓库：** `miclle/vinyl-record-player`；本机目录 `/Users/miclle/github/miclle/vinyl-record-player`。
 - **分支 / 基准分支：** `main` / `main`。
-- **实现 HEAD：** `2bb41bf8410999b18e20d82dbe4c81baad0a3d8f`，`feat(cad): redesign SC-2103 acoustic chambers`。
-- **上游 / 最近已推送状态：** `origin/main`，远端 `refs/heads/main` 与上述实现 HEAD 一致，ahead/behind 为 `0/0`；这是本次文档编辑前的实查快照。
+- **实现提交：** `2bb41bf8410999b18e20d82dbe4c81baad0a3d8f`，`feat(cad): redesign SC-2103 acoustic chambers`。
+- **提交前 HEAD / 上游快照：** `978d327f20b87ed6d0372529beff660f3c2ef81f`，`docs: refresh acoustic design handoff`；本地 `origin/main` 与 HEAD 一致，ahead/behind 为 `0/0`。该次核对未查询实时远端；清理内容由此快照之后的本次提交承载。
 - **当前整理者 / 接手者：** 本任务 / 未指定。
-- **实现交付级别：** transferable，可通过 [GitHub 仓库](https://github.com/miclle/vinyl-record-player) 的 `main` 获取代码、CAD、预览、报告和文档；接手者需具备该仓库读取权限。
-- **本交接文档版本：** 本次纯文档刷新由独立 docs 提交承载，用 `git log -1 --format=%H -- docs/current-work-handoff.md` 定位，再按下方命令核对远端包含关系。
+- **传递范围：** 此前实现与文档已发布到 [GitHub 仓库](https://github.com/miclle/vinyl-record-player)；本次旧模型删除与文档同步需取得承载本文的清理提交，仅获取上述旧 HEAD 不包含本次清理。
+- **本交接文档版本：** 提交后用 `git log -1 --format=%H -- docs/current-work-handoff.md` 定位，并结合 `git status` / `git diff` 识别后续本机修改。
 
 ## 目标与当前成果
 
@@ -23,13 +23,13 @@
 | 左右全频倒相接口 | 未实施：可封堵、可换管接口仅为讨论建议，当前模型左右仍为密闭腔；方案入口见[音腔专题](audio-layout.md#左右全频腔的后续方案) |
 | 选定弯臂机芯适配 | 部分完成：已有占位和干涉诊断，真实底部尺寸、安装孔与运动范围缺失，`installation_released=false` |
 | 声学、电气、热与隔振验证 | 未开展实物验收；开孔、紧固和制造接口仍需实测 |
-| 历史模型清理 / 统一主模型 | 本轮范围外，未删除历史文件，也未消除核对版对基线的依赖 |
+| 历史模型清理 / 统一主模型 | 后续已清理旧双单元 FCStd / STEP；保留两份当前模型，核对版仍依赖基线，尚未统一主模型 |
 
 ## 工作区与传递方式
 
-文档编辑前，暂存、未暂存、未跟踪文件及未推送提交均为空，已用 `git status --short --branch`、`git rev-list --left-right --count HEAD...@{upstream}` 和 `git ls-remote origin refs/heads/main` 核对。
+本次工作区删除 `cad/lumi-dual-driver.FCStd` / `.step`，并更新 `AGENTS.md`、`README.md`、`docs/selected-mechanism.md`、历史实施记录及本文。这些修改由本次清理提交承载；接手时用 `git status --short --branch` 和 `git diff` 核对。
 
-本次仅刷新 `AGENTS.md`、`README.md`、`docs/audio-layout.md`、`docs/selected-mechanism.md` 和本文，用户已明确授权提交与推送；不修改模型、代码或生成报告。接手时以承载本文的 docs 提交和实时 Git 状态为准，不把上方编辑前快照当作永远不变的 HEAD。
+旧双单元文件可从 Git 历史找回。两份现有 FCStd、配套 STEP、参数、生成代码与验证报告均未改变；机芯核对版仍读取已保存的三单元基线。用户已授权将清理与文档更新提交并推送；发布结果由推送后的远端核对确认。
 
 不要覆盖接手机器 FreeCAD 中未保存的手动修改。本任务前一轮使用独立 FreeCAD 进程生成交付物，没有关闭用户原 GUI 会话；磁盘文件与 GUI 中仍打开的旧文档可能不同。手动修改应先另存，再按重建要求关闭相关输出文档。
 
@@ -43,7 +43,7 @@
 
 ## 验证证据
 
-前一轮修复提交前已执行以下 FreeCAD 检查。本次纯文档刷新核对实现、测试定义、保存的报告、原测试输出及基线哈希，不重复生成模型或运行整套测试。
+下表 FreeCAD 测试与几何验收沿用此前实现提交的记录；本次只核对文件、依赖、文档链接、保存报告和基线哈希，没有重建 CAD 或重跑测试。
 
 | 命令或检查 | 结果与边界 |
 |---|---|
@@ -51,7 +51,7 @@
 | `PYTHONPATH=/Applications/FreeCAD.app/Contents/Resources/lib /Applications/FreeCAD.app/Contents/Resources/bin/python tools/validate_model.py` | 前一轮 30 项基线检查通过；本次读取 `cad/validation.json` 核对，63 个零件、74 个实体 |
 | `tools/mechanism-study.FCMacro` 生成的 `cad/mechanism-fit-report.json` | 4 项几何／STEP 检查通过；本次重新核对 `base_sha256` 与输入基线 FCStd 一致；安装仍未放行 |
 | 保存文件及预览核对 | 前一轮已回读 FCStd／STEP 并目视检查内部、俯视、后口和机芯核对图；两套 FCStd 均保留 GUI 状态 |
-| 本次文档检查 | `git diff --check`、改动涉及的本地路径／链接／锚点、命令入口、提交存在性及报告数据核对 |
+| 本次清理与文档检查 | `git diff --check`、相关本地路径／链接／锚点、两份保留 FCStd 与 HEAD 字节一致、旧文件无脚本／测试依赖及报告数据核对 |
 | 实物及声学试验 | 未执行；不能用上述检查推导频响、允许功率、气密、散热、声反馈或播放性能 |
 
 ## 阻塞与有效后续工作
@@ -64,14 +64,16 @@
 - [机芯后续适配与重建](selected-mechanism.md#后续适配与重建)：取得底部实测轮廓，再设计开口、支点和局部避让。
 - [加工前资料清单](design-basis.md#进入加工前必须补齐)：扬声器安装接口、材料、电子接线、固定与实物验收。
 
-`docs/superpowers/plans/2026-09-21-lumi-cad.md` 属于历史计划，不是当前任务或验收依据；本次未修改它。
+`docs/superpowers/plans/2026-09-21-lumi-cad.md` 属于历史计划，不是当前任务或验收依据；本次仅更新开头的历史状态与旧文件去向说明，保留当时的完成记录。
 
 ## 接手的第一步
 
-本轮已完成，没有需要自动恢复的代码任务。接手者先在仓库根目录核对版本，不自动重建或覆盖 CAD：
+本次清理已完成，没有需要自动恢复的代码任务。接手者先在仓库根目录核对版本和工作区，不自动重建或覆盖 CAD：
 
 ```sh
 git status --short --branch
+git diff --stat
+git diff -- docs/current-work-handoff.md
 git fetch origin
 git log -1 --format=%H -- docs/current-work-handoff.md
 git merge-base --is-ancestor 2bb41bf8410999b18e20d82dbe4c81baad0a3d8f HEAD
@@ -92,4 +94,4 @@ git rev-list --left-right --count HEAD...origin/main
 
 使用 macOS FreeCAD 1.1.1；其他机器需调整 `/Applications/FreeCAD.app/Contents/Resources/bin/python` 和库目录。完整生成顺序是基线 `tools/build.FCMacro` → 独立验证 → `tools/mechanism-study.FCMacro`；核对版读取已保存的基线，不自动应用 JSON 或 GUI 未保存修改。GUI 保存用于保留颜色和可见性，纯 Python 入口不输出完整预览。无需取得本机临时日志才能接手；上述测试可在对应提交重新执行。
 
-本文件继续沿用 `docs/current-work-handoff.md`，替代该路径中上一轮“待提交”的状态说明。完成交接的条件是本次 docs 提交推送成功、接手方能取得远端文档与实现；发布结果由提交后远端核对确认。
+本文件继续沿用 `docs/current-work-handoff.md`。跨机器接手时应确认已取得承载本文的清理提交，并保护接手机器上的未提交修改；不能把此前实现已发布等同于本次清理已发布。

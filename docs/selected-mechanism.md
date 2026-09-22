@@ -16,7 +16,7 @@
 
 ## CAD 与核对结果
 
-[FreeCAD 核对装配](../cad/lumi-selected-mechanism-fit.FCStd) 和 [STEP](../cad/lumi-selected-mechanism-fit.step) 沿用 v0.4 SC-2103 的外壳与电子、音响布局，并替换上部机芯外观。原基线文件保持独立，是本核对版的生成输入。
+[FreeCAD 核对装配](../cad/lumi-selected-mechanism-fit.FCStd) 和 [STEP](../cad/lumi-selected-mechanism-fit.step) 沿用 v0.4 SC-2103 的外壳与电子、音响布局，并替换上部机芯外观。[三单元基线](../cad/lumi-three-driver.FCStd) 保持独立，是本核对版的生成输入，须保留。两份文件可独立打开，但修改基线不会自动更新本核对版；需要按下方步骤重新生成。
 
 | 继承部件 | 用户提供的外廓 | 仍待确认 |
 |---|---|---|
