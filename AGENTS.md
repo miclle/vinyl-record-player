@@ -8,6 +8,7 @@ FreeCAD concept model of a turntable with one downward-facing woofer, two front 
 - `tools/build.FCMacro`: GUI entry point; invokes generation, rendering, and dimension-sheet creation.
 - `tools/render_views.py` and `tools/dimension_sheet.py`: viewport previews and projected drawings.
 - `tools/drawing_data.py` and `tools/drawing_pack.py`: saved-solid projection data and three grouped A3 PDF books under `output/pdf/`; see `docs/drawing-pack.md` for the separate FreeCAD/PDF runtimes.
+- `tools/assembly-guide.FCMacro`, `tools/assembly_guide.py`, and `tools/assembly_guide_pdf.py`: read-only CAD rendering and the two-page A2 numbered guide; see `docs/assembly-guide.md`. Covers the selected study's physical objects exactly once; exploded placements are temporary and never saved over source CAD.
 - `tools/validate_model.py`: baseline geometry and STEP validation; `tests/test_regressions.py`: regression tests; `tests/test_ac_inlet.py`: rear inlet opening and wiring-space checks.
 - `tools/mechanism_study.py` and `tools/mechanism-study.FCMacro`: selected-mechanism assembly, fit report, and GUI previews; `tests/test_mechanism_study.py`: fit-study regression tests.
 - `cad/parameters.json`: cabinet, drivers, transformer, amplifier, and AC inlet inputs; `lumi-three-driver.FCStd` / `.step`, `parts.csv`, and `validation.json` are baseline outputs.

@@ -15,6 +15,8 @@
 
 ## 分组平面图纸
 
+先看[整机结构导览（两页 A2 PDF）](output/pdf/00-assembly-guide.pdf)：[开盖全景](previews/assembly-guide-1.png)和[内部展开](previews/assembly-guide-2.png)用编号标出部件、材料状态、数量及对应详图号，覆盖当前选定装配的全部 58 个物理对象。详见[导览说明](docs/assembly-guide.md)。
+
 当前模型已整理为 **3 份 A3 矢量 PDF，共 34 页**：
 
 - [整机与外壳（12 页）](output/pdf/01-assembly-and-enclosure.pdf)：木板整数备料汇总、闭盖六面图与外壳各零件。
@@ -121,11 +123,14 @@ PYTHONPATH=/Applications/FreeCAD.app/Contents/Resources/lib \
 
 ## 验证范围
 
-当前 FreeCAD 环境执行 20 项用例，其中 PDF 依赖用例明确跳过，其余 19 项通过；PDF 比例用例在独立 PDF 环境补跑通过。测试覆盖宏重载、参数快照、保存实体尺寸、变压器与功放干涉、非默认尺寸标注，音腔泄漏、缩短全频腔、电子件入腔后的净容积扣除、倒相管堵塞、120／160／200 mm 三种试验管长，以及机芯核对版的覆盖保护和下探深度。旧模型、缺少属性及无效快照的测试同时核对失败报告覆盖、命令行退出和文档关闭。测试在临时目录运行，不覆盖交付文件：
+当前 FreeCAD 环境执行 23 项用例，其中 2 项 PDF 依赖用例明确跳过，其余 21 项通过；PDF 比例与导览标注检查在独立 PDF 环境补跑通过。测试覆盖宏重载、参数快照、保存实体尺寸、变压器与功放干涉、非默认尺寸标注，音腔泄漏、缩短全频腔、电子件入腔后的净容积扣除、倒相管堵塞、120／160／200 mm 三种试验管长，以及机芯核对版的覆盖保护和下探深度。导览新增对象覆盖、图号关联、1／3／8 根格栅的标注目标及缺失／遮挡标注拒绝检查。旧模型、缺少属性及无效快照的测试同时核对失败报告覆盖、命令行退出和文档关闭。测试在临时目录运行，不覆盖交付文件：
 
 ```sh
 PYTHONPATH=/Applications/FreeCAD.app/Contents/Resources/lib \
   /Applications/FreeCAD.app/Contents/Resources/bin/python -m unittest discover -s tests -v
+
+# 在具有 PDF 依赖的普通 Python 环境中补跑：
+python3 -m unittest discover -s tests -p '*_pdf.py' -v
 ```
 
 v0.6 基线的几何验证（不覆盖选定机芯核对版）：

@@ -1,0 +1,13 @@
+"""Generate guide views from temporary copies; saved CAD files are never edited."""
+import importlib
+import sys
+from pathlib import Path
+
+root = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(root/'tools'))
+import drawing_data
+import assembly_guide
+importlib.reload(drawing_data)
+importlib.reload(assembly_guide)
+assembly_guide.render(root)
+print('Guide views ready in tmp/assembly-guide; run tools/assembly_guide_pdf.py next.')

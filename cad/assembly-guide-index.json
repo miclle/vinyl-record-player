@@ -1,0 +1,750 @@
+{
+  "revision": "v0.6-ac-inlet",
+  "sources": {
+    "lumi-three-driver.FCStd": "33300fbe0d5a1c73f3481a68e4115db7a286a0a8ff93e666deb1b69c98e53052",
+    "lumi-selected-mechanism-fit.FCStd": "61086dc0fc8169d63f2c1566a1cdddabbe52d8c35233f4593ef16d8bf4e55d31"
+  },
+  "entries": [
+    {
+      "code": "W01",
+      "page": 1,
+      "title": "左右侧板",
+      "ids": [
+        "SideLeft",
+        "SideRight"
+      ],
+      "quantity": "2 块",
+      "material": "胡桃木饰面；基材待定",
+      "drawings": [
+        "A-P01"
+      ],
+      "size_mm": [
+        12.0,
+        350.0,
+        124.0
+      ],
+      "stock_mm": [
+        350.0,
+        124.0,
+        12.0
+      ]
+    },
+    {
+      "code": "W02",
+      "page": 1,
+      "title": "横向木格栅",
+      "ids": [
+        "Slat01",
+        "Slat02",
+        "Slat03",
+        "Slat04",
+        "Slat05",
+        "Slat06",
+        "Slat07",
+        "Slat08"
+      ],
+      "quantity": "8 条",
+      "material": "木饰条；木种待定",
+      "drawings": [
+        "A-P04"
+      ],
+      "size_mm": [
+        426.0,
+        5.016289,
+        7.584447
+      ],
+      "stock_mm": [
+        426.0,
+        7.0,
+        3.0
+      ]
+    },
+    {
+      "code": "F01",
+      "page": 1,
+      "title": "前沿银色饰条",
+      "ids": [
+        "Fascia"
+      ],
+      "quantity": "1 件",
+      "material": "铝饰面；厚度暂估",
+      "drawings": [
+        "A-P02"
+      ],
+      "size_mm": [
+        426.0,
+        6.0,
+        20.0
+      ]
+    },
+    {
+      "code": "C01",
+      "page": 1,
+      "title": "透明防尘盖",
+      "ids": [
+        "DustCover"
+      ],
+      "quantity": "1 件",
+      "material": "烟灰亚克力；壁厚 3 mm 暂估",
+      "drawings": [
+        "A-P05"
+      ],
+      "size_mm": [
+        426.0,
+        346.0,
+        63.2
+      ]
+    },
+    {
+      "code": "C02",
+      "page": 1,
+      "title": "铰链座与铰链轴",
+      "ids": [
+        "HingeBase0",
+        "HingeBase1",
+        "HingePin0",
+        "HingePin1"
+      ],
+      "quantity": "2 座 + 2 轴",
+      "material": "材质与固定方式待定",
+      "drawings": [
+        "A-P06"
+      ],
+      "size_mm": [
+        22.0,
+        9.0,
+        12.0
+      ]
+    },
+    {
+      "code": "C03",
+      "page": 1,
+      "title": "弹性脚垫",
+      "ids": [
+        "Foot0",
+        "Foot1",
+        "Foot2",
+        "Foot3"
+      ],
+      "quantity": "4 件",
+      "material": "弹性材料；材质与硬度待定",
+      "drawings": [
+        "A-P07"
+      ],
+      "size_mm": [
+        30.0,
+        30.0,
+        26.0
+      ]
+    },
+    {
+      "code": "K01",
+      "page": 1,
+      "title": "一体机芯基座",
+      "ids": [
+        "KitBase"
+      ],
+      "quantity": "1 件",
+      "material": "采购机芯外观占位；材质待确认",
+      "drawings": [
+        "C-P05"
+      ],
+      "size_mm": [
+        355.0,
+        280.0,
+        2.0
+      ]
+    },
+    {
+      "code": "K02",
+      "page": 1,
+      "title": "唱盘与表面环纹",
+      "ids": [
+        "KitPlatter",
+        "KitMatRings"
+      ],
+      "quantity": "1 盘 + 4 道环纹",
+      "material": "环纹是外观示意，不代表独立唱片垫",
+      "drawings": [
+        "C-P06"
+      ],
+      "size_mm": [
+        280.0,
+        280.0,
+        10.0
+      ]
+    },
+    {
+      "code": "K03",
+      "page": 1,
+      "title": "机芯主轴",
+      "ids": [
+        "KitSpindle"
+      ],
+      "quantity": "1 件",
+      "material": "外观占位；材质与接口待确认",
+      "drawings": [
+        "C-P07"
+      ],
+      "size_mm": [
+        7.0,
+        7.0,
+        10.0
+      ]
+    },
+    {
+      "code": "K04",
+      "page": 1,
+      "title": "唱臂支座",
+      "ids": [
+        "KitArmSupport"
+      ],
+      "quantity": "1 件",
+      "material": "采购机芯自带；外观占位",
+      "drawings": [
+        "C-P07"
+      ],
+      "size_mm": [
+        25.0,
+        33.0,
+        35.0
+      ]
+    },
+    {
+      "code": "K05",
+      "page": 1,
+      "title": "弯曲唱臂",
+      "ids": [
+        "KitCurvedArm"
+      ],
+      "quantity": "1 件",
+      "material": "实心扫掠占位；真实管壁与材质未知",
+      "drawings": [
+        "C-P08"
+      ],
+      "size_mm": [
+        39.564967,
+        204.777971,
+        14.795341
+      ]
+    },
+    {
+      "code": "K06",
+      "page": 1,
+      "title": "唱臂配重",
+      "ids": [
+        "KitCounterweight"
+      ],
+      "quantity": "1 件",
+      "material": "外观包络；质量与材质待确认",
+      "drawings": [
+        "C-P08"
+      ],
+      "size_mm": [
+        20.0,
+        16.0,
+        20.0
+      ]
+    },
+    {
+      "code": "K07",
+      "page": 1,
+      "title": "唱头壳与唱头",
+      "ids": [
+        "KitHeadshell",
+        "KitCartridge"
+      ],
+      "quantity": "各 1 件",
+      "material": "外观占位；唱头型号待确认",
+      "drawings": [
+        "C-P09"
+      ],
+      "size_mm": [
+        18.0,
+        27.0,
+        6.0
+      ]
+    },
+    {
+      "code": "K08",
+      "page": 1,
+      "title": "停臂架",
+      "ids": [
+        "KitArmRest"
+      ],
+      "quantity": "1 件",
+      "material": "外观占位；材质与固定方式待确认",
+      "drawings": [
+        "C-P10"
+      ],
+      "size_mm": [
+        8.0,
+        8.0,
+        27.0
+      ]
+    },
+    {
+      "code": "E01",
+      "page": 1,
+      "title": "控制旋钮与底座",
+      "ids": [
+        "ControlKnob",
+        "ControlBase"
+      ],
+      "quantity": "各 1 件",
+      "material": "实心外观占位；控制接口待确认",
+      "drawings": [
+        "C-P04",
+        "C-P05"
+      ],
+      "size_mm": [
+        32.0,
+        32.0,
+        14.0
+      ]
+    },
+    {
+      "code": "W03",
+      "page": 2,
+      "title": "底板",
+      "ids": [
+        "Bottom"
+      ],
+      "quantity": "1 块",
+      "material": "木质板材；基材待定",
+      "drawings": [
+        "A-P01"
+      ],
+      "size_mm": [
+        426.0,
+        350.0,
+        12.0
+      ],
+      "stock_mm": [
+        426.0,
+        350.0,
+        12.0
+      ]
+    },
+    {
+      "code": "W04",
+      "page": 2,
+      "title": "后板",
+      "ids": [
+        "Back"
+      ],
+      "quantity": "1 块",
+      "material": "木质板材；基材待定",
+      "drawings": [
+        "A-P02"
+      ],
+      "size_mm": [
+        426.0,
+        12.0,
+        112.0
+      ],
+      "stock_mm": [
+        426.0,
+        112.0,
+        12.0
+      ]
+    },
+    {
+      "code": "W05",
+      "page": 2,
+      "title": "格栅下横梁",
+      "ids": [
+        "LowerRail"
+      ],
+      "quantity": "1 件",
+      "material": "木质横梁；基材待定",
+      "drawings": [
+        "A-P03"
+      ],
+      "size_mm": [
+        426.0,
+        8.0,
+        12.0
+      ],
+      "stock_mm": [
+        426.0,
+        12.0,
+        8.0
+      ]
+    },
+    {
+      "code": "W06",
+      "page": 2,
+      "title": "倾斜扬声器障板",
+      "ids": [
+        "Baffle"
+      ],
+      "quantity": "1 块",
+      "material": "木质板材；斜口按精确轮廓修切",
+      "drawings": [
+        "B-P01"
+      ],
+      "size_mm": [
+        426.0,
+        37.65447,
+        90.0
+      ],
+      "stock_mm": [
+        426.0,
+        98.0,
+        8.0
+      ]
+    },
+    {
+      "code": "W07",
+      "page": 2,
+      "title": "三音腔共用顶板",
+      "ids": [
+        "AcousticRoof"
+      ],
+      "quantity": "1 块",
+      "material": "木质板材；基材待定",
+      "drawings": [
+        "B-P01"
+      ],
+      "size_mm": [
+        426.0,
+        338.0,
+        8.0
+      ],
+      "stock_mm": [
+        426.0,
+        338.0,
+        8.0
+      ]
+    },
+    {
+      "code": "W08",
+      "page": 2,
+      "title": "左右全频腔后板",
+      "ids": [
+        "AcousticRear"
+      ],
+      "quantity": "2 块",
+      "material": "一个 CAD 对象内的两块独立木板",
+      "drawings": [
+        "B-P02"
+      ],
+      "size_mm": [
+        117.0,
+        8.0,
+        90.0
+      ],
+      "stock_mm": [
+        117.0,
+        90.0,
+        8.0
+      ]
+    },
+    {
+      "code": "W09",
+      "page": 2,
+      "title": "低音腔全深隔板",
+      "ids": [
+        "AcousticDividerLeft",
+        "AcousticDividerRight"
+      ],
+      "quantity": "2 块",
+      "material": "木质板材；前缘按斜线修切",
+      "drawings": [
+        "B-P03"
+      ],
+      "size_mm": [
+        8.0,
+        313.588302,
+        90.0
+      ],
+      "stock_mm": [
+        314.0,
+        90.0,
+        8.0
+      ]
+    },
+    {
+      "code": "W10",
+      "page": 2,
+      "title": "后部承托梁",
+      "ids": [
+        "RearSupport"
+      ],
+      "quantity": "2 件",
+      "material": "一个 CAD 对象内的两块独立木梁",
+      "drawings": [
+        "B-P05"
+      ],
+      "size_mm": [
+        109.0,
+        30.0,
+        8.0
+      ],
+      "stock_mm": [
+        109.0,
+        30.0,
+        8.0
+      ]
+    },
+    {
+      "code": "W11",
+      "page": 2,
+      "title": "浮动承载台面",
+      "ids": [
+        "FloatingDeck"
+      ],
+      "quantity": "1 块",
+      "material": "木质结构板；机芯开口仍待设计",
+      "drawings": [
+        "B-P04"
+      ],
+      "size_mm": [
+        418.0,
+        314.0,
+        6.0
+      ],
+      "stock_mm": [
+        418.0,
+        314.0,
+        6.0
+      ]
+    },
+    {
+      "code": "F02",
+      "page": 2,
+      "title": "透声布",
+      "ids": [
+        "GrilleCloth"
+      ],
+      "quantity": "1 片",
+      "material": "织物；CAD 薄实体仅用于显示",
+      "drawings": [
+        "A-P03"
+      ],
+      "size_mm": [
+        426.0,
+        29.742773,
+        90.0
+      ]
+    },
+    {
+      "code": "F03",
+      "page": 2,
+      "title": "灯槽与扩散片",
+      "ids": [
+        "LightChannel",
+        "LightDiffuser"
+      ],
+      "quantity": "各 1 件",
+      "material": "灯槽／扩散片占位；LED 灯带未建模",
+      "drawings": [
+        "A-P04",
+        "A-P05"
+      ],
+      "size_mm": [
+        414.0,
+        14.0,
+        2.0
+      ]
+    },
+    {
+      "code": "S01",
+      "page": 2,
+      "title": "轴承密封避让杯",
+      "ids": [
+        "BearingPocket"
+      ],
+      "quantity": "1 件",
+      "material": "材质待定；通用轴承遗留结构，待适配",
+      "drawings": [
+        "B-P03"
+      ],
+      "size_mm": [
+        28.0,
+        28.0,
+        26.0
+      ]
+    },
+    {
+      "code": "S02",
+      "page": 2,
+      "title": "台面弹性支承",
+      "ids": [
+        "Isolator0",
+        "Isolator1",
+        "Isolator2"
+      ],
+      "quantity": "3 件",
+      "material": "弹性材料；刚度待定",
+      "drawings": [
+        "B-P06"
+      ],
+      "size_mm": [
+        16.0,
+        16.0,
+        8.0
+      ]
+    },
+    {
+      "code": "A01",
+      "page": 2,
+      "title": "左右全频扬声器",
+      "ids": [
+        "TweeterLeft",
+        "TweeterRight"
+      ],
+      "quantity": "2 只",
+      "material": "SC-2103 拆机件；安装孔暂估",
+      "drawings": [
+        "C-P02"
+      ],
+      "size_mm": [
+        78.0,
+        53.802127,
+        75.109459
+      ]
+    },
+    {
+      "code": "A02",
+      "page": 2,
+      "title": "底部朝下的低音单元",
+      "ids": [
+        "Woofer"
+      ],
+      "quantity": "1 只",
+      "material": "SC-2103 拆机件；安装孔暂估",
+      "drawings": [
+        "C-P01"
+      ],
+      "size_mm": [
+        132.0,
+        132.0,
+        65.0
+      ]
+    },
+    {
+      "code": "A03",
+      "page": 2,
+      "title": "后置可换倒相管",
+      "ids": [
+        "BassPort"
+      ],
+      "quantity": "1 件",
+      "material": "材质待定；当前管长为试验初值",
+      "drawings": [
+        "B-P04"
+      ],
+      "size_mm": [
+        48.0,
+        160.0,
+        48.0
+      ]
+    },
+    {
+      "code": "E02",
+      "page": 2,
+      "title": "功放板与散热片",
+      "ids": [
+        "Amplifier"
+      ],
+      "quantity": "1 总成",
+      "material": "采购电子模块；尺寸已包含散热片",
+      "drawings": [
+        "C-P02"
+      ],
+      "size_mm": [
+        75.0,
+        125.0,
+        45.0
+      ]
+    },
+    {
+      "code": "E03",
+      "page": 2,
+      "title": "电源变压器",
+      "ids": [
+        "PowerTransformer"
+      ],
+      "quantity": "1 总成",
+      "material": "用户提供外廓；固定耳与孔位待确认",
+      "drawings": [
+        "C-P03"
+      ],
+      "size_mm": [
+        88.0,
+        55.0,
+        50.0
+      ]
+    },
+    {
+      "code": "E04",
+      "page": 2,
+      "title": "备用电子预留区",
+      "ids": [
+        "PhonoBoard"
+      ],
+      "quantity": "1 预留区",
+      "material": "空间占位，不代表必须另购唱放",
+      "drawings": [
+        "C-P03"
+      ],
+      "size_mm": [
+        80.0,
+        52.0,
+        17.0
+      ]
+    },
+    {
+      "code": "E05",
+      "page": 2,
+      "title": "后部接口板预留",
+      "ids": [
+        "ConnectorPlate"
+      ],
+      "quantity": "1 预留区",
+      "material": "接口板占位；真实孔位与材质待定",
+      "drawings": [
+        "C-P04"
+      ],
+      "size_mm": [
+        105.0,
+        2.0,
+        32.0
+      ]
+    },
+    {
+      "code": "E06",
+      "page": 2,
+      "title": "AC 插座／开关／保险",
+      "ids": [
+        "ACInlet"
+      ],
+      "quantity": "1 总成",
+      "material": "8-F5 横装候选；外形与端子保守占位",
+      "drawings": [
+        "C-P01"
+      ],
+      "size_mm": [
+        58.0,
+        30.66,
+        49.0
+      ]
+    }
+  ],
+  "units": "mm",
+  "configuration": "selected-curved-arm",
+  "unmodeled": [
+    "电源线与外接插头",
+    "内部线束、端子护套",
+    "LED 灯带本体",
+    "紧固件、胶粘剂、密封件、吸音材料"
+  ],
+  "nominal_cabinet_mm": [
+    450.0,
+    350.0,
+    214.2
+  ],
+  "physical_object_count": 58
+}
