@@ -1,97 +1,58 @@
 # 当前工作交接
 
-- **状态：** 旧模型清理与相关文档同步已完成，由本次清理提交承载；发布状态以实际远端核对为准。SC-2103 音腔布局及审查修复此前已交付；整机加工与声学验收未完成。
-- **提交前状态核对时间：** 2026-09-22T09:03:15+08:00。
-- **仓库：** `miclle/vinyl-record-player`；本机目录 `/Users/miclle/github/miclle/vinyl-record-player`。
-- **分支 / 基准分支：** `main` / `main`。
-- **实现提交：** `2bb41bf8410999b18e20d82dbe4c81baad0a3d8f`，`feat(cad): redesign SC-2103 acoustic chambers`。
-- **提交前 HEAD / 上游快照：** `978d327f20b87ed6d0372529beff660f3c2ef81f`，`docs: refresh acoustic design handoff`；本地 `origin/main` 与 HEAD 一致，ahead/behind 为 `0/0`。该次核对未查询实时远端；清理内容由此快照之后的本次提交承载。
-- **当前整理者 / 接手者：** 本任务 / 未指定。
-- **传递范围：** 此前实现与文档已发布到 [GitHub 仓库](https://github.com/miclle/vinyl-record-player)；本次旧模型删除与文档同步需取得承载本文的清理提交，仅获取上述旧 HEAD 不包含本次清理。
-- **本交接文档版本：** 提交后用 `git log -1 --format=%H -- docs/current-work-handoff.md` 定位，并结合 `git status` / `git diff` 识别后续本机修改。
+- **状态：** 2026-09-22 已按用户授权完成木箱整数备料优化，基线为 `v0.5-integer-woodwork`；两套 CAD、预览、报告及三份 PDF 已同步重建。机芯安装与生产加工仍未放行。
+- **工作区：** `/Users/miclle/github/miclle/vinyl-record-player`，分支 `main`。
+- **本次修改前 HEAD：** `1c5fafb5315e231147cd8599b405db27f81d5e70`。本次交付包含图册生成、尺寸优化及缺件验证修复，用户已授权提交并推送至 `main`。
+- **接手核对：** 用 `git log -1 --format=%H -- docs/current-work-handoff.md` 定位承载本文的提交，并核对 `git status --short`、当前参数／报告及远端分支；不要将上述旧 HEAD 当作本轮成果。
 
-## 目标与当前成果
+## 当前模型与尺寸
 
-在 448.6 × 345.5 × 214.2 mm 的 LUMI 参考外廓内，重新安排用户的 Shockwave SC-2103 拆机扬声器、电源和功放。用户确认原箱和倒相管均已遗失；本轮交付可核对的空间方案、试验倒相结构和验证器，未把几何检查当作声学性能或加工放行。
-
-| 范围 | 当前状态 |
+| 项目 | 当前结果 |
 |---|---|
-| 三个音腔及电子布局 | 已完成：左右 Ø78 × 40 mm 全频朝前，各约 1.14 L 密闭试验腔；Ø132 × 65 mm 低音移到后排 Y=247 mm 并朝下，约 4.08 L 保守净容积；电源左后、功放右后 |
-| 低音倒相管 | 已建模：后置、内径 32、初始物理长度 160 mm；120／160／200 mm 空间已检查。密封、紧固、公差和声学调谐未完成 |
-| 审查发现的验证器问题 | 已修复：探测点随音腔边界变化；净容积扣除所有已建模入腔部件及保守安装包络，重叠占用只扣一次 |
-| CAD 与关联交付物 | 已完成并随实现提交发布：基线与弯臂核对版 FCStd／STEP、零件表、报告、尺寸图及预览 |
-| 左右全频倒相接口 | 未实施：可封堵、可换管接口仅为讨论建议，当前模型左右仍为密闭腔；方案入口见[音腔专题](audio-layout.md#左右全频腔的后续方案) |
-| 选定弯臂机芯适配 | 部分完成：已有占位和干涉诊断，真实底部尺寸、安装孔与运动范围缺失，`installation_released=false` |
-| 声学、电气、热与隔振验证 | 未开展实物验收；开孔、紧固和制造接口仍需实测 |
-| 历史模型清理 / 统一主模型 | 后续已清理旧双单元 FCStd / STEP；保留两份当前模型，核对版仍依赖基线，尚未统一主模型 |
+| 整机外廓 | 450 × 350 × 214.2 mm；木壳自身高度 124，底面 Z=26，顶面 Z=150 |
+| 矩形板件 | 侧板 350 × 124 × 12；底板 426 × 350 × 12；后板 426 × 112 × 12；浮动台面 418 × 314 × 6 mm |
+| 斜障板 | 真实法向厚 8；矩形备料 426 × 98 × 8；上下边修 18° 斜口至安装竖高 90 mm |
+| 木格栅 | 8 条 426 × 7 × 3 mm 矩形条，整体后倾 18°，竖向节距 11 mm |
+| 左右对称布局 | 低音中心 X=225；全频中心 X=80 / 370；隔板 X=129 / 313，厚 8；左右全频腔净宽各 117 mm |
+| 音腔 | 中央低音几何毛容积 4.725 L、保守净容积 4.181 L；左右全频各毛容积 1.168 L、保守净容积 1.132 L |
+| 倒相管 | 低音内径 32、管壁 2、物理长 160 mm；外口 Y=350、内口 Y=190；120／160／200 mm 试验长度均有回归检查 |
+| 机芯核对版 | 重建自当前基线；选定弯臂外观和 355 × 280 × 45 mm 参考／假设包络未改，安装未放行 |
 
-## 工作区与传递方式
+`cad/wood-cut-list.csv` 给出 22 块／条板件的整数矩形备料。成形轮廓并非全部整数：斜障板沿 Y 厚约 8.412 mm，隔板前缘必须按准确几何修切，不能逐项四舍五入。名义板厚、锯缝、贴皮、打磨、连接和装配间隙仍需材料与工艺确认。
 
-本次工作区删除 `cad/lumi-dual-driver.FCStd` / `.step`，并更新 `AGENTS.md`、`README.md`、`docs/selected-mechanism.md`、历史实施记录及本文。这些修改由本次清理提交承载；接手时用 `git status --short --branch` 和 `git diff` 核对。
+## 交付入口
 
-旧双单元文件可从 Git 历史找回。两份现有 FCStd、配套 STEP、参数、生成代码与验证报告均未改变；机芯核对版仍读取已保存的三单元基线。用户已授权将清理与文档更新提交并推送；发布结果由推送后的远端核对确认。
-
-不要覆盖接手机器 FreeCAD 中未保存的手动修改。本任务前一轮使用独立 FreeCAD 进程生成交付物，没有关闭用户原 GUI 会话；磁盘文件与 GUI 中仍打开的旧文档可能不同。手动修改应先另存，再按重建要求关闭相关输出文档。
-
-## 决策与边界
-
-- `cad/parameters.json` 版本为 `v0.4-sc2103-layout`。外径和总高采用用户尺寸，开孔 Ø100 / Ø40 mm、3 mm 法兰厚度与背部轮廓仍是假设。
-- `fullrange` 是参数键与角色名称，`TweeterLeft` / `TweeterRight` 仅保留为稳定对象 ID；不能据旧 ID 把单元当作纯高音。
-- 原箱及 T/S 参数缺失。左右密闭、低音 32 × 160 mm 管均是试验初值，没有验证其优于其他方案。左右倒相接口的建议不等于已实现功能。
-- 净容积由保存的音腔几何扣除已建模占用得到；扬声器与变压器使用保守实心包络，管道扣除整个外廓。尚未建模的吸音材料、支柱、密封件与线缆未计入。
-- 基线含通用机芯；核对版替换为选定弯臂机芯外观。基线的 `BearingPocket` 是通用轴承的密封避让杯，不能作为弯臂机芯已适配的证据。
+- [三单元基线 FCStd](../cad/lumi-three-driver.FCStd) / [STEP](../cad/lumi-three-driver.step)：共用外壳、音腔与电子布局，含通用机芯。
+- [选定弯臂核对版 FCStd](../cad/lumi-selected-mechanism-fit.FCStd) / [STEP](../cad/lumi-selected-mechanism-fit.step)：当前机芯布局入口，依赖保存的基线，须保留两份文件。
+- [图册说明](drawing-pack.md)：3 份 A3 矢量 PDF，共 33 页，第一册包含木板备料汇总；零件页同时标注成形 XYZ 包络与备料 L × W × T。
+- [木板备料表](../cad/wood-cut-list.csv) / [全部零件表](../cad/parts.csv)：前者用于材料准备，后者记录装配包络。
+- [基线报告](../cad/validation.json) / [机芯核对报告](../cad/mechanism-fit-report.json)：不同验证范围，不能互相代替。
 
 ## 验证证据
 
-下表 FreeCAD 测试与几何验收沿用此前实现提交的记录；本次只核对文件、依赖、文档链接、保存报告和基线哈希，没有重建 CAD 或重跑测试。
-
-| 命令或检查 | 结果与边界 |
+| 检查 | 当前结果 |
 |---|---|
-| `PYTHONPATH=/Applications/FreeCAD.app/Contents/Resources/lib /Applications/FreeCAD.app/Contents/Resources/bin/python -m unittest discover -s tests -v` | 前一轮 12 项测试通过；含后隔板移至 Y=100 mm、功放及变压器入腔排量、串腔、堵管、三种管长及既有回归 |
-| `PYTHONPATH=/Applications/FreeCAD.app/Contents/Resources/lib /Applications/FreeCAD.app/Contents/Resources/bin/python tools/validate_model.py` | 前一轮 30 项基线检查通过；本次读取 `cad/validation.json` 核对，63 个零件、74 个实体 |
-| `tools/mechanism-study.FCMacro` 生成的 `cad/mechanism-fit-report.json` | 4 项几何／STEP 检查通过；本次重新核对 `base_sha256` 与输入基线 FCStd 一致；安装仍未放行 |
-| 保存文件及预览核对 | 前一轮已回读 FCStd／STEP 并目视检查内部、俯视、后口和机芯核对图；两套 FCStd 均保留 GUI 状态 |
-| 本次清理与文档检查 | `git diff --check`、相关本地路径／链接／锚点、两份保留 FCStd 与 HEAD 字节一致、旧文件无脚本／测试依赖及报告数据核对 |
-| 实物及声学试验 | 未执行；不能用上述检查推导频响、允许功率、气密、散热、声反馈或播放性能 |
+| FreeCAD 完整测试集 | 18 项用例，17 项通过；缺少独立 PDF 库的 1 项明确跳过，随后在 PDF 环境补跑通过 |
+| 基线验证 | 33 项通过，63 个零件对象、74 个实体；含音腔闭合、管道气路、内部安装包络、STEP 回读 |
+| 新增木工验证 | 保存几何的法向厚度、整数备料包容性、格栅矩形截面／节距／邻件间隙；测试另覆盖 70° 斜面、10 mm 障板和 4 mm 格栅 |
+| 缺件验证修复 | 透声布、前沿饰条、下横梁、灯槽或扩散片缺失时，预检写入失败报告，覆盖旧成功结果；回归覆盖五种缺件、CLI 非零退出及文档关闭 |
+| 机芯核对版 | 4 项实体／STEP 检查通过；闭盖示意净空约 16.2 mm，`installation_released=false` |
+| 图册 | CAD 对象覆盖核对、PDF 比例回归，以及生成后的页面渲染检查；斜板备料与成形尺寸分别标注 |
 
-## 阻塞与有效后续工作
+## 重建与 GUI 保护
 
-本轮实现交付没有未解决的代码阻塞。整机适配仍缺弯臂机芯真实安装资料：355 × 280 mm 来自直臂配图，45 mm 下探为项目假设。该包络与顶板、倒相管等重叠；台面 Z=150 与音腔顶板顶面 Z=136 相距 14 mm，假设包络多需 31 mm，不代表实物必然干涉。
+使用 FreeCAD 1.1.1。基线生成和预览 → 基线独立验证 → 机芯核对版生成和预览 → 图册提取与排版，完整入口见 [README](../README.md#v05-基线重建) 和[图册说明](drawing-pack.md#重新生成)。
 
-后续工作沿用正式专题，不另维护第二套 TODO：
+本轮在独立 FreeCAD 进程的临时目录重建、验证后复制交付物，未关闭或重建用户原有 GUI 会话中的文档。用户窗口可能仍显示旧版或未保存的手动修改；应先另存这些修改，再关闭旧文档并重新打开磁盘上的新模型。不要把 GUI 当前外观当作新文件已加载的证据。
 
-- [左右全频倒相方案与试装](audio-layout.md#左右全频腔的后续方案)：新增接口前核对出管空间、所属音腔、可封堵结构，并扩展验证器的临时封口与气路检查。
-- [机芯后续适配与重建](selected-mechanism.md#后续适配与重建)：取得底部实测轮廓，再设计开口、支点和局部避让。
-- [加工前资料清单](design-basis.md#进入加工前必须补齐)：扬声器安装接口、材料、电子接线、固定与实物验收。
+`tools/build_model.py` 仍只按 `LumiThreeDriver` 文档名阻止原位重建，不能保护重新打开后改名的基线文档；核对版同时检查输出路径。常规重建前须按 AGENTS.md 保存并关闭相应目标文档。本轮临时日志不是交付依赖。
 
-`docs/superpowers/plans/2026-09-21-lumi-cad.md` 属于历史计划，不是当前任务或验收依据；本次仅更新开头的历史状态与旧文件去向说明，保留当时的完成记录。
+## 剩余边界
 
-## 接手的第一步
+- 板件名义尺寸优化不等于加工放行：材质、真实板厚、接缝、紧固孔、公差和表面处理尚待确认。
+- 机芯底部轮廓、安装孔、支点及运动范围仍缺实测。安装面与音腔顶面相差 14 mm，假设下探需多 31 mm；矩形包络重叠不能证明实物必然碰撞。
+- 单元外径与总高来自用户，开孔 Ø100／Ø40、法兰厚 3 mm、背部轮廓等仍是假设。
+- 几何容积与试验倒相管不代表声学调谐完成；电气、散热、声反馈、隔振和播放功能尚未实物验证。
+- 左右全频仍是密闭试验腔；可封堵倒相接口只是既有讨论，未在本轮新增。
 
-本次清理已完成，没有需要自动恢复的代码任务。接手者先在仓库根目录核对版本和工作区，不自动重建或覆盖 CAD：
-
-```sh
-git status --short --branch
-git diff --stat
-git diff -- docs/current-work-handoff.md
-git fetch origin
-git log -1 --format=%H -- docs/current-work-handoff.md
-git merge-base --is-ancestor 2bb41bf8410999b18e20d82dbe4c81baad0a3d8f HEAD
-git rev-list --left-right --count HEAD...origin/main
-```
-
-完成条件：确认本地包含实现提交和最新交接文档，识别并保护本机修改，明确与 `origin/main` 的差异。随后按用户的新任务选择上述专题中的有效工作；不要继续执行已关闭的审查修复，也不要把讨论中的全频倒相接口当作已经存在。
-
-## 文件入口与环境
-
-| 文件 | 用途 |
-|---|---|
-| [AGENTS.md](../AGENTS.md)、[README](../README.md) | 项目约定、基线生成与验证入口 |
-| [音腔设计](audio-layout.md)、[参数](../cad/parameters.json) | 当前三音腔、倒相管、电子布局与估算口径 |
-| [机芯专题](selected-mechanism.md)、[机芯参数](../cad/selected-mechanism.json) | 选定款式、假设与未放行事项 |
-| [验证器](../tools/validate_model.py)、[回归测试](../tests/test_regressions.py) | 探测点、扣容积、安装空间和导出检查 |
-| [基线报告](../cad/validation.json)、[核对报告](../cad/mechanism-fit-report.json) | 两套不同范围的验证结果 |
-
-使用 macOS FreeCAD 1.1.1；其他机器需调整 `/Applications/FreeCAD.app/Contents/Resources/bin/python` 和库目录。完整生成顺序是基线 `tools/build.FCMacro` → 独立验证 → `tools/mechanism-study.FCMacro`；核对版读取已保存的基线，不自动应用 JSON 或 GUI 未保存修改。GUI 保存用于保留颜色和可见性，纯 Python 入口不输出完整预览。无需取得本机临时日志才能接手；上述测试可在对应提交重新执行。
-
-本文件继续沿用 `docs/current-work-handoff.md`。跨机器接手时应确认已取得承载本文的清理提交，并保护接手机器上的未提交修改；不能把此前实现已发布等同于本次清理已发布。
+后续工作分别以[音腔专题](audio-layout.md)、[机芯安装专题](selected-mechanism.md)和[加工前资料清单](design-basis.md#进入加工前必须补齐)为准。历史 `docs/superpowers/plans/2026-09-21-lumi-cad.md` 不代表当前尺寸或验收状态。

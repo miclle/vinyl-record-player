@@ -1,5 +1,5 @@
 {
-  "revision": "v0.4-sc2103-layout",
+  "revision": "v0.5-integer-woodwork",
   "freecad": "1.1.1",
   "checks": {
     "build_parameters_match": true,
@@ -21,6 +21,9 @@
     "transformer_reservation_clear": true,
     "amplifier_dimensions_match": true,
     "amplifier_reservation_clear": true,
+    "wood_panel_normal_thickness_matches": true,
+    "integer_wood_stock_contains_finished_panels": true,
+    "rectangular_slats_pitch_and_clearance": true,
     "three_independent_enclosed_chambers": true,
     "bass_port_dimensions_match": true,
     "bass_port_solid_clear": true,
@@ -37,8 +40,8 @@
     "part_count": 63,
     "solid_count": 74,
     "overall_mm": [
-      448.6,
-      345.5,
+      450.0,
+      350.0,
       214.2
     ],
     "driver_reservations_mm": {
@@ -111,28 +114,340 @@
     ],
     "amplifier_reservation_collisions": [],
     "amplifier_clearances_mm": {
-      "SideRight": 26.600000000000023,
+      "SideRight": 28.0,
       "Bottom": 10.0,
-      "Back": 23.5,
+      "Back": 28.0,
       "RearSupport": 35.0,
       "FloatingDeck": 51.0,
       "PowerTransformer": 221.14474897677312
+    },
+    "woodworking": {
+      "SideLeft": {
+        "finished_local_bounds_mm": [
+          [
+            350.0,
+            124.0,
+            12.000000000000028
+          ]
+        ],
+        "rectangular_stock_mm": [
+          350.0,
+          124.0,
+          12.0
+        ],
+        "quantity": 1
+      },
+      "SideRight": {
+        "finished_local_bounds_mm": [
+          [
+            350.0,
+            124.00000000000001,
+            12.000000000000057
+          ]
+        ],
+        "rectangular_stock_mm": [
+          350.0,
+          124.0,
+          12.0
+        ],
+        "quantity": 1
+      },
+      "Bottom": {
+        "finished_local_bounds_mm": [
+          [
+            426.0,
+            350.0,
+            12.0
+          ]
+        ],
+        "rectangular_stock_mm": [
+          426.0,
+          350.0,
+          12.0
+        ],
+        "quantity": 1
+      },
+      "Back": {
+        "finished_local_bounds_mm": [
+          [
+            426.0,
+            112.0,
+            12.000000000000057
+          ]
+        ],
+        "rectangular_stock_mm": [
+          426.0,
+          112.0,
+          12.0
+        ],
+        "quantity": 1
+      },
+      "LowerRail": {
+        "finished_local_bounds_mm": [
+          [
+            426.0,
+            12.0,
+            8.000000000000004
+          ]
+        ],
+        "rectangular_stock_mm": [
+          426.0,
+          12.0,
+          8.0
+        ],
+        "quantity": 1
+      },
+      "Baffle": {
+        "finished_local_bounds_mm": [
+          [
+            426.0,
+            97.23095775130732,
+            8.000000000000007
+          ]
+        ],
+        "rectangular_stock_mm": [
+          426.0,
+          98.0,
+          8.0
+        ],
+        "quantity": 1
+      },
+      "AcousticRoof": {
+        "finished_local_bounds_mm": [
+          [
+            426.0,
+            338.0,
+            8.0
+          ]
+        ],
+        "rectangular_stock_mm": [
+          426.0,
+          338.0,
+          8.0
+        ],
+        "quantity": 1
+      },
+      "AcousticRear": {
+        "finished_local_bounds_mm": [
+          [
+            117.0,
+            90.0,
+            8.000000000000028
+          ],
+          [
+            117.0,
+            90.0,
+            8.000000000000028
+          ]
+        ],
+        "rectangular_stock_mm": [
+          117.0,
+          90.0,
+          8.0
+        ],
+        "quantity": 2
+      },
+      "AcousticDividerLeft": {
+        "finished_local_bounds_mm": [
+          [
+            313.5883022060939,
+            90.0,
+            8.000000000000028
+          ]
+        ],
+        "rectangular_stock_mm": [
+          314.0,
+          90.0,
+          8.0
+        ],
+        "quantity": 1
+      },
+      "AcousticDividerRight": {
+        "finished_local_bounds_mm": [
+          [
+            313.5883022060939,
+            90.0,
+            8.0
+          ]
+        ],
+        "rectangular_stock_mm": [
+          314.0,
+          90.0,
+          8.0
+        ],
+        "quantity": 1
+      },
+      "RearSupport": {
+        "finished_local_bounds_mm": [
+          [
+            109.0,
+            30.0,
+            8.0
+          ],
+          [
+            109.0,
+            30.0,
+            8.0
+          ]
+        ],
+        "rectangular_stock_mm": [
+          109.0,
+          30.0,
+          8.0
+        ],
+        "quantity": 2
+      },
+      "FloatingDeck": {
+        "finished_local_bounds_mm": [
+          [
+            418.0,
+            314.0,
+            6.0
+          ]
+        ],
+        "rectangular_stock_mm": [
+          418.0,
+          314.0,
+          6.0
+        ],
+        "quantity": 1
+      },
+      "Slat01": {
+        "finished_local_bounds_mm": [
+          [
+            426.0,
+            7.0,
+            3.0000000000000018
+          ]
+        ],
+        "rectangular_stock_mm": [
+          426.0,
+          7.0,
+          3.0
+        ],
+        "quantity": 1
+      },
+      "Slat02": {
+        "finished_local_bounds_mm": [
+          [
+            426.0,
+            7.000000000000007,
+            3.0000000000000018
+          ]
+        ],
+        "rectangular_stock_mm": [
+          426.0,
+          7.0,
+          3.0
+        ],
+        "quantity": 1
+      },
+      "Slat03": {
+        "finished_local_bounds_mm": [
+          [
+            426.0,
+            7.000000000000007,
+            3.000000000000002
+          ]
+        ],
+        "rectangular_stock_mm": [
+          426.0,
+          7.0,
+          3.0
+        ],
+        "quantity": 1
+      },
+      "Slat04": {
+        "finished_local_bounds_mm": [
+          [
+            426.0,
+            7.0,
+            3.000000000000003
+          ]
+        ],
+        "rectangular_stock_mm": [
+          426.0,
+          7.0,
+          3.0
+        ],
+        "quantity": 1
+      },
+      "Slat05": {
+        "finished_local_bounds_mm": [
+          [
+            426.0,
+            7.0,
+            3.0000000000000018
+          ]
+        ],
+        "rectangular_stock_mm": [
+          426.0,
+          7.0,
+          3.0
+        ],
+        "quantity": 1
+      },
+      "Slat06": {
+        "finished_local_bounds_mm": [
+          [
+            426.0,
+            7.000000000000014,
+            3.0000000000000018
+          ]
+        ],
+        "rectangular_stock_mm": [
+          426.0,
+          7.0,
+          3.0
+        ],
+        "quantity": 1
+      },
+      "Slat07": {
+        "finished_local_bounds_mm": [
+          [
+            426.0,
+            7.0,
+            3.0000000000000036
+          ]
+        ],
+        "rectangular_stock_mm": [
+          426.0,
+          7.0,
+          3.0
+        ],
+        "quantity": 1
+      },
+      "Slat08": {
+        "finished_local_bounds_mm": [
+          [
+            426.0,
+            7.000000000000014,
+            3.0000000000000044
+          ]
+        ],
+        "rectangular_stock_mm": [
+          426.0,
+          7.0,
+          3.0
+        ],
+        "quantity": 1
+      }
     },
     "acoustics": {
       "volume_basis": "保存实体封闭性检测；仅临时封住设计的扬声器及倒相口。净容积扣除所有已建模占用，扬声器与变压器采用实心安装包络，倒相管扣除整个外廓；重叠占用只扣一次。未计尚未建模的吸音材料、支柱、密封件及线缆。",
       "acoustic_performance_verified": false,
       "chambers": {
         "left": {
-          "gross_after_recess_l": 1.1728168019400371,
-          "conservative_net_l": 1.135882293594081
+          "gross_after_recess_l": 1.1684816241702058,
+          "conservative_net_l": 1.1320391493885642
         },
         "woofer": {
-          "gross_after_recess_l": 4.62263899632096,
-          "conservative_net_l": 4.079294263697299
+          "gross_after_recess_l": 4.724552408587847,
+          "conservative_net_l": 4.181207675964185
         },
         "right": {
-          "gross_after_recess_l": 1.1728168019400371,
-          "conservative_net_l": 1.135882293594081
+          "gross_after_recess_l": 1.1684816241702058,
+          "conservative_net_l": 1.132039149388564
         }
       },
       "port_inner_diameter_mm": 32.0,
@@ -155,6 +470,6 @@
     "未对所有零件做全局干涉放行；这里只检查列出的关键部件与外壳",
     "变压器固定耳宽厚为保守占位，孔距未知；未验证散热、磁场、电气或走线"
   ],
-  "requested_revision": "v0.4-sc2103-layout",
+  "requested_revision": "v0.5-integer-woodwork",
   "passed": true
 }

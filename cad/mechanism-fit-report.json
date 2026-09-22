@@ -1,7 +1,7 @@
 {
   "revision": "v0.3-fit-study",
   "selected_option": "28高端弯臂机芯全套餐装好直接用 自动回臂",
-  "base_sha256": "29d6e36944ebd652fad2f5780f6aeeaafb0dc885e4f95b99c7650a1c07e218fb",
+  "base_sha256": "c9a2137fde2abcba7e5cc5252c57661e6afe94a0b9809816366f646113b8329f",
   "assumptions": {
     "revision": "v0.3-fit-study",
     "selected_option": "28高端弯臂机芯全套餐装好直接用 自动回臂",
@@ -47,7 +47,7 @@
       {
         "part": "Slat07",
         "label": "横向木格栅 07",
-        "overlap_mm3": 7112.808
+        "overlap_mm3": 5262.146
       },
       {
         "part": "Slat08",
@@ -57,7 +57,7 @@
       {
         "part": "RearSupport",
         "label": "后部两侧隔振承托梁",
-        "overlap_mm3": 39456.0
+        "overlap_mm3": 39120.0
       },
       {
         "part": "Isolator0",
@@ -77,17 +77,17 @@
       {
         "part": "BassPort",
         "label": "后置倒相管 · Ø32 × 160 可换试验件",
-        "overlap_mm3": 14018.283
+        "overlap_mm3": 13519.609
       },
       {
         "part": "Baffle",
         "label": "左右全频斜面障板",
-        "overlap_mm3": 65184.873
+        "overlap_mm3": 68546.385
       },
       {
         "part": "AcousticRoof",
         "label": "三音腔共用顶板 · 中部延伸至后板",
-        "overlap_mm3": 587733.183
+        "overlap_mm3": 589457.983
       },
       {
         "part": "BearingPocket",
@@ -97,17 +97,17 @@
       {
         "part": "AcousticRear",
         "label": "左右全频腔后板 · 密封试装",
-        "overlap_mm3": 30249.6
+        "overlap_mm3": 29992.0
       },
       {
         "part": "AcousticDividerLeft",
         "label": "低音腔左全深隔板",
-        "overlap_mm3": 48298.86
+        "overlap_mm3": 48223.108
       },
       {
         "part": "AcousticDividerRight",
         "label": "低音腔右全深隔板",
-        "overlap_mm3": 48298.86
+        "overlap_mm3": 48223.108
       },
       {
         "part": "TweeterLeft",
@@ -117,7 +117,7 @@
       {
         "part": "TweeterRight",
         "label": "右全频 · SC-2103 安装占位",
-        "overlap_mm3": 2898.764
+        "overlap_mm3": 2835.704
       }
     ],
     "illustrative_closed_cover_clear": true,

@@ -23,7 +23,8 @@ import validate_model
 
 class ParameterValidationTests(unittest.TestCase):
     def test_incompatible_model_replaces_success_report_and_closes_document(self):
-        cases = ['old_schema', 'missing_property', 'missing_snapshot', 'invalid_snapshot']
+        missing_neighbors = ['GrilleCloth', 'Fascia', 'LowerRail', 'LightChannel', 'LightDiffuser']
+        cases = ['old_schema', 'missing_property', 'missing_snapshot', 'invalid_snapshot'] + missing_neighbors
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             (root / 'cad').mkdir()
@@ -48,6 +49,8 @@ class ParameterValidationTests(unittest.TestCase):
                             doc.getObject('Woofer').removeProperty('TotalHeight')
                         elif case == 'missing_snapshot':
                             datum.removeProperty('BuildParametersJSON')
+                        elif case in missing_neighbors:
+                            doc.removeObject(case)
                         else:
                             datum.BuildParametersJSON = '{invalid'
                         doc.recompute()
@@ -67,6 +70,9 @@ class ParameterValidationTests(unittest.TestCase):
                     self.assertEqual(json.loads(report_path.read_text()), result)
                     self.assertEqual(opened_after, opened_before)
                     self.assertTrue(result['errors'])
+                    if case in missing_neighbors:
+                        self.assertFalse(result['checks']['required_model_fields_present'])
+                        self.assertIn(case, '\n'.join(result['errors']))
                     # Exercise the actual CLI exit path and overwrite a stale successful report.
                     report_path.write_text('{"passed": true}')
                     run = subprocess.run([sys.executable, str(root / 'tools/validate_model.py')],
@@ -180,8 +186,10 @@ class AcousticLayoutTests(unittest.TestCase):
                 result=validate_model.validate()
             self.assertTrue(result['passed'],result)
             chambers=result['metrics']['acoustics']['chambers']
-            self.assertAlmostEqual(chambers['left']['gross_after_recess_l'],0.64631680194,places=8)
-            self.assertAlmostEqual(chambers['right']['gross_after_recess_l'],0.64631680194,places=8)
+            # 117 mm width times the integral of cavity depth over Z=38..128;
+            # the front boundary uses the true 8 mm normal baffle thickness.
+            self.assertAlmostEqual(chambers['left']['gross_after_recess_l'],0.64198162417,places=8)
+            self.assertAlmostEqual(chambers['right']['gross_after_recess_l'],0.64198162417,places=8)
 
     def test_electronics_in_chamber_reduce_net_volume(self):
         with tempfile.TemporaryDirectory() as tmp:

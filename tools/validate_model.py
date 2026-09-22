@@ -48,6 +48,10 @@ def _validate_document(doc,p):
     }
     for name in ['BassPort','BearingPocket','AcousticRoof','AcousticRear','AcousticDividerLeft','AcousticDividerRight','Baffle','Bottom','Back']:
         required[name]=['Shape']
+    # Slat clearance checks dereference these neighbors; reject missing parts
+    # here so the failure report replaces any previous successful validation.
+    for name in ['GrilleCloth','Fascia','LowerRail','LightChannel','LightDiffuser']:
+        required[name]=['Shape']
     for name in ['Woofer','TweeterLeft','TweeterRight']:
         required[name]=['Shape','DriverRole','FlangeDiameter','CutoutDiameter','ReservedDepth',
                         'TotalHeight','FlangeThickness','MountCentre','InwardAxis']
@@ -180,6 +184,8 @@ def _validate_document(doc,p):
     metrics['amplifier_reservation_collisions']=amplifier_hits
     metrics['amplifier_clearances_mm']=amplifier_gaps
     checks['amplifier_reservation_clear']=not amplifier_hits
+    wood_checks,wood_metrics=check_woodworking(doc,p)
+    checks.update(wood_checks);metrics['woodworking']=wood_metrics
     acoustic_checks,acoustic_metrics=check_acoustics(doc,p,reserved+[(transformer.Name,envelope)])
     checks.update(acoustic_checks);metrics['acoustics']=acoustic_metrics
     metrics['woofer_floor_clearance_mm']=doc.getObject('Woofer').Shape.BoundBox.ZMin
@@ -205,8 +211,9 @@ def check_acoustics(doc,p,reserved):
     def obj(name):return doc.getObject(name).Shape
     a=math.radians(p['front_angle'])
     front_y=lambda z:8+(z-zlo)/math.tan(a)
+    inner_offset=8+ac['baffle_thickness']/math.sin(a)
     pts=[V(t,front_y(zlo)+8,zlo),V(t,front_y(zhi)+8,zhi),
-         V(t,front_y(zhi)+16,zhi),V(t,front_y(zlo)+16,zlo)]
+         V(t,front_y(zhi)+inner_offset,zhi),V(t,front_y(zlo)+inner_offset,zlo)]
     blank_baffle=Part.Face(Part.makePolygon(pts+[pts[0]])).extrude(V(W-2*t,0,0))
     blank_bottom=Part.makeBox(W-2*t,D,t,V(t,0,z0))
     caps=[]
@@ -229,7 +236,7 @@ def check_acoustics(doc,p,reserved):
     # Locate each chamber from its current boundaries, not the original layout.
     left,right=p['acoustic_divider_x']; pt=ac['partition_thickness']
     seed_z=(zlo+zhi)/2
-    inner_front=front_y(seed_z)+16
+    inner_front=front_y(seed_z)+inner_offset
     satellite_y=(inner_front+ac['satellite_rear_y'])/2
     seeds={'left':V((t+left)/2,satellite_y,seed_z),
            'woofer':V((left+pt+right)/2,(inner_front+D-t)/2,seed_z),
@@ -287,6 +294,49 @@ def check_acoustics(doc,p,reserved):
         mouth=V(px,D-port['length']-1,pz)
         checks['bass_port_connects_only_woofer']=air.Solids[candidates['woofer'][0]].isInside(mouth,1e-6,False)
     return checks,metrics
+
+
+def check_woodworking(doc,p):
+    """Check real saved solids against nominal thickness and rectangular stock."""
+    normal=App.Vector(0,math.sin(math.radians(p['front_angle'])),-math.cos(math.radians(p['front_angle'])))
+    metrics={}; thickness_ok=True; stock_ok=True
+    expected=['SideLeft','SideRight','Bottom','Back','LowerRail','Baffle','AcousticRoof',
+              'AcousticRear','AcousticDividerLeft','AcousticDividerRight','RearSupport','FloatingDeck']
+    expected += [f'Slat{i+1:02}' for i in range(p['slat_count'])]
+    for name in expected:
+        obj=doc.getObject(name)
+        if obj is None or not all(hasattr(obj,k) for k in ['StockLength','StockWidth','StockThickness','StockNormal','StockCount']):
+            thickness_ok=stock_ok=False
+            metrics[name]={'error':'缺少备料或法向厚度字段'}
+            continue
+        thickness=float(obj.StockThickness)
+        direction=obj.StockNormal
+        if name=='Baffle':thickness=p['acoustic']['baffle_thickness'];direction=normal
+        if name.startswith('Slat'):thickness=p['slat_thickness'];direction=normal
+        dims=[]
+        for solid in obj.Shape.Solids:
+            aligned=solid.copy()
+            aligned.Placement=App.Placement(App.Vector(),App.Rotation(direction,App.Vector(0,0,1))).multiply(aligned.Placement)
+            bb=aligned.optimalBoundingBox(False)
+            length,width=sorted([bb.XLength,bb.YLength],reverse=True)
+            dims.append([length,width,bb.ZLength])
+            thickness_ok &= abs(bb.ZLength-thickness)<1e-5 and abs(float(obj.StockThickness)-thickness)<1e-6
+            stock_ok &= length<=float(obj.StockLength)+1e-5 and width<=float(obj.StockWidth)+1e-5
+        stock=[float(obj.StockLength),float(obj.StockWidth),float(obj.StockThickness)]
+        stock_ok &= all(abs(v-round(v))<1e-6 for v in stock) and obj.StockCount==len(dims)
+        metrics[name]={'finished_local_bounds_mm':dims,'rectangular_stock_mm':stock,'quantity':obj.StockCount}
+    slats=[doc.getObject(f'Slat{i+1:02}') for i in range(p['slat_count'])]
+    regular=all(s and s.Shape.isValid() for s in slats)
+    if regular:
+        regular=all(abs(s.Shape.Volume-(p['width']-2*p['wall'])*p['slat_face_width']*p['slat_thickness'])<1e-5 for s in slats)
+        regular &= all(abs(slats[i].Shape.CenterOfMass.z-slats[i-1].Shape.CenterOfMass.z-p['slat_pitch'])<1e-6 for i in range(1,len(slats)))
+        for slat in slats:
+            for other in [doc.GrilleCloth,doc.Fascia,doc.LowerRail,doc.Baffle,doc.LightChannel,doc.LightDiffuser]+slats:
+                if slat.Name!=other.Name:
+                    regular &= slat.Shape.common(other.Shape).Volume<1e-5
+    return {'wood_panel_normal_thickness_matches':bool(thickness_ok),
+            'integer_wood_stock_contains_finished_panels':bool(stock_ok),
+            'rectangular_slats_pitch_and_clearance':bool(regular)},metrics
 
 
 if __name__=='__main__':

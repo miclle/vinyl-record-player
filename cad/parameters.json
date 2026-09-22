@@ -1,8 +1,8 @@
 {
   "units": "mm",
-  "revision": "v0.4-sc2103-layout",
-  "width": 448.6,
-  "depth": 345.5,
+  "revision": "v0.5-integer-woodwork",
+  "width": 450.0,
+  "depth": 350.0,
   "closed_height": 214.2,
   "foot_height": 26.0,
   "cabinet_top": 150.0,
@@ -24,14 +24,14 @@
   "woofer": {
     "flange_diameter": 132.0,
     "cutout_diameter": 100.0,
-    "center_x": 224.3,
+    "center_x": 225.0,
     "center_y": 247.0,
     "total_height": 65.0,
     "flange_thickness": 3.0
   },
   "acoustic_divider_x": [
     129.0,
-    311.6
+    313.0
   ],
   "power_transformer": {
     "body_length": 60.0,
@@ -56,7 +56,7 @@
     "cutout_diameter": 40.0,
     "center_x": [
       80.0,
-      368.6
+      370.0
     ],
     "center_z": 88.0,
     "total_height": 40.0,
@@ -68,7 +68,8 @@
     "roof_bottom_z": 128.0,
     "roof_thickness": 8.0,
     "source": "Shockwave SC-2103 salvaged drivers; original cabinets and ports unavailable; exact variant unconfirmed",
-    "satellite_alignment": "sealed trial; response unverified"
+    "satellite_alignment": "sealed trial; response unverified",
+    "baffle_thickness": 8.0
   },
   "bass_port": {
     "inner_diameter": 32.0,
@@ -92,5 +93,8 @@
     "length": 80.0,
     "width": 52.0,
     "height": 17.0
-  }
+  },
+  "slat_face_width": 7.0,
+  "slat_thickness": 3.0,
+  "slat_pitch": 11.0
 }

@@ -32,7 +32,7 @@ def build():
     if 'LumiThreeDriver' in App.listDocuments():
         raise RuntimeError('Close LumiThreeDriver before rebuilding; unsaved edits are protected')
     doc = App.newDocument('LumiThreeDriver')
-    doc.Label = 'LUMI · SC-2103 三音腔布局 · v0.4'
+    doc.Label = 'LUMI · SC-2103 整数备料布局 · ' + p['revision']
     groups = {}
     for name, label in [('Cabinet','01 胡桃木外壳'), ('Front','02 倾斜格栅与灯光'),
                         ('Deck','03 浮动唱盘底板'), ('Mechanism','04 唱盘与唱臂包络'),
@@ -99,8 +99,14 @@ def build():
     cloth = add('GrilleCloth','透声布外观占位（非实心材料）',slope(z0+t,H-22,4,0.5),'Front',BLACK,material='透声织物（薄实体仅用于显示）')
     n=p['slat_count']
     for i in range(n):
-        z=z0+t+2+i*(H-24-(z0+t)-7)/(n-1)
-        add('Slat%02d'%(i+1),'横向木格栅 %02d'%(i+1),slope(z,z+7,0,3),'Front',SLAT,material='胡桃木饰条 / 厚 3 mm')
+        z=z0+t+2+i*p['slat_pitch']
+        start=V(t,front_y(z),z)
+        along=V(0,math.cos(a),math.sin(a))*p['slat_face_width']
+        normal=inward*p['slat_thickness']
+        points=[start,start+along,start+along+normal,start+normal]
+        slat=Part.Face(Part.makePolygon(points+[points[0]])).extrude(V(W-2*t,0,0))
+        add('Slat%02d'%(i+1),'横向木格栅 %02d'%(i+1),slat,'Front',SLAT,
+            material=f"矩形木饰条 / 面宽 {p['slat_face_width']:g} / 法向厚 {p['slat_thickness']:g} mm")
     box('LightChannel','灯带铝槽占位',t+6,7,H-22,W-2*t-12,14,2,'Front',SILVER)
     box('LightDiffuser','3000 K 暖光扩散片',t+8,8,H-23,W-2*t-16,12,1,'Front',(1.0,0.64,0.22),material='扩散片 / 光色示意')
 
@@ -108,13 +114,15 @@ def build():
     zlo,zhi=z0+t,ac['roof_bottom_z']
     rear=ac['satellite_rear_y']; pt=ac['partition_thickness']
     left,right=p['acoustic_divider_x']
-    baffle=slope(zlo,zhi,8,8)
+    baffle_y_thickness=ac['baffle_thickness']/math.sin(a)
+    baffle=slope(zlo,zhi,8,baffle_y_thickness)
     speaker_centres=[]
     for x in tweeter['center_x']:
         centre=V(x,front_y(tweeter['center_z'])+8,tweeter['center_z'])
         speaker_centres.append(centre)
         baffle=baffle.cut(Part.makeCylinder(tweeter['cutout_diameter']/2,30,centre-inward*5,inward))
-    add('Baffle','左右全频斜面障板',baffle,'Audio',BLACK,material='8 mm 障板；开孔待实测')
+    add('Baffle','左右全频斜面障板',baffle,'Audio',BLACK,
+        material=f"法向厚 {ac['baffle_thickness']:g} mm 障板；上下斜口修切，开孔待实测")
     roof=Part.makeBox(W-2*t,rear+pt,ac['roof_thickness'],V(t,0,zhi)).fuse(
         Part.makeBox(right+pt-left,D-t-rear-pt,ac['roof_thickness'],V(left,rear+pt,zhi)))
     # A sealed local recess clears the generic bearing without opening the low chamber.
@@ -129,7 +137,8 @@ def build():
         Part.makeBox(W-t-right-pt,pt,zhi-zlo,V(right+pt,rear,zlo))])
     add('AcousticRear','左右全频腔后板 · 密封试装',rear_panels,'Audio',GRAY)
     for side,x in zip(['Left','Right'],p['acoustic_divider_x']):
-        pts=[V(x,front_y(zlo)+16,zlo),V(x,D-t,zlo),V(x,D-t,zhi),V(x,front_y(zhi)+16,zhi)]
+        inner_offset=8+baffle_y_thickness
+        pts=[V(x,front_y(zlo)+inner_offset,zlo),V(x,D-t,zlo),V(x,D-t,zhi),V(x,front_y(zhi)+inner_offset,zhi)]
         divider=Part.Face(Part.makePolygon(pts+[pts[0]])).extrude(V(pt,0,0))
         add('AcousticDivider'+side,'低音腔'+('左' if side=='Left' else '右')+'全深隔板',divider,'Audio',GRAY)
 
@@ -244,6 +253,45 @@ def build():
     for i,(x,y) in enumerate([(33,30),(W-33,30),(33,D-30),(W-33,D-30)]):
         foot=Part.makeCylinder(15,19,V(x,y,7)).fuse(Part.makeCone(11,15,7,V(x,y,0)))
         add('Foot%d'%i,'脚垫 %d'%(i+1),foot,'Feet',BLACK,material='弹性脚垫占位')
+
+    # Stock dimensions describe a rectangular blank in the board's own plane,
+    # not its tilted XYZ envelope. Compound panel objects contain two blanks.
+    stock_specs={
+        'SideLeft':(V(1,0,0),t,'矩形板'), 'SideRight':(V(1,0,0),t,'矩形板'),
+        'Bottom':(V(0,0,1),t,'矩形板；另开低音通孔'),
+        'Back':(V(0,1,0),t,'矩形板；另开倒相通孔及沉台'),
+        'LowerRail':(V(0,1,0),8,'矩形横梁'),
+        'Baffle':(inward,ac['baffle_thickness'],f'整数矩形备料；上下两边修 {90-p["front_angle"]:g}° 斜口至安装竖高 {zhi-zlo:g}；另开法向孔'),
+        'AcousticRoof':(V(0,0,1),ac['roof_thickness'],'矩形备料；切 T 形轮廓并开轴承孔'),
+        'AcousticRear':(V(0,1,0),pt,'两块独立矩形板'),
+        'AcousticDividerLeft':(V(1,0,0),pt,'整数矩形备料；前缘按精确斜线修切'),
+        'AcousticDividerRight':(V(1,0,0),pt,'整数矩形备料；前缘按精确斜线修切'),
+        'RearSupport':(V(0,0,1),8,'两块独立矩形梁'),
+        'FloatingDeck':(V(0,0,1),p['deck_thickness'],'矩形板；另开主轴孔，机芯安装接口待定'),
+    }
+    for i in range(n):
+        stock_specs[f'Slat{i+1:02}']=(inward,p['slat_thickness'],'矩形截面成品条；整体倾斜安装，无需把截面切成斜四边形')
+    stock_rows=[]
+    for name,(normal,thickness,note) in stock_specs.items():
+        obj=doc.getObject(name)
+        sizes=[]
+        for solid in obj.Shape.Solids:
+            aligned=solid.copy()
+            aligned.Placement=App.Placement(V(),App.Rotation(normal,V(0,0,1))).multiply(aligned.Placement)
+            bb=aligned.optimalBoundingBox(False)
+            sizes.append(sorted([bb.XLength,bb.YLength],reverse=True))
+        length=math.ceil(max(size[0] for size in sizes)-1e-6)
+        width=math.ceil(max(size[1] for size in sizes)-1e-6)
+        for prop,value in [('StockLength',length),('StockWidth',width),('StockThickness',thickness)]:
+            obj.addProperty('App::PropertyLength',prop,'Woodworking');setattr(obj,prop,value)
+        obj.addProperty('App::PropertyVector','StockNormal','Woodworking').StockNormal=normal
+        obj.addProperty('App::PropertyInteger','StockCount','Woodworking').StockCount=len(sizes)
+        obj.addProperty('App::PropertyString','StockNote','Woodworking').StockNote=note
+        stock_rows.append([name,obj.Label,len(sizes),length,width,thickness,note])
+    with (ROOT/'cad/wood-cut-list.csv').open('w',newline='',encoding='utf-8-sig') as f:
+        writer=csv.writer(f,lineterminator='\n')
+        writer.writerow(['ID','板件','数量','备料长_mm','备料宽_mm','名义板厚_mm','后续加工说明'])
+        writer.writerows(stock_rows)
 
     info=doc.addObject('App::FeaturePython','GeometryDatums')
     info.Label='尺寸基准（JSON 修改后重建）'

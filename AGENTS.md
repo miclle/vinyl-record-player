@@ -7,9 +7,11 @@ FreeCAD concept model of a turntable with one downward-facing woofer, two front 
 - `tools/build_model.py`: geometry generation and CAD export.
 - `tools/build.FCMacro`: GUI entry point; invokes generation, rendering, and dimension-sheet creation.
 - `tools/render_views.py` and `tools/dimension_sheet.py`: viewport previews and projected drawings.
+- `tools/drawing_data.py` and `tools/drawing_pack.py`: saved-solid projection data and three grouped A3 PDF books under `output/pdf/`; see `docs/drawing-pack.md` for the separate FreeCAD/PDF runtimes.
 - `tools/validate_model.py`: baseline geometry and STEP validation; `tests/test_regressions.py`: regression tests.
 - `tools/mechanism_study.py` and `tools/mechanism-study.FCMacro`: selected-mechanism assembly, fit report, and GUI previews; `tests/test_mechanism_study.py`: fit-study regression tests.
 - `cad/parameters.json`: cabinet, drivers, transformer, and amplifier inputs; `lumi-three-driver.FCStd` / `.step`, `parts.csv`, and `validation.json` are baseline outputs.
+- `cad/wood-cut-list.csv`: generated integer rectangular stock sizes and quantities. `StockLength` / `StockWidth` / `StockThickness` are board-local dimensions; tilted XYZ envelopes and finished bevels may remain fractional.
 - `cad/selected-mechanism.json`: mechanism assumptions; `lumi-selected-mechanism-fit.FCStd` / `.step` and `mechanism-fit-report.json` are fit-study outputs. The study reads the saved baseline FCStd. Historical `lumi-dual-driver.*` files are available only in Git history.
 - `previews/`: generated PNG and SVG assets.
 - `docs/audio-layout.md`: chamber volumes, trial ports, and unimplemented satellite-port options; `docs/current-work-handoff.md`: verified resume state.
@@ -50,3 +52,5 @@ Follow the existing concise English Angular-style commit messages, such as `feat
 ## Modeling Boundaries
 
 Edit `cad/parameters.json` and rebuild: saved `Part::Feature` solids do not update automatically. Validation rejects mismatched or missing parameter snapshots. The SC-2103 layout has three independent chambers and a replaceable rear port; `fullrange` is the parameter/role name, while `TweeterLeft` / `TweeterRight` remain stable legacy object IDs. CAD cavity volumes and trial port dimensions are not verified acoustic tuning. Driver `total_height` includes `flange_thickness`; inward depth is their difference. Amplifier dimensions already include the heatsink. Transformer ear width/thickness, speaker cutouts, mounting holes, and amplifier floor clearance remain assumptions. Distinguish user-provided dimensions from estimates. Passing geometry checks does not establish acoustic performance or manufacturing readiness. Reference photos retain their owners' copyright; the repository license does not cover them.
+
+The v0.5 woodworking layout uses a 450 × 350 mm footprint. `acoustic.baffle_thickness` and `slat_thickness` are true normal thicknesses; baffle horizontal cuts and adjoining divider fronts must stay geometrically coincident. Slats have rectangular `slat_face_width` × `slat_thickness` sections and a vertical `slat_pitch`. Integer stock dimensions do not define kerf, measured sheet thickness, finish allowances, or joint clearances; do not round mating geometry independently.
