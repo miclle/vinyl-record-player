@@ -30,14 +30,14 @@ class ACInletTests(unittest.TestCase):
 
     def test_rear_has_rounded_slot_and_two_through_bolt_holes(self):
         back = self.doc.Back.Shape
-        # Horizontal mounting: slot x=46..94, z=94..122; screw centres z=88/128.
-        for x, z in [(70, 108), (47, 108), (93, 108), (70, 95),
-                     (70, 121), (70, 88), (70, 128)]:
+        # Cabinet translated down 3.5 mm for the purchased feet; panel-local holes unchanged.
+        for x, z in [(70, 104.5), (47, 104.5), (93, 104.5), (70, 91.5),
+                     (70, 117.5), (70, 84.5), (70, 124.5)]:
             with self.subTest(x=x, z=z):
                 probe = Part.makeCylinder(0.1, 12, App.Vector(x, 338, z), App.Vector(0, 1, 0))
                 self.assertLess(back.common(probe).Volume, 1e-6)
         # R3 must retain wood in the corner, and material between slot and bolts.
-        for x, z in [(46.1, 94.1), (70, 91), (70, 125)]:
+        for x, z in [(46.1, 90.6), (70, 87.5), (70, 121.5)]:
             self.assertTrue(back.isInside(App.Vector(x, 344, z), 1e-6, False))
         blank_volume = 426 * 12 * 112
         port_volume = math.pi * 18**2 * 9 + math.pi * 24**2 * 3

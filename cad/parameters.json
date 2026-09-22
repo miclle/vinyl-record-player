@@ -1,15 +1,15 @@
 {
   "units": "mm",
-  "revision": "v0.6-ac-inlet",
+  "revision": "v0.7-purchased-feet",
   "width": 450.0,
   "depth": 350.0,
-  "closed_height": 214.2,
-  "foot_height": 26.0,
-  "cabinet_top": 150.0,
+  "closed_height": 210.7,
+  "foot_height": 22.5,
+  "cabinet_top": 146.5,
   "wall": 12.0,
   "deck_thickness": 6.0,
   "cover_wall": 3.0,
-  "cover_bottom": 151.0,
+  "cover_bottom": 147.5,
   "cover_angle_open": 70.0,
   "front_angle": 72.0,
   "slat_count": 8,
@@ -58,14 +58,14 @@
       80.0,
       370.0
     ],
-    "center_z": 88.0,
+    "center_z": 84.5,
     "total_height": 40.0,
     "flange_thickness": 3.0
   },
   "acoustic": {
     "partition_thickness": 8.0,
     "satellite_rear_y": 150.0,
-    "roof_bottom_z": 128.0,
+    "roof_bottom_z": 124.5,
     "roof_thickness": 8.0,
     "source": "Shockwave SC-2103 salvaged drivers; original cabinets and ports unavailable; exact variant unconfirmed",
     "satellite_alignment": "sealed trial; response unverified",
@@ -81,7 +81,7 @@
       200.0
     ],
     "center_x": 288.0,
-    "center_z": 106.0,
+    "center_z": 102.5,
     "flange_diameter": 48.0,
     "flange_thickness": 3.0,
     "note": "flush removable cartridge; acoustic tuning, air velocity, seal and retention unverified"
@@ -89,7 +89,7 @@
   "phono_board": {
     "x": 26.0,
     "y": 170.0,
-    "z": 48.0,
+    "z": 44.5,
     "length": 80.0,
     "width": 52.0,
     "height": 17.0
@@ -101,7 +101,7 @@
     "model": "8-F5 C8 inlet + switch + fuse holder",
     "orientation": "horizontal; vendor front drawing rotated 90 degrees",
     "center_x": 70.0,
-    "center_z": 108.0,
+    "center_z": 104.5,
     "cutout_width": 48.0,
     "cutout_height": 28.0,
     "cutout_radius": 3.0,
@@ -121,5 +121,25 @@
     "electrical_released": false,
     "installation_released": false,
     "note": "User supplied vendor images; body and terminal region are one conservative envelope. 30.66 mm chosen over 30.62 mm. Panel thickness, fasteners, insulation, wiring, ratings and fuse selection need verification."
+  },
+  "feet": {
+    "rubber_diameter": 30.0,
+    "rubber_height": 20.0,
+    "stud_diameter": 8.0,
+    "stud_length": 23.0,
+    "flange_diameter": 37.0,
+    "flange_thickness": 2.5,
+    "barrel_diameter": 12.0,
+    "barrel_height": 14.5,
+    "mount_hole_diameter": 5.5,
+    "mount_pitch_circle_assumption": 28.0,
+    "panel_hole_diameter_assumption": 12.4,
+    "pilot_diameter_assumption": 3.0,
+    "pilot_depth_assumption": 8.0,
+    "side_inset": 33.0,
+    "front_y": 40.0,
+    "rear_inset": 30.0,
+    "installation_released": false,
+    "note": "Flange below bottom panel, barrel pointing upward through panel; uncompressed rubber touches flange underside. Vendor dimensions; pitch circle, panel clearance and blind wood screw pilots are assumptions. Threads represented by nominal cylinders. Actual sealing, fastening, load and isolation unverified."
   }
 }

@@ -2,6 +2,7 @@
 from pathlib import Path
 import FreeCAD as App
 import FreeCADGui as Gui
+import Part
 
 ROOT=Path(__file__).resolve().parents[1]
 
@@ -53,4 +54,34 @@ def render(doc,p,groups):
     iso()
     doc.recompute()
     doc.save()
+    render_foot_detail(doc)
     (ROOT/'cad/render.done').write_text('Rendered closed, open, front, right, bottom, top, rear, internal, audio-layout from FreeCAD viewport.\n')
+
+
+def render_foot_detail(source):
+    """Temporary quarter section; never cut or save the source assembly."""
+    import json
+    p=json.loads(source.GeometryDatums.BuildParametersJSON)
+    x,y=p['feet']['side_inset'],p['feet']['front_y']
+    crop=Part.makeBox(54,60,60,App.Vector(x-21,y-30,0))
+    cut=Part.makeBox(40,30,60,App.Vector(x,y-30,0))
+    detail=App.newDocument('FootInstallationDetail')
+    try:
+        for name,color in [('Bottom',(0.63,0.43,0.26)),('Foot0',(0.06,0.07,0.08)),
+                           ('FootMount0',(0.45,0.48,0.51))]:
+            obj=detail.addObject('Part::Feature',name+'Section')
+            obj.Shape=source.getObject(name).Shape.common(crop).cut(cut)
+            obj.ViewObject.ShapeColor=color
+            obj.ViewObject.DisplayMode='Flat Lines'
+            if name=='Foot0':
+                obj.ViewObject.DiffuseColor=[(0.73,0.75,0.77) if face.CenterOfMass.z>=p['feet']['rubber_height'] else color
+                                            for face in obj.Shape.Faces]
+        detail.recompute()
+        view=Gui.activeDocument().activeView()
+        view.setCameraType('Orthographic')
+        view.setCameraOrientation(App.Rotation(App.Vector(1,1,0),App.Vector(-1,1,2),App.Vector(1,-1,1),'ZXY').Q)
+        view.fitAll();Gui.updateGui()
+        view.saveImage(str(ROOT/'previews/feet-installation.png'),1600,1200,'White')
+    finally:
+        App.closeDocument(detail.Name)
+        App.setActiveDocument(source.Name)

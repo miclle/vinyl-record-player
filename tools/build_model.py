@@ -11,6 +11,7 @@ from pathlib import Path
 import FreeCAD as App
 import Part
 from ac_inlet import installation as inlet_installation
+from feet import installation as feet_installation
 
 ROOT = Path(__file__).resolve().parents[1]
 V = App.Vector
@@ -27,6 +28,7 @@ def build():
         raise ValueError('This layout requires one woofer and two full-range satellites')
     W, D, H = p['width'], p['depth'], p['cabinet_top']
     t, z0 = p['wall'], p['foot_height']
+    foot_parts = feet_installation(p)
     a = math.radians(p['front_angle'])
     inward = V(0, math.sin(a), -math.cos(a))
     front_y = lambda z: 8 + (z - (z0+t)) / math.tan(a)
@@ -79,6 +81,9 @@ def build():
     woofer=p['woofer']; tweeter=p['fullrange']
     bottom=Part.makeBox(W-2*t,D,t,V(t,0,z0))
     bottom=bottom.cut(Part.makeCylinder(woofer['cutout_diameter']/2,t+2,V(woofer['center_x'],woofer['center_y'],z0-1)))
+    for part in foot_parts:
+        for cutter in part['cutouts']:
+            bottom = bottom.cut(cutter)
     add('Bottom','底板 · 低音向下开孔',bottom,'Cabinet',BLACK,material='12 mm 木板；低音开孔待选型')
     port=p['bass_port']; ac=p['acoustic']
     px,pz=port['center_x'],port['center_z']
@@ -139,8 +144,9 @@ def build():
     bx,by=p['platter_x'],p['platter_y']
     roof=roof.cut(Part.makeCylinder(14,ac['roof_thickness']+2,V(bx,by,zhi-1)))
     add('AcousticRoof','三音腔共用顶板 · 中部延伸至后板',roof,'Audio',GRAY)
-    pocket=Part.makeCylinder(14,zhi+ac['roof_thickness']-110,V(bx,by,110)).cut(
-        Part.makeCylinder(12,zhi+ac['roof_thickness']-111,V(bx,by,112)))
+    pocket_bottom=H-40
+    pocket=Part.makeCylinder(14,zhi+ac['roof_thickness']-pocket_bottom,V(bx,by,pocket_bottom)).cut(
+        Part.makeCylinder(12,zhi+ac['roof_thickness']-pocket_bottom-1,V(bx,by,pocket_bottom+2)))
     add('BearingPocket','通用轴承密封避让杯（选定机芯待重做）',pocket,'Audio',GRAY)
     rear_panels=Part.makeCompound([
         Part.makeBox(left-t,pt,zhi-zlo,V(t,rear,zlo)),
@@ -212,7 +218,7 @@ def build():
                       ('MountSpan',span),('MountThicknessAssumption',ear_thickness)]:
         power.addProperty('App::PropertyLength',key,'Installation');setattr(power,key,value)
 
-    box('ConnectorPlate','后部接口安装板占位',324,D-t-2,65,105,2,32,'Electronics',BLACK)
+    box('ConnectorPlate','后部接口安装板占位',324,D-t-2,z0+39,105,2,32,'Electronics',BLACK)
     # Connector holes are intentionally deferred until actual parts are selected.
 
     cx,cy=p['platter_x'],p['platter_y']
@@ -260,15 +266,24 @@ def build():
     for i,x in enumerate([55,W-77]):
         box('HingeBase%d'%i,'铰链固定座 %d'%(i+1),x,D-13,H-12,22,9,12,'Cover',BLACK)
         cyl('HingePin%d'%i,'铰链轴 %d'%(i+1),3,22,V(x,D-3,cb),'Cover',GRAY,V(1,0,0))
-    for i,(x,y) in enumerate([(33,30),(W-33,30),(33,D-30),(W-33,D-30)]):
-        foot=Part.makeCylinder(15,19,V(x,y,7)).fuse(Part.makeCone(11,15,7,V(x,y,0)))
-        add('Foot%d'%i,'脚垫 %d'%(i+1),foot,'Feet',BLACK,material='弹性脚垫占位')
+    for i,part in enumerate(foot_parts):
+        foot=add(f'Foot{i}',f'VE 橡胶脚垫与 M8 螺杆 {i+1}',part['foot'],'Feet',BLACK,
+                 basis='用户商家图：橡胶 Ø30×20、M8 外露23；螺纹以光杆表示，金属顶片厚度未定义',
+                 material='已购橡胶脚垫总成；硬度、压缩量及承载未验证')
+        mount=add(f'FootMount{i}',f'M8 脚垫固定座 {i+1}',part['mount'],'Feet',GRAY,
+                  basis='用户商家图：底盘 Ø37×2.5、圆柱 Ø12×14.5、3×Ø5.5；孔分布圆及板预孔为参数中的假设',
+                  material='已购镀黑锌固定座；有效螺纹及紧固方案待实物确认')
+        for obj in (foot,mount):
+            obj.addProperty('App::PropertyBool','InstallationReleased','Installation').InstallationReleased=False
+        if App.GuiUp:
+            foot.ViewObject.DiffuseColor=[SILVER if face.CenterOfMass.z >= p['feet']['rubber_height'] else BLACK
+                                         for face in foot.Shape.Faces]
 
     # Stock dimensions describe a rectangular blank in the board's own plane,
     # not its tilted XYZ envelope. Compound panel objects contain two blanks.
     stock_specs={
         'SideLeft':(V(1,0,0),t,'矩形板'), 'SideRight':(V(1,0,0),t,'矩形板'),
-        'Bottom':(V(0,0,1),t,'矩形板；另开低音通孔'),
+        'Bottom':(V(0,0,1),t,f"矩形板；低音通孔；4×Ø{p['feet']['panel_hole_diameter_assumption']:g} 脚座通孔、12×Ø{p['feet']['pilot_diameter_assumption']:g} 深{p['feet']['pilot_depth_assumption']:g} 底面盲预孔（安装假设）"),
         'Back':(V(0,1,0),t,'矩形板；倒相孔及沉台；AC 横孔 48×28 R3、上下 2×Ø4.5 孔距 40'),
         'LowerRail':(V(0,1,0),8,'矩形横梁'),
         'Baffle':(inward,ac['baffle_thickness'],f'整数矩形备料；上下两边修 {90-p["front_angle"]:g}° 斜口至安装竖高 {zhi-zlo:g}；另开法向孔'),

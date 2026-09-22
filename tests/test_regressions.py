@@ -24,7 +24,7 @@ import validate_model
 class ParameterValidationTests(unittest.TestCase):
     def test_incompatible_model_replaces_success_report_and_closes_document(self):
         missing_neighbors = ['GrilleCloth', 'Fascia', 'LowerRail', 'LightChannel', 'LightDiffuser']
-        cases = ['old_schema', 'missing_property', 'missing_snapshot', 'invalid_snapshot'] + missing_neighbors
+        cases = ['old_schema', 'missing_property', 'missing_snapshot', 'invalid_snapshot', 'Feet'] + missing_neighbors
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             (root / 'cad').mkdir()
@@ -32,6 +32,7 @@ class ParameterValidationTests(unittest.TestCase):
             shutil.copy2(ROOT / 'cad/parameters.json', root / 'cad/parameters.json')
             shutil.copy2(ROOT / 'tools/validate_model.py', root / 'tools/validate_model.py')
             shutil.copy2(ROOT / 'tools/ac_inlet.py', root / 'tools/ac_inlet.py')
+            shutil.copy2(ROOT / 'tools/feet.py', root / 'tools/feet.py')
             for case in cases:
                 with self.subTest(case=case):
                     with patch.object(build_model, 'ROOT', root):
@@ -50,8 +51,14 @@ class ParameterValidationTests(unittest.TestCase):
                             doc.getObject('Woofer').removeProperty('TotalHeight')
                         elif case == 'missing_snapshot':
                             datum.removeProperty('BuildParametersJSON')
-                        elif case in missing_neighbors:
+                        elif case in missing_neighbors or case == 'Feet':
                             doc.removeObject(case)
+                            if case == 'Feet':
+                                # Removing only the group must not hide the missing-group
+                                # preflight behind a missing foot or mount error.
+                                for prefix in ('Foot', 'FootMount'):
+                                    for i in range(4):
+                                        self.assertIsNotNone(doc.getObject(f'{prefix}{i}'))
                         else:
                             datum.BuildParametersJSON = '{invalid'
                         doc.recompute()
@@ -71,7 +78,7 @@ class ParameterValidationTests(unittest.TestCase):
                     self.assertEqual(json.loads(report_path.read_text()), result)
                     self.assertEqual(opened_after, opened_before)
                     self.assertTrue(result['errors'])
-                    if case in missing_neighbors:
+                    if case in missing_neighbors or case == 'Feet':
                         self.assertFalse(result['checks']['required_model_fields_present'])
                         self.assertIn(case, '\n'.join(result['errors']))
                     # Exercise the actual CLI exit path and overwrite a stale successful report.
@@ -187,10 +194,13 @@ class AcousticLayoutTests(unittest.TestCase):
                 result=validate_model.validate()
             self.assertTrue(result['passed'],result)
             chambers=result['metrics']['acoustics']['chambers']
-            # 117 mm width times the integral of cavity depth over Z=38..128;
-            # the front boundary uses the true 8 mm normal baffle thickness.
-            self.assertAlmostEqual(chambers['left']['gross_after_recess_l'],0.64198162417,places=8)
-            self.assertAlmostEqual(chambers['right']['gross_after_recess_l'],0.64198162417,places=8)
+            # The unchanged 117 x 90 mm chamber gains the 0.2 mm radial
+            # panel clearance but loses the barrel/stud protruding above its floor.
+            import math
+            foot_delta = math.pi*((6.2**2-6**2)*12-6**2*2.5-4**2*6)/1e6
+            for side in ('left','right'):
+                self.assertAlmostEqual(chambers[side]['gross_after_recess_l'],
+                                       0.64198162417+foot_delta,places=8)
 
     def test_electronics_in_chamber_reduce_net_volume(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -242,13 +252,14 @@ class MacroReloadTests(unittest.TestCase):
             shutil.copy2(ROOT / 'tools/build.FCMacro', macro)
             def write_sources(version):
                 (root / 'ac_inlet.py').write_text(f'value = {version}\n')
+                (root / 'feet.py').write_text(f'value = {version}\n')
                 (root / 'build_model.py').write_text(f'def deliver():\n    return {version}, {version}, {version}\n')
                 (root / 'render_views.py').write_text(f'def render(*args):\n    return {version}\n')
                 (root / 'dimension_sheet.py').write_text(f'def create(*args):\n    return {version}\n')
             saved_path = sys.path[:]
             try:
                 with patch.dict(sys.modules, {'FreeCADGui': types.ModuleType('FreeCADGui')}):
-                    for name in ['ac_inlet', 'build_model', 'render_views', 'dimension_sheet']:
+                    for name in ['ac_inlet', 'feet', 'build_model', 'render_views', 'dimension_sheet']:
                         sys.modules.pop(name, None)
                     env = {'__file__': str(macro), '__name__': '__main__'}
                     write_sources(1)

@@ -5,6 +5,7 @@ from pathlib import Path
 import FreeCAD as App
 import Part
 from ac_inlet import installation as inlet_installation
+from feet import installation as feet_installation
 
 ROOT=Path(__file__).resolve().parents[1]
 
@@ -21,7 +22,8 @@ def _validate_document(doc,p):
     result={'revision':p['revision'],'freecad':'.'.join(App.Version()[:3]),'checks':{},'metrics':{},'limitations':[
         '静态 Part 实体由 JSON 驱动重建，原生文件不含自动联动的完整特征历史',
         '音响与唱盘部件为概念包络；声学、隔振、连接工艺及电气均未验证',
-        '214.2 mm 暂作为闭盖总高；原厂测量基准未明确',
+        '原厂 214.2 mm 测量基准未明确；本版按已购脚垫名义高度调整闭盖总高',
+        '脚垫未压缩；脚座孔距、板预孔及密封为安装假设；低音离地19.5 mm，低于此前20 mm试验目标，声学待测',
         '开盖按 0 至 70 度每 5 度抽样检查，非连续运动求解',
         '未对所有零件做全局干涉放行；这里只检查列出的关键部件与外壳',
         '变压器固定耳宽厚为保守占位，孔距未知；未验证散热、磁场、电气或走线'
@@ -47,6 +49,7 @@ def _validate_document(doc,p):
         'PowerTransformer': ['Shape'],
         'Amplifier': ['Shape'],
         'ACInlet': ['Shape','ElectricalReleased','InstallationReleased'],
+        'Feet': ['Group'],
     }
     for name in ['BassPort','BearingPocket','AcousticRoof','AcousticRear','AcousticDividerLeft','AcousticDividerRight','Baffle','Bottom','Back']:
         required[name]=['Shape']
@@ -57,6 +60,9 @@ def _validate_document(doc,p):
     for name in ['Woofer','TweeterLeft','TweeterRight']:
         required[name]=['Shape','DriverRole','FlangeDiameter','CutoutDiameter','ReservedDepth',
                         'TotalHeight','FlangeThickness','MountCentre','InwardAxis']
+    for i in range(4):
+        for prefix in ('Foot','FootMount'):
+            required[f'{prefix}{i}']=['Shape','InstallationReleased']
     missing=[]
     for name,properties in required.items():
         obj=doc.getObject(name)
@@ -189,12 +195,16 @@ def _validate_document(doc,p):
     checks['amplifier_reservation_clear']=not amplifier_hits
     inlet_checks,inlet_metrics=check_ac_inlet(doc,p)
     checks.update(inlet_checks);metrics['ac_inlet']=inlet_metrics
+    feet_checks,feet_metrics=check_feet(doc,p)
+    checks.update(feet_checks);metrics['feet']=feet_metrics
     wood_checks,wood_metrics=check_woodworking(doc,p)
     checks.update(wood_checks);metrics['woodworking']=wood_metrics
     acoustic_checks,acoustic_metrics=check_acoustics(doc,p,reserved+[(transformer.Name,envelope)])
     checks.update(acoustic_checks);metrics['acoustics']=acoustic_metrics
-    metrics['woofer_floor_clearance_mm']=doc.getObject('Woofer').Shape.BoundBox.ZMin
-    checks['woofer_floor_clearance']=metrics['woofer_floor_clearance_mm']>=20
+    metrics['woofer_floor_clearance_mm']=doc.getObject('Woofer').Shape.optimalBoundingBox(False).ZMin
+    metrics['woofer_previous_20mm_trial_target_met']=metrics['woofer_floor_clearance_mm']>=20
+    checks['woofer_floor_clearance_matches_installation']=(metrics['woofer_floor_clearance_mm']>0 and
+        abs(metrics['woofer_floor_clearance_mm']-(p['foot_height']-p['woofer']['flange_thickness']))<1e-5)
     readback=Part.read(str(ROOT/'cad/lumi-three-driver.step'))
     checks['step_valid']=readback.isValid()
     checks['step_solid_count']=len(readback.Solids)==len(compound.Solids)
@@ -202,6 +212,44 @@ def _validate_document(doc,p):
     checks['step_volume']=abs(readback.Volume-compound.Volume)/compound.Volume<1e-7
     checks['step_bounds']=all(abs(a-b)<1e-5 for a,b in zip([readback.BoundBox.XLength,readback.BoundBox.YLength,readback.BoundBox.ZLength],metrics['overall_mm']))
     return finish()
+
+def check_feet(doc,p):
+    parts=feet_installation(p)
+    s=p['feet'];bottom=doc.Bottom.Shape
+    matches=True;cutouts_match=True;supported=True;hits=[]
+    for i,part in enumerate(parts):
+        x,y=part['center'];r=s['flange_diameter']/2
+        region=Part.makeCylinder(r,p['wall'],App.Vector(x,y,p['foot_height']))
+        expected=region
+        for cutter in part['cutouts']:
+            expected=expected.cut(cutter)
+        actual=bottom.common(region)
+        cutouts_match &= actual.cut(expected).Volume+expected.cut(actual).Volume<1e-5
+        supported &= (x-r>=p['wall'] and x+r<=p['width']-p['wall'] and
+                      y-r>=0 and y+r<=p['depth'] and actual.Volume>0)
+        for prefix,key in [('Foot','foot'),('FootMount','mount')]:
+            name=f'{prefix}{i}';obj=doc.getObject(name)
+            if obj is None:
+                matches=False
+                continue
+            shape=obj.Shape
+            matches &= shape.cut(part[key]).Volume+part[key].cut(shape).Volume<1e-5
+            for other in doc.Objects:
+                if other.TypeId!='Part::Feature' or other.Name==name:
+                    continue
+                if shape.BoundBox.intersect(other.Shape.BoundBox) and shape.common(other.Shape).Volume>1e-5:
+                    hits.append({'part':name,'other':other.Name})
+    return {'feet_parts_match':bool(matches),'feet_bottom_cutouts_match':bool(cutouts_match),
+            'feet_installation_clear':not hits,'feet_flanges_supported':bool(supported)}, {
+        'centers_xy_mm':[list(part['center']) for part in parts],
+        'mount_pilot_centers_xy_mm':[[list(xy) for xy in part['holes']] for part in parts],
+        'nominal_uncompressed_floor_height_mm':p['foot_height'],
+        'nominal_thread_overlap_mm':s['flange_thickness']+s['barrel_height'],
+        'stud_protrusion_above_mount_mm':s['stud_length']-s['flange_thickness']-s['barrel_height'],
+        'pilot_remaining_wood_mm':p['wall']-s['pilot_depth_assumption'],
+        'collisions':hits,'installation_released':False,
+        'note':'螺纹为名义圆柱，啮合是包络重叠长度；底盘贴板及橡胶贴底盘为理想接触，未验证真实密封或承载'}
+
 
 def check_ac_inlet(doc,p):
     opening, bolts, expected, wiring = inlet_installation(p)
@@ -279,6 +327,9 @@ def check_acoustics(doc,p,reserved):
                                  V(px,D-port['flange_thickness'],pz),V(0,1,0)))
     walls=[obj(n) for n in ['SideLeft','SideRight','Bottom','Back','Baffle','AcousticRoof',
                            'AcousticRear','AcousticDividerLeft','AcousticDividerRight','BearingPocket']]
+    # Purchased assemblies close the new panel openings in the nominal CAD.
+    # Do not cap missing mounts: a real saved-geometry leak must still fail.
+    walls.extend(o.Shape for o in doc.Feet.Group)
     barrier=walls[0].multiFuse(walls[1:]+caps)
     # The outside remains connected; closed acoustic voids form separate solids.
     region=Part.makeBox(W+4,D+4,H+4,V(-2,-2,-2))
@@ -299,7 +350,7 @@ def check_acoustics(doc,p,reserved):
         sealed=len(set(indices))==3 and all(air.Solids[i].BoundBox.XMin>0 and
             air.Solids[i].BoundBox.YMin>0 and air.Solids[i].BoundBox.ZMin>0 for i in indices)
     checks={'three_independent_enclosed_chambers':sealed}
-    metrics={'volume_basis':'保存实体封闭性检测；仅临时封住设计的扬声器及倒相口。净容积扣除所有已建模占用，扬声器与变压器采用实心安装包络，倒相管扣除整个外廓；重叠占用只扣一次。未计尚未建模的吸音材料、支柱、密封件及线缆。',
+    metrics={'volume_basis':'保存实体封闭性检测；仅临时封住设计的扬声器及倒相口。脚座穿板由保存的脚垫与固定座理想接触封闭，不代表实物气密。净容积扣除所有已建模占用，扬声器与变压器采用实心安装包络，倒相管扣除整个外廓；重叠占用只扣一次。未计尚未建模的吸音材料、支柱、密封件及线缆。',
              'acoustic_performance_verified':False,'chambers':{},'port_inner_diameter_mm':port['inner_diameter'],
              'port_length_mm':port['length'],'port_trial_lengths_mm':port['trial_lengths']}
     port_outer=Part.makeCylinder(outer_r,port['length'],V(px,D-port['length'],pz),V(0,1,0))

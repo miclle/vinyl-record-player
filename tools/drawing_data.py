@@ -12,6 +12,7 @@ from pathlib import Path
 import FreeCAD as App
 import Part
 import TechDraw
+from feet import positions as foot_positions
 
 ROOT = Path(__file__).resolve().parents[1]
 V = App.Vector
@@ -99,6 +100,10 @@ def collect(root=ROOT, project=True):
                         hx,hy=(spec['center_x'],spec['center_y']) if spec else (p['platter_x'],p['platter_y'])
                         diameter=spec['cutout_diameter'] if spec else (28 if name=='AcousticRoof' else 20.4)
                         holes.append({'u_mm':hx-pos[0],'v_mm':hy-pos[1],'label':f'Ø{diameter:g}'})
+                        if name == 'Bottom':
+                            for fx, fy in foot_positions(p):
+                                holes.append({'u_mm':fx-pos[0], 'v_mm':fy-pos[1],
+                                              'label':f"Ø{p['feet']['panel_hole_diameter_assumption']:g} 暂估"})
                     elif name=='Back':
                         holes.append({'u_mm':p['bass_port']['center_x']-pos[0],
                                       'v_mm':p['bass_port']['center_z']-pos[2],
@@ -127,6 +132,11 @@ def collect(root=ROOT, project=True):
             def hole(x,y): return f'孔中心局部坐标 ({f(x)}, {f(y)})；基准为该板左前下角。'
             add('SideLeft',1,t,['长边沿 Y，板高沿 Z；两侧板同形，数量 2。'],['SideRight'])
             add('Bottom',1,t,[f"通孔 Ø{f(p['woofer']['cutout_diameter'])}（暂定低音开孔）。",hole(p['woofer']['center_x']-t,p['woofer']['center_y'])])
+            fs=p['feet']
+            cards[-1]['notes'] += [
+                f"脚座中心局部 X={f(fs['side_inset']-t)}/{f(W-fs['side_inset']-t)}；Y={f(fs['front_y'])}/{f(D-fs['rear_inset'])}。",
+                f"每处中心通孔 Ø{f(fs['panel_hole_diameter_assumption'])}；底面3×Ø{f(fs['pilot_diameter_assumption'])} 盲预孔深{f(fs['pilot_depth_assumption'])}，余木{f(t-fs['pilot_depth_assumption'])}。",
+                f"预孔分布圆 Ø{f(fs['mount_pitch_circle_assumption'])}，从 +X 起0°/120°/240°；全部脚座板孔尺寸为安装假设。"]
             add('Back',1,t,[f"通孔 Ø{f(p['bass_port']['inner_diameter']+2*p['bass_port']['wall_thickness'])}；后侧沉台 Ø{f(p['bass_port']['flange_diameter'])}，深 {f(p['bass_port']['flange_thickness'])}。",f"孔中心：距左边 {f(p['bass_port']['center_x']-t)}，距下边 {f(p['bass_port']['center_z']-zlo)}。"])
             inlet=p['ac_inlet']
             cards[-1]['notes'] += [
@@ -145,7 +155,14 @@ def collect(root=ROOT, project=True):
             add('DustCover',1,p['cover_wall'],['五面空心罩，底面开口；厚度适用于顶面和四侧。','本图为成形外廓，不是热弯展开图；弯曲半径、拼接未定义。'])
             add('HingeBase0',1,None,['实心安装座占位；材料壁厚及安装孔未定义。'],['HingeBase1'])
             add('HingePin0',1,None,['实心轴 Ø6 × 22；轴线沿 X，壁厚不适用。'],['HingePin1'])
-            add('Foot0',1,None,['总高 26；上圆柱 Ø30 × 19；下锥台高 7、底径 Ø22。','实心弹性脚垫占位，壁厚不适用。'],['Foot1','Foot2','Foot3'])
+            add('Foot0',1,None,[
+                f"VE橡胶 Ø{f(fs['rubber_diameter'])}×{f(fs['rubber_height'])}；M{f(fs['stud_diameter'])} 外露{f(fs['stud_length'])}，总高{f(fs['rubber_height']+fs['stud_length'])}。",
+                f"未压缩离地高{f(p['foot_height'])}；低音最低点{f(p['foot_height']-p['woofer']['flange_thickness'])}（低于原20试验目标）。",
+                '商家图尺寸，螺纹光杆示意；硬度、承载与隔振待测。'],['Foot1','Foot2','Foot3'])
+            add('FootMount0',1,None,[
+                f"底盘 Ø{f(fs['flange_diameter'])}×{f(fs['flange_thickness'])}；圆柱 Ø{f(fs['barrel_diameter'])}×{f(fs['barrel_height'])}；总高{f(fs['flange_thickness']+fs['barrel_height'])}。",
+                f"M{f(fs['stud_diameter'])} 通孔示意；3×Ø{f(fs['mount_hole_diameter'])} 孔，分布圆 Ø{f(fs['mount_pitch_circle_assumption'])} 暂估。",
+                '底盘贴底板下表面、圆柱朝上穿板；有效螺纹、木螺钉、密封待实测。'],['FootMount1','FootMount2','FootMount3'])
             ac=p['acoustic']
             add('Baffle',2,ac['baffle_thickness'],[f'后倾 {f(90-p["front_angle"])}°；法向板厚 {f(ac["baffle_thickness"])}；Y 向厚度 {f(ac["baffle_thickness"]/sin)}。',f'上下两边修 {f(90-p["front_angle"])}° 斜口至安装竖高 {f(ac["roof_bottom_z"]-zlo)}；前表面斜长 {f((ac["roof_bottom_z"]-zlo)/sin)}。',f'2 × Ø{f(p["fullrange"]["cutout_diameter"])} 法向孔；中心 X={" / ".join(f(x) for x in p["fullrange"]["center_x"])}，Z={f(p["fullrange"]["center_z"])}（整机坐标）。','正视孔为椭圆；固定螺孔未知。'])
             add('AcousticRoof',2,ac['roof_thickness'],[f'前横板进深 {f(ac["satellite_rear_y"]+ac["partition_thickness"])}；中央后伸部宽 {f(p["acoustic_divider_x"][1]+ac["partition_thickness"]-p["acoustic_divider_x"][0])}。',f'后伸部左缘 X={f(p["acoustic_divider_x"][0])}；后缘 Y={f(D-t)}。',f'轴承孔 Ø28；中心 X={f(p["platter_x"])}, Y={f(p["platter_y"])}（整机坐标）。'])

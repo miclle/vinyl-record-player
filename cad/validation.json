@@ -1,5 +1,5 @@
 {
-  "revision": "v0.6-ac-inlet",
+  "revision": "v0.7-purchased-feet",
   "freecad": "1.1.1",
   "checks": {
     "build_parameters_match": true,
@@ -26,6 +26,10 @@
     "ac_inlet_envelope_clear": true,
     "ac_inlet_wiring_space_clear": true,
     "ac_inlet_flange_supported": true,
+    "feet_parts_match": true,
+    "feet_bottom_cutouts_match": true,
+    "feet_installation_clear": true,
+    "feet_flanges_supported": true,
     "wood_panel_normal_thickness_matches": true,
     "integer_wood_stock_contains_finished_panels": true,
     "rectangular_slats_pitch_and_clearance": true,
@@ -34,7 +38,7 @@
     "bass_port_solid_clear": true,
     "bass_port_air_path_clear": true,
     "bass_port_connects_only_woofer": true,
-    "woofer_floor_clearance": true,
+    "woofer_floor_clearance_matches_installation": true,
     "step_valid": true,
     "step_solid_count": true,
     "no_group_duplicates_in_step": true,
@@ -42,12 +46,12 @@
     "step_bounds": true
   },
   "metrics": {
-    "part_count": 64,
-    "solid_count": 75,
+    "part_count": 68,
+    "solid_count": 79,
     "overall_mm": [
       450.0,
       351.88,
-      214.2
+      210.7
     ],
     "driver_reservations_mm": {
       "TweeterLeft": {
@@ -78,12 +82,12 @@
     "driver_local_bounds_mm": {
       "TweeterLeft": [
         78.0,
-        78.0,
+        78.00000000000003,
         40.00000000000001
       ],
       "TweeterRight": [
         78.0,
-        78.0,
+        78.00000000000003,
         40.00000000000001
       ],
       "Woofer": [
@@ -129,7 +133,7 @@
     "ac_inlet": {
       "center_xz_mm": [
         70.0,
-        108.0
+        104.5
       ],
       "cutout_width_height_radius_mm": [
         48.0,
@@ -139,11 +143,11 @@
       "bolt_centers_xz_mm": [
         [
           70.0,
-          88.0
+          84.5
         ],
         [
           70.0,
-          128.0
+          124.5
         ]
       ],
       "collisions": [],
@@ -158,13 +162,98 @@
       "electrical_released": false,
       "installation_released": false
     },
+    "feet": {
+      "centers_xy_mm": [
+        [
+          33.0,
+          40.0
+        ],
+        [
+          417.0,
+          40.0
+        ],
+        [
+          33.0,
+          320.0
+        ],
+        [
+          417.0,
+          320.0
+        ]
+      ],
+      "mount_pilot_centers_xy_mm": [
+        [
+          [
+            47.0,
+            40.0
+          ],
+          [
+            26.000000000000004,
+            52.124355652982146
+          ],
+          [
+            25.999999999999993,
+            27.87564434701786
+          ]
+        ],
+        [
+          [
+            431.0,
+            40.0
+          ],
+          [
+            410.0,
+            52.124355652982146
+          ],
+          [
+            410.0,
+            27.87564434701786
+          ]
+        ],
+        [
+          [
+            47.0,
+            320.0
+          ],
+          [
+            26.000000000000004,
+            332.12435565298216
+          ],
+          [
+            25.999999999999993,
+            307.87564434701784
+          ]
+        ],
+        [
+          [
+            431.0,
+            320.0
+          ],
+          [
+            410.0,
+            332.12435565298216
+          ],
+          [
+            410.0,
+            307.87564434701784
+          ]
+        ]
+      ],
+      "nominal_uncompressed_floor_height_mm": 22.5,
+      "nominal_thread_overlap_mm": 17.0,
+      "stud_protrusion_above_mount_mm": 6.0,
+      "pilot_remaining_wood_mm": 4.0,
+      "collisions": [],
+      "installation_released": false,
+      "note": "螺纹为名义圆柱，啮合是包络重叠长度；底盘贴板及橡胶贴底盘为理想接触，未验证真实密封或承载"
+    },
     "woodworking": {
       "SideLeft": {
         "finished_local_bounds_mm": [
           [
             350.0,
             124.0,
-            12.000000000000028
+            12.000000000000027
           ]
         ],
         "rectangular_stock_mm": [
@@ -224,7 +313,7 @@
           [
             426.0,
             12.0,
-            8.000000000000004
+            8.000000000000002
           ]
         ],
         "rectangular_stock_mm": [
@@ -238,7 +327,7 @@
         "finished_local_bounds_mm": [
           [
             426.0,
-            97.23095775130732,
+            97.2309577513073,
             8.000000000000007
           ]
         ],
@@ -354,7 +443,7 @@
           [
             426.0,
             7.0,
-            3.0000000000000018
+            3.000000000000002
           ]
         ],
         "rectangular_stock_mm": [
@@ -414,7 +503,7 @@
           [
             426.0,
             7.0,
-            3.0000000000000018
+            3.000000000000002
           ]
         ],
         "rectangular_stock_mm": [
@@ -429,7 +518,7 @@
           [
             426.0,
             7.000000000000014,
-            3.0000000000000018
+            3.000000000000002
           ]
         ],
         "rectangular_stock_mm": [
@@ -458,7 +547,7 @@
         "finished_local_bounds_mm": [
           [
             426.0,
-            7.000000000000014,
+            7.0,
             3.0000000000000044
           ]
         ],
@@ -471,20 +560,20 @@
       }
     },
     "acoustics": {
-      "volume_basis": "保存实体封闭性检测；仅临时封住设计的扬声器及倒相口。净容积扣除所有已建模占用，扬声器与变压器采用实心安装包络，倒相管扣除整个外廓；重叠占用只扣一次。未计尚未建模的吸音材料、支柱、密封件及线缆。",
+      "volume_basis": "保存实体封闭性检测；仅临时封住设计的扬声器及倒相口。脚座穿板由保存的脚垫与固定座理想接触封闭，不代表实物气密。净容积扣除所有已建模占用，扬声器与变压器采用实心安装包络，倒相管扣除整个外廓；重叠占用只扣一次。未计尚未建模的吸音材料、支柱、密封件及线缆。",
       "acoustic_performance_verified": false,
       "chambers": {
         "left": {
-          "gross_after_recess_l": 1.1684816241702058,
-          "conservative_net_l": 1.1320391493885642
+          "gross_after_recess_l": 1.1679892737695354,
+          "conservative_net_l": 1.1315467989878938
         },
         "woofer": {
           "gross_after_recess_l": 4.724552408587847,
           "conservative_net_l": 4.181207675964185
         },
         "right": {
-          "gross_after_recess_l": 1.1684816241702058,
-          "conservative_net_l": 1.132039149388564
+          "gross_after_recess_l": 1.167989273769535,
+          "conservative_net_l": 1.1315467989878936
         }
       },
       "port_inner_diameter_mm": 32.0,
@@ -497,16 +586,18 @@
       "port_collisions": [],
       "port_air_path_obstructions": []
     },
-    "woofer_floor_clearance_mm": 23.0
+    "woofer_floor_clearance_mm": 19.5,
+    "woofer_previous_20mm_trial_target_met": false
   },
   "limitations": [
     "静态 Part 实体由 JSON 驱动重建，原生文件不含自动联动的完整特征历史",
     "音响与唱盘部件为概念包络；声学、隔振、连接工艺及电气均未验证",
-    "214.2 mm 暂作为闭盖总高；原厂测量基准未明确",
+    "原厂 214.2 mm 测量基准未明确；本版按已购脚垫名义高度调整闭盖总高",
+    "脚垫未压缩；脚座孔距、板预孔及密封为安装假设；低音离地19.5 mm，低于此前20 mm试验目标，声学待测",
     "开盖按 0 至 70 度每 5 度抽样检查，非连续运动求解",
     "未对所有零件做全局干涉放行；这里只检查列出的关键部件与外壳",
     "变压器固定耳宽厚为保守占位，孔距未知；未验证散热、磁场、电气或走线"
   ],
-  "requested_revision": "v0.6-ac-inlet",
+  "requested_revision": "v0.7-purchased-feet",
   "passed": true
 }

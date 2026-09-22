@@ -24,7 +24,10 @@ class DrawingPackTests(unittest.TestCase):
         cards = {c['key']: c for c in data['cards']}
         self.assertEqual(data['coverage']['baseline_missing'], [])
         self.assertEqual(data['coverage']['study_missing'], [])
-        self.assertEqual(data['coverage']['baseline_count'], 64)
+        self.assertEqual(data['coverage']['baseline_count'], 68)
+        self.assertEqual(cards['Foot0']['size_mm'], [30.0, 30.0, 43.0])
+        self.assertEqual(cards['FootMount0']['size_mm'], [37.0, 37.0, 17.0])
+        self.assertEqual(len(cards['Bottom']['holes']), 5)
         self.assertEqual(len(cards['Back']['holes']), 4)
         self.assertEqual(cards['ACInlet']['size_mm'], [58.0, 30.66, 49.0])
         self.assertEqual(cards['Bottom']['size_mm'], [426.0, 350.0, 12.0])
