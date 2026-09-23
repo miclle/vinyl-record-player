@@ -6,6 +6,7 @@
     "required_model_fields_present": true,
     "all_shapes_valid": true,
     "overall_matches_parameters": true,
+    "deck_rear_clearance_matches_parameters": true,
     "one_woofer_two_fullrange": true,
     "driver_dimensions_match_parameters": true,
     "driver_geometry_matches_dimensions": true,
@@ -62,6 +63,7 @@
       363.2,
       210.7
     ],
+    "deck_rear_clearance_mm": 2.0,
     "driver_reservations_mm": {
       "TweeterLeft": {
         "role": "fullrange",
@@ -456,13 +458,13 @@
         "finished_local_bounds_mm": [
           [
             418.0,
-            314.0,
+            328.0,
             6.0
           ]
         ],
         "rectangular_stock_mm": [
           418.0,
-          314.0,
+          328.0,
           6.0
         ],
         "quantity": 1

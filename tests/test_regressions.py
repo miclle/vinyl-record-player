@@ -22,6 +22,34 @@ import validate_model
 
 
 class ParameterValidationTests(unittest.TestCase):
+    def test_floating_deck_rear_clearance_survives_export_and_stock_sizing(self):
+        for clearance, depth in [(2.0, 328.0), (7.0, 323.0)]:
+            with self.subTest(clearance=clearance), tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp)
+                (root / 'cad').mkdir()
+                params = json.loads((ROOT / 'cad/parameters.json').read_text())
+                params['deck_rear_clearance'] = clearance
+                (root / 'cad/parameters.json').write_text(json.dumps(params))
+                with patch.object(build_model, 'ROOT', root):
+                    doc, _, _ = build_model.deliver()
+                    App.closeDocument(doc.Name)
+                doc = App.openDocument(str(root / 'cad/lumi-three-driver.FCStd'))
+                try:
+                    deck = doc.FloatingDeck
+                    bounds = deck.Shape.optimalBoundingBox(False)
+                    self.assertAlmostEqual(deck.Shape.distToShape(doc.Back.Shape)[0], clearance)
+                    self.assertAlmostEqual(bounds.YMin, 8.0)
+                    self.assertAlmostEqual(bounds.YLength, depth)
+                    self.assertAlmostEqual(bounds.XLength, 418.0)
+                    self.assertAlmostEqual(bounds.ZLength, 6.0)
+                    self.assertAlmostEqual(float(deck.StockWidth), depth)
+                    for name in ['SideLeft', 'SideRight', 'Back', 'AcousticRoof',
+                                 'PowerTransformer', 'Amplifier', 'ACInlet',
+                                 'HingeBase0', 'HingeBase1', 'HingePin0', 'HingePin1']:
+                        self.assertLess(deck.Shape.common(doc.getObject(name).Shape).Volume, 1e-6, name)
+                finally:
+                    App.closeDocument(doc.Name)
+
     def test_incompatible_model_replaces_success_report_and_closes_document(self):
         missing_neighbors = ['GrilleCloth', 'Fascia', 'LightChannel', 'LightDiffuser']
         cases = ['old_schema', 'missing_property', 'missing_snapshot', 'invalid_snapshot', 'Feet'] + missing_neighbors

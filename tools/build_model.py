@@ -199,7 +199,8 @@ def build():
     add('RearSupport','后部两侧隔振承托梁',support,'Deck',GRAY)
     for i,(x,y) in enumerate([(44,100),(W-44,100),(W/2,295)]):
         cyl('Isolator%d'%i,'弹性支承 %d（刚度待定）'%(i+1),8,8,V(x,y,H-14),'Deck',(0.12,0.15,0.16))
-    deck_shape=Part.makeBox(W-2*t-8,D-t-24,p['deck_thickness'],V(t+4,8,H-p['deck_thickness']))
+    # Rear clearance is an installation assumption, not verified suspension travel.
+    deck_shape=Part.makeBox(W-2*t-8,D-t-8-p['deck_rear_clearance'],p['deck_thickness'],V(t+4,8,H-p['deck_thickness']))
     deck_shape=deck_shape.cut(Part.makeCylinder(10.2,p['deck_thickness']+2,V(p['platter_x'],p['platter_y'],H-p['deck_thickness']-1)))
     deck=add('FloatingDeck','唱盘与唱臂共用浮动底板',deck_shape,'Deck',BLACK,material='结构底板 / 6 mm 占位；主轴孔 Ø20.4 待选型')
     amplifier=p['amplifier']

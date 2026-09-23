@@ -55,7 +55,7 @@ def _validate_document(doc,p):
         'ACInlet': ['Shape','ElectricalReleased','InstallationReleased'],
         'Feet': ['Group'],
     }
-    for name in ['BassPort','BearingPocket','AcousticRoof','AcousticRear','AcousticDividerLeft','AcousticDividerRight','Baffle','Bottom','Back']:
+    for name in ['BassPort','BearingPocket','AcousticRoof','AcousticRear','AcousticDividerLeft','AcousticDividerRight','Baffle','Bottom','Back','FloatingDeck']:
         required[name]=['Shape']
     # Slat clearance checks dereference these neighbors; reject missing parts
     # here so the failure report replaces any previous successful validation.
@@ -94,6 +94,11 @@ def _validate_document(doc,p):
     metrics['overall_mm']=[bb.XLength,bb.YLength,bb.ZLength]
     expected_overall=[p['width'],p['depth']+max(p['ac_inlet']['flange_thickness'],p['hinges']['overall_projection_assumption']),p['closed_height']]
     checks['overall_matches_parameters']=all(abs(v-e)<1e-5 for v,e in zip(metrics['overall_mm'],expected_overall))
+    deck_bounds=doc.FloatingDeck.Shape.optimalBoundingBox(False)
+    back_bounds=doc.Back.Shape.optimalBoundingBox(False)
+    metrics['deck_rear_clearance_mm']=back_bounds.YMin-deck_bounds.YMax
+    checks['deck_rear_clearance_matches_parameters']=(p['deck_rear_clearance']>0 and
+        abs(metrics['deck_rear_clearance_mm']-p['deck_rear_clearance'])<1e-6)
     drivers=[o for o in objects if hasattr(o,'DriverRole')]
     checks['one_woofer_two_fullrange']=len(drivers)==3 and sorted(o.DriverRole for o in drivers)==['fullrange','fullrange','woofer']
     metrics['driver_reservations_mm']={o.Name:{'role':o.DriverRole,'flange_diameter':float(o.FlangeDiameter),'cutout_diameter':float(o.CutoutDiameter),'depth':float(o.ReservedDepth),'total_height':float(o.TotalHeight),'flange_thickness':float(o.FlangeThickness)} for o in drivers}

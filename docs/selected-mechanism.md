@@ -45,6 +45,8 @@
 
 当前核对版继承合页中心 X=100／350 mm、AC 插座中心 Z=88.5 mm 和变压器中心 Y=267 mm；这些位置由基线控制，不在机芯参数中重复定义。详见[合页参数与联动重建](../references/hinges/README.md#参数与重建)。
 
+浮动台面也继承基线的 418 × 328 × 6 mm 尺寸和 2 mm 名义后缝，由 `deck_rear_clearance` 控制。主轴孔、支承位置及台面高度未变；后缝尚未按实物隔振运动验证，见[设计依据](design-basis.md)。
+
 参数入口按部件区分：[基线参数](../cad/parameters.json) 控制外壳、扬声器、变压器、功放及合页安装；[机芯参数](../cad/selected-mechanism.json) 控制弯臂机芯占位及下探假设。
 
 1. 先把手动改动另存。基线参数有变化时，按 [README](../README.md#v09-基线重建) 重建基线并运行 `tools/validate_model.py`；报告必须与刚保存的基线一致。
@@ -61,6 +63,6 @@ PYTHONPATH="${FREECAD_RESOURCES:?请先设置 FreeCAD 运行环境}/lib" \
   "$FREECAD_RESOURCES/bin/python" tools/mechanism_study.py
 ```
 
-该入口生成 CAD 与报告，不刷新 GUI 颜色和预览。`tools/validate_model.py` 的 51 项检查只针对 v0.9 基线，不能用来宣称此款机芯已适配。
+该入口生成 CAD 与报告，不刷新 GUI 颜色和预览。`tools/validate_model.py` 当前的 52 项检查只针对基线，包含台面后缝与参数的一致性检查，不能用来宣称此款机芯已适配。
 
 音响布局详见 [SC-2103 三音腔设计](audio-layout.md)。低音腔向后延伸后，顶板与倒相管仍需按弯臂机芯真实底部重新核对。`BearingPocket` 是基线通用轴承的密封避让杯，在核对版中作为现有结构保留，不代表适配了选定机芯。

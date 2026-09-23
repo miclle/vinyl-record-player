@@ -1,8 +1,8 @@
 {
   "revision": "v0.9-torque-hinges",
   "sources": {
-    "lumi-three-driver.FCStd": "6dba2aa1b95a263c21ee201c0f1db5684da197885e15c8690732cd088d10062f",
-    "lumi-selected-mechanism-fit.FCStd": "ee68cfd99341588dcbd70f2ecc95c0b3b413cdd8d6f30470aa01b8457e527321"
+    "lumi-three-driver.FCStd": "81d51068af41dedd9441c15a46fadac504ad8094132bc3344a52a547fd5f6aef",
+    "lumi-selected-mechanism-fit.FCStd": "b52229e33a256b037cd60afa710bd1f51faf7b3adadc45e2d8f49e161223841b"
   },
   "entries": [
     {
@@ -488,12 +488,12 @@
       ],
       "size_mm": [
         418.0,
-        314.0,
+        328.0,
         6.0
       ],
       "stock_mm": [
         418.0,
-        314.0,
+        328.0,
         6.0
       ]
     },

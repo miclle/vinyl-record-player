@@ -8,6 +8,7 @@
   "cabinet_top": 146.5,
   "wall": 12.0,
   "deck_thickness": 6.0,
+  "deck_rear_clearance": 2.0,
   "cover_wall": 3.0,
   "cover_bottom": 147.5,
   "cover_angle_open": 70.0,
