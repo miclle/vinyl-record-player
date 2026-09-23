@@ -4,6 +4,7 @@ import math
 from pathlib import Path
 import FreeCAD as App
 import Part
+from hinges import check_installation as check_hinges
 from ac_inlet import installation as inlet_installation
 from feet import installation as feet_installation
 from fascia import dimensions as fascia_dimensions, installation as fascia_installation
@@ -26,7 +27,8 @@ def _validate_document(doc,p):
         '原厂 214.2 mm 测量基准未明确；本版按已购脚垫名义高度调整闭盖总高',
         '脚垫未压缩；脚座孔距、板预孔及密封为安装假设；低音离地19.5 mm，低于此前20 mm试验目标，声学待测',
         'T 型铝条按30×30×5总外廓、等厚居中截面建模；端隙、槽隙为假设，根部圆角、胶层及固定件待实测',
-        '开盖按 0 至 70 度每 5 度抽样检查，非连续运动求解',
+        '盖壳每5度、合页活动总成每1度抽样检查至设定开角；非连续运动求解',
+        'HFA5751-3434总厚13.2/12.8存在冲突；轴心、筒节、安装孔与压板为假设；3 N.m为用户提供最大值，非扭矩寿命实测',
         '未对所有零件做全局干涉放行；这里只检查列出的关键部件与外壳',
         '变压器固定耳宽厚为保守占位，孔距未知；未验证散热、磁场、电气或走线'
     ]}
@@ -66,6 +68,10 @@ def _validate_document(doc,p):
     for i in range(4):
         for prefix in ('Foot','FootMount'):
             required[f'{prefix}{i}']=['Shape','InstallationReleased']
+    for i in range(2):
+        for prefix in ('HingeBase','HingePin','HingeSpacer','HingeBacking'):
+            required[f'{prefix}{i}']=['Shape','InstallationReleased']
+    required['DustCover']=['Shape']
     missing=[]
     for name,properties in required.items():
         obj=doc.getObject(name)
@@ -86,7 +92,7 @@ def _validate_document(doc,p):
     compound=Part.makeCompound([o.Shape for o in objects]);bb=compound.BoundBox
     metrics['part_count']=len(objects);metrics['solid_count']=len(compound.Solids)
     metrics['overall_mm']=[bb.XLength,bb.YLength,bb.ZLength]
-    expected_overall=[p['width'],p['depth']+p['ac_inlet']['flange_thickness'],p['closed_height']]
+    expected_overall=[p['width'],p['depth']+max(p['ac_inlet']['flange_thickness'],p['hinges']['overall_projection_assumption']),p['closed_height']]
     checks['overall_matches_parameters']=all(abs(v-e)<1e-5 for v,e in zip(metrics['overall_mm'],expected_overall))
     drivers=[o for o in objects if hasattr(o,'DriverRole')]
     checks['one_woofer_two_fullrange']=len(drivers)==3 and sorted(o.DriverRole for o in drivers)==['fullrange','fullrange','woofer']
@@ -200,6 +206,8 @@ def _validate_document(doc,p):
     checks.update(inlet_checks);metrics['ac_inlet']=inlet_metrics
     feet_checks,feet_metrics=check_feet(doc,p)
     checks.update(feet_checks);metrics['feet']=feet_metrics
+    hinge_checks,hinge_metrics=check_hinges(doc,p)
+    checks.update(hinge_checks);metrics['hinges']=hinge_metrics
     fascia_checks,fascia_metrics=check_fascia(doc,p)
     checks.update(fascia_checks);metrics['fascia']=fascia_metrics
     wood_checks,wood_metrics=check_woodworking(doc,p)

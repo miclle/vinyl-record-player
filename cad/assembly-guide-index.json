@@ -1,8 +1,8 @@
 {
-  "revision": "v0.8-t-fascia",
+  "revision": "v0.9-torque-hinges",
   "sources": {
-    "lumi-three-driver.FCStd": "e8343a970ccaeff9774bdc5ed970262d0e975e1dcebb9936457a3b2a4d8943fd",
-    "lumi-selected-mechanism-fit.FCStd": "891bb1d09d4b817195a827e41784e9ab3ee6ed1e49d0900f63895920f8135798"
+    "lumi-three-driver.FCStd": "6dba2aa1b95a263c21ee201c0f1db5684da197885e15c8690732cd088d10062f",
+    "lumi-selected-mechanism-fit.FCStd": "ee68cfd99341588dcbd70f2ecc95c0b3b413cdd8d6f30470aa01b8457e527321"
   },
   "entries": [
     {
@@ -98,22 +98,27 @@
     {
       "code": "C02",
       "page": 1,
-      "title": "铰链座与铰链轴",
+      "title": "可调定位合页与安装板",
       "ids": [
         "HingeBase0",
-        "HingeBase1",
         "HingePin0",
-        "HingePin1"
+        "HingeSpacer0",
+        "HingeBacking0",
+        "HingeBase1",
+        "HingePin1",
+        "HingeSpacer1",
+        "HingeBacking1"
       ],
-      "quantity": "2 座 + 2 轴",
-      "material": "材质与固定方式待定",
+      "quantity": "2 只 + 2 垫片 + 2 压板",
+      "material": "锌合金合页；铝垫片及压板为安装假设",
       "drawings": [
-        "A-P06"
+        "A-P06",
+        "A-P08"
       ],
       "size_mm": [
-        22.0,
-        9.0,
-        12.0
+        51.0,
+        13.2,
+        34.75
       ]
     },
     {
@@ -727,5 +732,5 @@
     350.0,
     210.7
   ],
-  "physical_object_count": 61
+  "physical_object_count": 65
 }

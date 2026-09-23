@@ -1,5 +1,5 @@
 {
-  "revision": "v0.8-t-fascia",
+  "revision": "v0.9-torque-hinges",
   "freecad": "1.1.1",
   "checks": {
     "build_parameters_match": true,
@@ -30,6 +30,12 @@
     "feet_bottom_cutouts_match": true,
     "feet_installation_clear": true,
     "feet_flanges_supported": true,
+    "hinge_mount_holes_clear": true,
+    "hinge_mount_material_and_blind_depth": true,
+    "hinge_saved_shapes_match": true,
+    "hinge_fixed_neighbors_clear": true,
+    "hinge_cover_assembly_sweep_clear": true,
+    "hinge_installation_unreleased": true,
     "fascia_t_section_matches": true,
     "fascia_neighbors_clear": true,
     "fascia_roof_rebate_and_shelf_match": true,
@@ -49,11 +55,11 @@
     "step_bounds": true
   },
   "metrics": {
-    "part_count": 67,
-    "solid_count": 78,
+    "part_count": 71,
+    "solid_count": 82,
     "overall_mm": [
       450.0,
-      351.88,
+      363.2,
       210.7
     ],
     "driver_reservations_mm": {
@@ -117,7 +123,7 @@
       "RearSupport": 40.0,
       "FloatingDeck": 56.0,
       "Amplifier": 221.0,
-      "PhonoBoard": 27.5
+      "PhonoBoard": 17.5
     },
     "amplifier_envelope_mm": [
       75.0,
@@ -136,7 +142,7 @@
     "ac_inlet": {
       "center_xz_mm": [
         70.0,
-        104.5
+        88.5
       ],
       "cutout_width_height_radius_mm": [
         48.0,
@@ -146,20 +152,20 @@
       "bolt_centers_xz_mm": [
         [
           70.0,
-          84.5
+          68.5
         ],
         [
           70.0,
-          124.5
+          108.5
         ]
       ],
       "collisions": [],
       "wire_reservation_collisions": [],
       "wire_reservation_clearances_mm": {
         "AcousticDividerLeft": 35.0,
-        "RearSupport": 6.0,
-        "FloatingDeck": 22.0,
-        "PowerTransformer": 6.0
+        "RearSupport": 22.0,
+        "FloatingDeck": 38.0,
+        "PowerTransformer": 6.71999999999997
       },
       "wire_clearance_assumption_mm": 20.0,
       "electrical_released": false,
@@ -249,6 +255,22 @@
       "collisions": [],
       "installation_released": false,
       "note": "螺纹为名义圆柱，啮合是包络重叠长度；底盘贴板及橡胶贴底盘为理想接触，未验证真实密封或承载"
+    },
+    "hinges": {
+      "axis_mm": [
+        0.0,
+        356.95,
+        147.0
+      ],
+      "sample_step_degrees": 1,
+      "sample_count": 71,
+      "collisions": [],
+      "fixed_collisions": [],
+      "bare_cover_mass_estimate_kg": 0.8479268785506899,
+      "bare_cover_closed_moment_estimate_nm": 1.5135386608606896,
+      "max_torque_user_reported_nm": 3.0,
+      "torque_scope": "User reports maximum 3 N.m; per-hinge interpretation provisional, range/tolerance/life not verified",
+      "installation_released": false
     },
     "fascia": {
       "length_mm": 425.0,
@@ -602,10 +624,11 @@
     "原厂 214.2 mm 测量基准未明确；本版按已购脚垫名义高度调整闭盖总高",
     "脚垫未压缩；脚座孔距、板预孔及密封为安装假设；低音离地19.5 mm，低于此前20 mm试验目标，声学待测",
     "T 型铝条按30×30×5总外廓、等厚居中截面建模；端隙、槽隙为假设，根部圆角、胶层及固定件待实测",
-    "开盖按 0 至 70 度每 5 度抽样检查，非连续运动求解",
+    "盖壳每5度、合页活动总成每1度抽样检查至设定开角；非连续运动求解",
+    "HFA5751-3434总厚13.2/12.8存在冲突；轴心、筒节、安装孔与压板为假设；3 N.m为用户提供最大值，非扭矩寿命实测",
     "未对所有零件做全局干涉放行；这里只检查列出的关键部件与外壳",
     "变压器固定耳宽厚为保守占位，孔距未知；未验证散热、磁场、电气或走线"
   ],
-  "requested_revision": "v0.8-t-fascia",
+  "requested_revision": "v0.9-torque-hinges",
   "passed": true
 }

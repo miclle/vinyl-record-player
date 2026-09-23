@@ -12,6 +12,7 @@ import FreeCAD as App
 import Part
 from ac_inlet import installation as inlet_installation
 from feet import installation as feet_installation
+from hinges import installation as hinge_installation, dimensions as hinge_dimensions
 from fascia import dimensions as fascia_dimensions, installation as fascia_installation
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -30,6 +31,7 @@ def build():
     W, D, H = p['width'], p['depth'], p['cabinet_top']
     t, z0 = p['wall'], p['foot_height']
     foot_parts = feet_installation(p)
+    hinge_parts = hinge_installation(p)
     fascia_shape, fascia_cuts = fascia_installation(p)
     fd = fascia_dimensions(p)
     a = math.radians(p['front_angle'])
@@ -100,7 +102,10 @@ def build():
     back = back.cut(inlet_opening)
     for bolt in inlet_bolts:
         back = back.cut(bolt)
-    add('Back','后板 · 倒相管沉台与 AC 插座安装孔',back,'Cabinet',WOOD)
+    for part in hinge_parts:
+        for cut in part['wood_cuts']:
+            back = back.cut(cut)
+    add('Back','后板 · 倒相管、AC 与铰链盲预孔',back,'Cabinet',WOOD)
     inlet = add('ACInlet','8 字 AC 插座 · 开关保险一体式安装包络',inlet_shape,'Electronics',BLACK,
                 basis='用户提供 8-F5 商家图；横装开孔 48×28 R3、2×Ø4.5 孔距 40；外形及端子为保守包络',
                 material='采购件占位；接线、绝缘、螺钉及适用板厚待实物确认，未放行通电')
@@ -271,10 +276,20 @@ def build():
     # Closed cover is a five-sided hollow shell, not a solid box.
     cw=p['cover_wall']; cb=p['cover_bottom']; ch=p['closed_height']-cb
     cover=Part.makeBox(W-2*t,D-4,ch,V(t,2,cb)).cut(Part.makeBox(W-2*t-2*cw,D-4-2*cw,ch,V(t+cw,2+cw,cb-cw)))
-    lid=add('DustCover','烟灰透明防尘盖',cover,'Cover',(0.34,0.37,0.39),material='3 mm 亚克力概念壳',transparency=76)
-    for i,x in enumerate([55,W-77]):
-        box('HingeBase%d'%i,'铰链固定座 %d'%(i+1),x,D-13,H-12,22,9,12,'Cover',BLACK)
-        cyl('HingePin%d'%i,'铰链轴 %d'%(i+1),3,22,V(x,D-3,cb),'Cover',GRAY,V(1,0,0))
+    for part in hinge_parts:
+        for cut in part['cover_cuts']:
+            cover = cover.cut(cut)
+    hs=p['hinges']; hd=hinge_dimensions(p)
+    lid=add('DustCover','烟灰透明防尘盖',cover,'Cover',(0.34,0.37,0.39),material=f"{cw:g} mm 亚克力概念壳；4×Ø{hs['cover_hole_diameter_assumption']:g} 铰链孔为安装假设",transparency=76)
+    for i,part in enumerate(hinge_parts):
+        for prefix,key,label,material,color in [
+                ('HingeBase','fixed','定位合页固定叶','锌合金；HFA5751-3434 简化外形',BLACK),
+                ('HingePin','moving','定位合页活动叶及轴筒','锌合金；与固定叶合计 1 只采购合页',BLACK),
+                ('HingeSpacer','spacer','合页上盖补偿垫片',f"{hd['spacer']:g} mm 铝垫片；安装假设",SILVER),
+                ('HingeBacking','backing','亚克力内侧压板',f"{hs['backing_thickness_assumption']:g} mm 铝板；安装假设",SILVER)]:
+            obj=add(f'{prefix}{i}',f'{label} {i+1}',part[key],'Cover',color,
+                    basis='用户选定 HFA5751-3434；57×51、孔距34×34、4×Ø5.2；轴线、外廓细节与安装见 references/hinges',material=material)
+            obj.addProperty('App::PropertyBool','InstallationReleased','Installation').InstallationReleased=False
     for i,part in enumerate(foot_parts):
         foot=add(f'Foot{i}',f'VE 橡胶脚垫与 M8 螺杆 {i+1}',part['foot'],'Feet',BLACK,
                  basis='用户商家图：橡胶 Ø30×20、M8 外露23；螺纹以光杆表示，金属顶片厚度未定义',
@@ -293,7 +308,7 @@ def build():
     stock_specs={
         'SideLeft':(V(1,0,0),t,'矩形板'), 'SideRight':(V(1,0,0),t,'矩形板'),
         'Bottom':(V(0,0,1),t,f"矩形板；低音通孔；4×Ø{p['feet']['panel_hole_diameter_assumption']:g} 脚座通孔、12×Ø{p['feet']['pilot_diameter_assumption']:g} 深{p['feet']['pilot_depth_assumption']:g} 底面盲预孔（安装假设）"),
-        'Back':(V(0,1,0),t,'矩形板；倒相孔及沉台；AC 横孔 48×28 R3、上下 2×Ø4.5 孔距 40'),
+        'Back':(V(0,1,0),t,f"矩形板；倒相孔及沉台；AC 横孔 48×28 R3、上下 2×Ø4.5 孔距 40；4×Ø{p['hinges']['wood_pilot_diameter_assumption']:g} 深{p['hinges']['wood_pilot_depth_assumption']:g} 后侧铰链盲预孔（假设）"),
         'Baffle':(inward,ac['baffle_thickness'],f'整数矩形备料；上下两边修 {90-p["front_angle"]:g}° 斜口至安装竖高 {zhi-zlo:g}；另开法向孔'),
         'AcousticRoof':(V(0,0,1),ac['roof_thickness'],f"T 形板；成形前缘 Y={fd['roof_front']:g}；顶面前缘台阶宽 {fd['rebate_rear']-fd['roof_front']:g}、深 {fd['rebate_depth']:g}、余厚 {fd['remaining_roof']:g}；Ø28 轴承孔"),
         'AcousticRear':(V(0,1,0),pt,'两块独立矩形板'),
@@ -336,7 +351,7 @@ def build():
     info.addProperty('App::PropertyVector','SpindlePoint','Geometry').SpindlePoint=V(cx,cy,H+17.3)
     info.addProperty('App::PropertyVector','PivotPoint','Geometry').PivotPoint=V(pivot.x,pivot.y,H+17.3)
     info.addProperty('App::PropertyVector','StylusPoint','Geometry').StylusPoint=stylus
-    info.addProperty('App::PropertyVector','CoverHinge','Geometry').CoverHinge=V(0,D-3,cb)
+    info.addProperty('App::PropertyVector','CoverHinge','Geometry').CoverHinge=hinge_dimensions(p)['axis']
     doc.recompute()
     with (ROOT/'cad/parts.csv').open('w',newline='',encoding='utf-8-sig') as f:
         writer=csv.writer(f,lineterminator='\n');writer.writerow(['ID','零件','分组','材料说明','尺寸依据','包络X_mm','包络Y_mm','包络Z_mm']);writer.writerows(rows)

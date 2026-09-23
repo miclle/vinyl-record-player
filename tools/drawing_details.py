@@ -3,6 +3,7 @@ import math
 
 import FreeCAD as App
 import Part
+from hinges import dimensions as hinge_dimensions
 from feet import positions as foot_positions
 from fascia import dimensions as fascia_dimensions
 
@@ -15,7 +16,8 @@ def panel_details(doc, p, project_shape, project=True):
     sine = math.sin(math.radians(p['front_angle']))
     specs = [
         ('Bottom', 1, 'A-H01', '底板 / 通孔与底面盲预孔', 'bottom', ('X', 'Y')),
-        ('Back', 1, 'A-H02', '后板 / 倒相孔、沉台与 AC 开孔', 'front', ('X', 'Z')),
+        ('Back', 1, 'A-H02', '后板 / 倒相、AC 与铰链盲预孔', 'front', ('X', 'Z')),
+        ('DustCover', 1, 'A-H03', '防尘盖后壁 / 合页安装孔', 'front', ('X', 'Z')),
         ('Baffle', 2, 'B-H01', '倾斜扬声器障板 / 前表面法向开孔', 'baffle_face', ('X', 'S')),
         ('AcousticRoof', 2, 'B-H02', '音腔顶板 / 轴承孔与前缘台阶', 'top', ('X', 'Y')),
         ('FloatingDeck', 2, 'B-H03', '浮动底板 / 主轴孔', 'top', ('X', 'Y')),
@@ -63,13 +65,32 @@ def panel_details(doc, p, project_shape, project=True):
                 round_hole(f'H{i}', inlet['center_x']-b.XMin,
                            inlet['center_z']+sign*inlet['mount_hole_pitch']/2-b.ZMin,
                            inlet['mount_hole_diameter'])
+            hs=p['hinges']; hd=hinge_dimensions(p)
+            for i,x in enumerate(hs['center_x'],1):
+                for j,sign in enumerate((-1,1),1):
+                    round_hole(f'J{i}.{j}',x+sign*hs['hole_pitch']/2-b.XMin,hd['bottom_hole_z']-b.ZMin,hs['wood_pilot_diameter_assumption'],'blind',hs['wood_pilot_depth_assumption'])
             notes = [
                 '主图从箱内向后看（+X 向右）；O 为后板左下角。后侧沉台以虚线叠画，保持与正面相同坐标，勿镜像孔位。',
                 f"H1 同心沉台：从箱外后侧加工 Ø{port['flange_diameter']:g}，深 {port['flange_thickness']:g}；通孔与沉台轴心相同。",
                 f"H2 横向圆角通孔；H3/H4 上下孔距 {inlet['mount_hole_pitch']:g}。H2 左下角 = ({inlet['center_x']-b.XMin-inlet['cutout_width']/2:g}, {inlet['center_z']-b.ZMin-inlet['cutout_height']/2:g})。",
-                'AC 开孔须先实物试孔；面板紧固、螺钉长度及电气安装未确认。接口板、铰链等未建模安装孔仍待确认。',
+                f"J为箱外后侧铰链盲预孔，深{hs['wood_pilot_depth_assumption']:g}，余木{p['wall']-hs['wood_pilot_depth_assumption']:g}；孔径、深度为安装假设。AC与铰链须实物试装。",
             ]
             size = [b.XLength, b.ZLength]
+        elif key == 'DustCover':
+            hs=p['hinges']; hd=hinge_dimensions(p)
+            for i,x in enumerate(hs['center_x'],1):
+                for j,sign in enumerate((-1,1),1):
+                    round_hole(f'J{i}.{j}',x+sign*hs['hole_pitch']/2-b.XMin,hd['top_hole_z']-b.ZMin,hs['cover_hole_diameter_assumption'])
+            # Isolate the rear wall, so the cover's front/top are not projected as drilling contours.
+            shape=shape.common(Part.makeBox(b.XLength,p['cover_wall'],b.ZLength,V(b.XMin,b.YMax-p['cover_wall'],b.ZMin)))
+            size=[b.XLength,b.ZLength]
+            notes=[
+                '从罩内向后看；O 为后壁左下角；孔仅贯穿后壁，不能贯穿前壁。尺寸为安装假设。',
+                f"每只合页两孔横距{hs['hole_pitch']:g}；孔心距后壁下边{hd['top_hole_z']-b.ZMin:g}。同轴配合外侧{hd['spacer']:g} mm垫片与内侧{hs['backing_thickness_assumption']:g} mm压板。",
+                f"垫片／压板外廓{hs['axis_length']:g}×{hs['plate_height_assumption']:g}，厚度分别为{hd['spacer']:g}/{hs['backing_thickness_assumption']:g}；局部孔心({(hs['axis_length']-hs['hole_pitch'])/2:g},{hs['plate_height_assumption']/2:g})/({(hs['axis_length']+hs['hole_pitch'])/2:g},{hs['plate_height_assumption']/2:g})，见 A-P08。",
+                '保持同轴，勿强行夹紧亚克力；孔边加工与紧固力须试装确认。',
+                'M5仅作拟用螺栓规格；螺栓长度、垫圈、孔隙、孔边加工与紧固力须试装确认。未放行加工。',
+            ]
         elif key == 'Baffle':
             # Only the actual front face: projecting the entire thickness would
             # enlarge the S envelope by the bevel's offset and shift the datum.
@@ -108,7 +129,7 @@ def panel_details(doc, p, project_shape, project=True):
         sheets.append(dict(key=key, code=code, title=title, volume=volume, view=view, axes=axes,
                            size_mm=size, projection=projection, holes=holes, notes=notes,
                            thickness_mm=p['acoustic']['baffle_thickness'] if key == 'Baffle' else
-                           (b.YLength if key == 'Back' else b.ZLength)))
+                           (p['cover_wall'] if key=='DustCover' else b.YLength if key == 'Back' else b.ZLength)))
     return sheets
 
 

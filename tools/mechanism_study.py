@@ -10,6 +10,7 @@ import tempfile
 from pathlib import Path
 import FreeCAD as App
 import Part
+from hinges import moving_names, rotation as hinge_rotation, check_installation
 
 ROOT = Path(__file__).resolve().parents[1]
 V = App.Vector
@@ -114,6 +115,7 @@ def build_study():
             hit = add('Interference' + obj.Name, '包络重叠 · ' + obj.Label, common, (0.90, 0.16, 0.12), True)
             if App.GuiUp:
                 hit.ViewObject.Transparency = 10
+    hinge_checks, hinge_metrics = check_installation(doc, base_parameters)
     upper = Part.makeCompound([o.Shape for o in kit.Group])
     lid = doc.getObject('DustCover').Shape
     lid_overlap = lid.common(upper).Volume
@@ -137,8 +139,10 @@ def build_study():
             'all_shapes_valid': all(o.Shape.isValid() for o in physical),
             'step_valid': exported.isValid(),
             'step_solids_match': len(exported.Solids) == len(expected.Solids),
+            **hinge_checks,
             'step_volume_matches': abs(exported.Volume - expected.Volume) / expected.Volume < 1e-7,
         },
+        'hinges': hinge_metrics,
         'fit': {
             'installation_released': False,
             'dimensions_confirmed': False,
@@ -154,7 +158,7 @@ def build_study():
             'illustrative_cover_clearance_mm': lid.distToShape(upper)[0],
         },
         'limitations': ['尺寸图属于直臂配图，弯臂款尺寸尚未确认', '下探体为保守矩形空间，不是真实机芯轮廓，重叠不代表实物必然碰撞',
-                        '仅检查示意上部的闭盖位置，尚未验证开盖及自动回臂运动', 'STEP 仅导出装配示意，包络及红色干涉体保留在 FCStd'],
+                        '合页及盖总成对示意机芯做1度开盖抽样；真实机芯和自动回臂运动未验证', 'STEP 仅导出装配示意，包络及红色干涉体保留在 FCStd'],
     }
     (ROOT / 'cad/mechanism-fit-report.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
     return doc, cfg, report
@@ -172,13 +176,13 @@ def render_study(doc, cfg):
         view.fitAll()
         Gui.updateGui()
         view.saveImage(str(ROOT / 'previews' / name), 1600, 1200, 'White')
-    lid = doc.getObject('DustCover')
-    original = lid.Placement
-    bounds = lid.Shape.optimalBoundingBox(False)
-    lid.Placement = App.Placement(V(), App.Rotation(V(1, 0, 0), -70), V(0, bounds.YMax - 1, bounds.ZMin))
+    p=json.loads((ROOT/'cad/parameters.json').read_text())
+    originals={name:doc.getObject(name).Placement for name in moving_names()}
+    for name,original in originals.items():
+        doc.getObject(name).Placement=hinge_rotation(p,p['cover_angle_open']).multiply(original)
     doc.recompute()
     save('selected-mechanism-open.png')
-    lid.Placement = original
+    for name,original in originals.items():doc.getObject(name).Placement=original
     for name in ['Cover', 'SelectedKit', 'Controls', 'Front', 'Deck']:
         for obj in doc.getObject(name).Group:
             obj.ViewObject.Visibility = False

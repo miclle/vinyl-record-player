@@ -35,7 +35,7 @@ class PDFProjectionTests(unittest.TestCase):
                                    '--data', str(data), '--output', tmp, '--font', str(font)],
                                   check=True, capture_output=True, text=True)
             summaries=json.loads(result.stdout)
-            self.assertEqual([s['pages'] for s in summaries], [15,11,14])
+            self.assertEqual([s['pages'] for s in summaries], [17,11,14])
             for prefix,summary in zip('ABC',summaries):
                 pdf=PdfReader(Path(tmp)/summary['file'])
                 self.assertEqual(len(pdf.pages),summary['pages'])

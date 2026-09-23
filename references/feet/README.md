@@ -65,7 +65,7 @@
 
 ## 参数与重建
 
-修改 `cad/parameters.json` 的 `feet` 对象后，按[基线重建](../../README.md#v07-基线重建)生成并验证，再重建机芯核对版、图册和导览。保存实体不会自动响应 JSON 修改。
+修改 `cad/parameters.json` 的 `feet` 对象后，按[基线重建](../../README.md#v09-基线重建)生成并验证，再重建机芯核对版、图册和导览。保存实体不会自动响应 JSON 修改。
 
 - `rubber_*`、`stud_*`、`flange_*`、`barrel_*` 和 `mount_hole_diameter` 记录名义零件尺寸；带 `_assumption` 后缀的孔距、板孔和预孔参数为安装假设。
 - `side_inset`、`front_y`、`rear_inset` 控制脚位；右侧 X 与后排 Y 分别由箱宽、箱深减去边距得到。固定孔的三个角度当前由代码固定为 0°／120°／240°。

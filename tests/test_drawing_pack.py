@@ -14,6 +14,56 @@ sys.path.insert(0, str(ROOT / 'tools'))
 
 
 class DrawingPackTests(unittest.TestCase):
+    def test_nondefault_hinge_notes_match_saved_geometry_and_hole_sheets(self):
+        from unittest.mock import patch
+        import build_model
+        import mechanism_study
+        import drawing_data
+        import Part
+
+        p=json.loads((ROOT/'cad/parameters.json').read_text())
+        p['hinges'].update(wood_pilot_depth_assumption=7,
+                           wood_pilot_diameter_assumption=3.2,
+                           backing_thickness_assumption=3,
+                           plate_height_assumption=20,
+                           cover_hole_diameter_assumption=5.8)
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp); (root/'cad').mkdir()
+            (root/'cad/parameters.json').write_text(json.dumps(p))
+            shutil.copy2(ROOT/'cad/selected-mechanism.json',root/'cad/selected-mechanism.json')
+            with patch.object(build_model,'ROOT',root):
+                doc,_,_=build_model.deliver()
+            App.closeDocument(doc.Name)
+            saved=App.openDocument(str(root/'cad/lumi-three-driver.FCStd'))
+            try:
+                self.assertEqual(saved.HingeBacking0.Shape.optimalBoundingBox(False).YLength,3)
+                self.assertEqual(saved.HingeBacking0.Shape.optimalBoundingBox(False).ZLength,20)
+                self.assertIn('3 mm 铝板',saved.HingeBacking0.MaterialNote)
+                self.assertIn('Ø5.8',saved.DustCover.MaterialNote)
+                # The new pilot ends at Y=343 and retains wood in front of it.
+                probe=Part.makeCylinder(1.59,6.98,App.Vector(83,343.01,130),App.Vector(0,1,0))
+                self.assertLess(saved.Back.Shape.common(probe).Volume,1e-6)
+                self.assertTrue(saved.Back.Shape.isInside(App.Vector(83,342.8,130),1e-6,False))
+            finally:
+                App.closeDocument(saved.Name)
+            with patch.object(mechanism_study,'ROOT',root):
+                study,_,_=mechanism_study.build_study()
+            App.closeDocument(study.Name)
+            data=drawing_data.collect(root,project=False)
+        cards={c['key']:c for c in data['cards']}
+        sheets={s['key']:s for s in data['hole_sheets']}
+        self.assertIn('4×Ø3.2 深7', ' '.join(cards['Back']['notes']))
+        self.assertIn('保留5 mm木厚', ' '.join(cards['Back']['notes']))
+        self.assertIn('3 mm内压板', ' '.join(cards['HingePin0']['notes']))
+        self.assertEqual(cards['HingeBacking0']['thickness_mm'],3)
+        self.assertEqual({h['depth_mm'] for h in sheets['Back']['holes'] if h['id'].startswith('J')},{7})
+        self.assertEqual({h['diameter_mm'] for h in sheets['DustCover']['holes']},{5.8})
+        notes=' '.join(sheets['DustCover']['notes'])
+        self.assertIn('内侧3 mm压板',notes)
+        self.assertIn('外廓51×20',notes)
+        self.assertIn('厚度分别为2/3',notes)
+        self.assertIn('(8.5,10)/(42.5,10)',notes)
+
     def test_saved_geometry_coverage_split_panels_and_slope_thickness(self):
         spec = importlib.util.find_spec('drawing_data')
         self.assertIsNotNone(spec, 'drawing_data exporter is not implemented')
@@ -24,7 +74,7 @@ class DrawingPackTests(unittest.TestCase):
         cards = {c['key']: c for c in data['cards']}
         self.assertEqual(data['coverage']['baseline_missing'], [])
         self.assertEqual(data['coverage']['study_missing'], [])
-        self.assertEqual(data['coverage']['baseline_count'], 67)
+        self.assertEqual(data['coverage']['baseline_count'], 71)
         self.assertNotIn('LowerRail', cards)
         self.assertEqual(cards['GrilleCloth']['drawing_code'], 'A-P03')
         self.assertEqual(cards['GrilleCloth']['drawing_column'], 1)
@@ -58,7 +108,7 @@ class DrawingPackTests(unittest.TestCase):
         data = drawing_data.collect(ROOT, project=False)
         self.assertIn('hole_sheets', data)
         sheets = {s['key']: s for s in data['hole_sheets']}
-        self.assertEqual(set(sheets), {'Bottom', 'Back', 'Baffle', 'AcousticRoof', 'FloatingDeck'})
+        self.assertEqual(set(sheets), {'Bottom', 'Back', 'Baffle', 'AcousticRoof', 'FloatingDeck', 'DustCover'})
         bottom = sheets['Bottom']
         self.assertEqual(len(bottom['holes']), 17)
         pilots = [h for h in bottom['holes'] if h['kind'] == 'blind']
@@ -75,7 +125,7 @@ class DrawingPackTests(unittest.TestCase):
         port = next(h for h in back if h['id'] == 'H1')
         self.assertEqual((port['u_mm'], port['v_mm']), (276, 68))
         self.assertEqual(port['recess'], {'diameter_mm': 48, 'depth_mm': 3, 'face': '后侧'})
-        self.assertEqual([(h['u_mm'], h['v_mm']) for h in back[2:]], [(58, 50), (58, 90)])
+        self.assertEqual([(h['u_mm'], h['v_mm']) for h in back[2:4]], [(58, 34), (58, 74)])
         self.assertEqual(sheets['AcousticRoof']['holes'][0]['u_mm'], 164)
         self.assertAlmostEqual(sheets['AcousticRoof']['holes'][0]['v_mm'], 166.8)
         self.assertIn('余厚 4.3',' '.join(sheets['AcousticRoof']['notes']))

@@ -1,7 +1,7 @@
 {
   "revision": "v0.3-fit-study",
   "selected_option": "28高端弯臂机芯全套餐装好直接用 自动回臂",
-  "base_sha256": "e8343a970ccaeff9774bdc5ed970262d0e975e1dcebb9936457a3b2a4d8943fd",
+  "base_sha256": "6dba2aa1b95a263c21ee201c0f1db5684da197885e15c8690732cd088d10062f",
   "assumptions": {
     "revision": "v0.3-fit-study",
     "selected_option": "28高端弯臂机芯全套餐装好直接用 自动回臂",
@@ -23,7 +23,29 @@
     "all_shapes_valid": true,
     "step_valid": true,
     "step_solids_match": true,
+    "hinge_mount_holes_clear": true,
+    "hinge_mount_material_and_blind_depth": true,
+    "hinge_saved_shapes_match": true,
+    "hinge_fixed_neighbors_clear": true,
+    "hinge_cover_assembly_sweep_clear": true,
+    "hinge_installation_unreleased": true,
     "step_volume_matches": true
+  },
+  "hinges": {
+    "axis_mm": [
+      0.0,
+      356.95,
+      147.0
+    ],
+    "sample_step_degrees": 1,
+    "sample_count": 71,
+    "collisions": [],
+    "fixed_collisions": [],
+    "bare_cover_mass_estimate_kg": 0.8479268785506899,
+    "bare_cover_closed_moment_estimate_nm": 1.5135386608606896,
+    "max_torque_user_reported_nm": 3.0,
+    "torque_scope": "User reports maximum 3 N.m; per-hinge interpretation provisional, range/tolerance/life not verified",
+    "installation_released": false
   },
   "fit": {
     "installation_released": false,
@@ -126,7 +148,7 @@
   "limitations": [
     "尺寸图属于直臂配图，弯臂款尺寸尚未确认",
     "下探体为保守矩形空间，不是真实机芯轮廓，重叠不代表实物必然碰撞",
-    "仅检查示意上部的闭盖位置，尚未验证开盖及自动回臂运动",
+    "合页及盖总成对示意机芯做1度开盖抽样；真实机芯和自动回臂运动未验证",
     "STEP 仅导出装配示意，包络及红色干涉体保留在 FCStd"
   ]
 }

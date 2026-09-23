@@ -141,7 +141,7 @@ class Guide:
         self.legend(1, 391, 58, 185, 21)
         dims = ' × '.join(number(n) for n in self.data['nominal_cabinet_mm'])
         self.text(47, 372, '木箱与闭盖名义外廓  '+dims+' mm', 11)
-        self.text(47, 380, 'AC 插座法兰超出后板；精确装配外廓见 A-01。机芯外观与安装尺寸仍待确认。', 9, MUTED)
+        self.text(47, 380, '合页与 AC 插座法兰超出后板；含合页外廓见 A-01。机芯安装尺寸仍待确认。', 9, MUTED)
         self.text(47, 390, '读图路径：定位编号 → 查看材料与数量 → 按 A / B / C 图号查尺寸。', 9, MUTED)
         self.c.showPage()
 

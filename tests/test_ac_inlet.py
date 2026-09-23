@@ -30,30 +30,30 @@ class ACInletTests(unittest.TestCase):
 
     def test_rear_has_rounded_slot_and_two_through_bolt_holes(self):
         back = self.doc.Back.Shape
-        # Cabinet translated down 3.5 mm for the purchased feet; panel-local holes unchanged.
-        for x, z in [(70, 104.5), (47, 104.5), (93, 104.5), (70, 91.5),
-                     (70, 117.5), (70, 84.5), (70, 124.5)]:
+        # Inlet lowered 16 mm to clear the symmetric hinge installation.
+        for x, z in [(70, 88.5), (47, 88.5), (93, 88.5), (70, 75.5),
+                     (70, 101.5), (70, 68.5), (70, 108.5)]:
             with self.subTest(x=x, z=z):
                 probe = Part.makeCylinder(0.1, 12, App.Vector(x, 338, z), App.Vector(0, 1, 0))
                 self.assertLess(back.common(probe).Volume, 1e-6)
         # R3 must retain wood in the corner, and material between slot and bolts.
-        for x, z in [(46.1, 90.6), (70, 87.5), (70, 121.5)]:
+        for x, z in [(46.1, 74.6), (70, 71.5), (70, 105.5)]:
             self.assertTrue(back.isInside(App.Vector(x, 344, z), 1e-6, False))
         blank_volume = 426 * 12 * 112
         port_volume = math.pi * 18**2 * 9 + math.pi * 24**2 * 3
         slot_area = 48 * 28 - (4 - math.pi) * 3**2
         removed = 12 * (slot_area + 2 * math.pi * 2.25**2)
-        self.assertAlmostEqual(back.Volume, blank_volume - port_volume - removed, places=5)
+        self.assertAlmostEqual(back.Volume, blank_volume - port_volume - removed - 4*math.pi*1.5**2*8, places=5)
 
     def test_fit_checks_reject_blocked_wiring_space_and_filled_slot(self):
         self.assertIsNotNone(self.doc.getObject('ACInlet'))
         checks, metrics = validate_model.check_ac_inlet(self.doc, self.p)
         self.assertTrue(all(checks.values()), (checks, metrics))
         obstacle = self.doc.addObject('Part::Feature', 'TestObstruction')
-        obstacle.Shape = Part.makeBox(10, 5, 10, App.Vector(65, 305, 102))
+        obstacle.Shape = Part.makeBox(10, 5, 10, App.Vector(65, 305, 86))
         checks, _ = validate_model.check_ac_inlet(self.doc, self.p)
         self.assertFalse(checks['ac_inlet_wiring_space_clear'])
         self.doc.Back.Shape = self.doc.Back.Shape.fuse(
-            Part.makeBox(10, 12, 10, App.Vector(65, 338, 103)))
+            Part.makeBox(10, 12, 10, App.Vector(65, 338, 87)))
         checks, _ = validate_model.check_ac_inlet(self.doc, self.p)
         self.assertFalse(checks['ac_inlet_panel_cutouts_match'])

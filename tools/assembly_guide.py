@@ -13,6 +13,7 @@ from pathlib import Path
 import FreeCAD as App
 import Part
 import drawing_data
+from hinges import moving_names, rotation as hinge_rotation
 
 ROOT = Path(__file__).resolve().parents[1]
 V = App.Vector
@@ -24,7 +25,7 @@ CATALOG = [
     ('W02', 1, '横向木格栅', [f'Slat{i:02}' for i in range(1, 9)], '8 条', '木饰条；木种待定'),
     ('F01', 1, '前沿银色 T 型铝饰条', ['Fascia'], '1 件', '铝合金 T 型材；固定待实测'),
     ('C01', 1, '透明防尘盖', ['DustCover'], '1 件', '烟灰亚克力；壁厚为暂估'),
-    ('C02', 1, '铰链座与铰链轴', ['HingeBase0', 'HingeBase1', 'HingePin0', 'HingePin1'], '2 座 + 2 轴', '材质与固定方式待定'),
+    ('C02', 1, '可调定位合页与安装板', [f'{prefix}{i}' for i in range(2) for prefix in ('HingeBase','HingePin','HingeSpacer','HingeBacking')], '2 只 + 2 垫片 + 2 压板', '锌合金合页；铝垫片及压板为安装假设'),
     ('C03', 1, '脚垫与固定座', [f'Foot{i}' for i in range(4)]+[f'FootMount{i}' for i in range(4)], '4 套', '已购橡胶脚垫与镀黑锌座；安装孔距暂估'),
     ('K01', 1, '一体机芯基座', ['KitBase'], '1 件', '采购机芯外观占位；材质待确认'),
     ('K02', 1, '唱盘与表面环纹', ['KitPlatter', 'KitMatRings'], '1 盘 + 4 道环纹', '环纹是外观示意，不代表独立唱片垫'),
@@ -96,7 +97,7 @@ def overview_targets(entries):
     overview.update({'W01': ('SideRight', (1, 0.3, 0.5)),
                      'W02': (slats[(len(slats)-1)//2], (0.22, 0.0, 0.6)),
                      'C01': ('DustCover', (0.35, 0.5, 0.65)),
-                     'C02': ('HingeBase1', (0.5, 0.5, 1)),
+                     'C02': ('HingeBacking1', (1, 0, 0.5)),
                      'C03': ('Foot1', (1, 0, 0)),
                      'K01': ('KitBase', (0.93, 0.85, 1)),
                      'K02': ('KitPlatter', (0.33, 0.4, 1)),
@@ -240,8 +241,8 @@ def render(root=ROOT):
                                            'visible_ids': sorted(o.Name for o in physical if o.ViewObject.Visibility)}
 
             reset()
-            b = doc.DustCover.Shape.optimalBoundingBox(False)
-            doc.DustCover.Placement = App.Placement(V(), App.Rotation(V(1, 0, 0), -70), V(0, b.YMax-1, b.ZMin))
+            for name in moving_names():
+                doc.getObject(name).Placement=hinge_rotation(data['parameters'],data['parameters']['cover_angle_open']).multiply(originals[name])
             overview = overview_targets(entries)
             save('overview', rotation, overview)
 
@@ -275,6 +276,7 @@ def render(root=ROOT):
                             'W11': ('FloatingDeck', (0.7, 0.25, 1)),
                             'A01': ('TweeterRight', (0.5, 0, 0.5)),
                             'A03': ('BassPort', (0.5, 0.95, 1)),
+                            'E03': ('PowerTransformer', (0.5, 0.75, 1)),
                             'F02': ('GrilleCloth', (0.45, 0.4, 0.5))})
             save('exploded', rotation, targets)
 

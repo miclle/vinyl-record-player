@@ -3,6 +3,7 @@ from pathlib import Path
 import FreeCAD as App
 import FreeCADGui as Gui
 import Part
+from hinges import moving_names, rotation as hinge_rotation
 
 ROOT=Path(__file__).resolve().parents[1]
 
@@ -21,12 +22,11 @@ def render(doc,p,groups):
         Gui.updateGui()
         view.saveImage(str(ROOT/'previews'/name),1600,1200,'White')
     iso(); save('closed.png')
-    lid=doc.getObject('DustCover')
-    original=lid.Placement
-    hinge=doc.getObject('GeometryDatums').CoverHinge
-    lid.Placement=App.Placement(App.Vector(),App.Rotation(App.Vector(1,0,0),-p['cover_angle_open']),hinge)
+    originals={name:doc.getObject(name).Placement for name in moving_names()}
+    for name,original in originals.items():
+        doc.getObject(name).Placement=hinge_rotation(p,p['cover_angle_open']).multiply(original)
     doc.recompute();iso();save('open.png')
-    lid.Placement=original
+    for name,original in originals.items():doc.getObject(name).Placement=original
     doc.recompute()
     view.setCameraOrientation(App.Rotation(App.Vector(1,0,0),90).Q);view.fitAll();save('front.png')
     view.setCameraOrientation(App.Rotation(App.Vector(0,1,0),App.Vector(0,0,1),App.Vector(1,0,0),'ZXY').Q);view.fitAll();save('right.png')
@@ -55,6 +55,7 @@ def render(doc,p,groups):
     doc.recompute()
     doc.save()
     render_foot_detail(doc)
+    render_hinge_detail(doc,p)
     (ROOT/'cad/render.done').write_text('Rendered closed, open, front, right, bottom, top, rear, internal, audio-layout from FreeCAD viewport.\n')
 
 
@@ -85,6 +86,31 @@ def render_foot_detail(source):
         view.setCameraOrientation(App.Rotation(App.Vector(1,1,0),App.Vector(-1,1,2),App.Vector(1,-1,1),'ZXY').Q)
         view.fitAll();Gui.updateGui()
         view.saveImage(str(ROOT/'previews/feet-installation.png'),1600,1200,'White')
+    finally:
+        App.closeDocument(detail.Name)
+        App.setActiveDocument(source.Name)
+
+
+def render_hinge_detail(source,p):
+    """Read-only close-up of both mounting faces; source placements are untouched."""
+    detail=App.newDocument('HingeInstallationDetail')
+    try:
+        x=p['hinges']['center_x'][0]
+        crop=Part.makeBox(75,45,85,App.Vector(x-37.5,p['depth']-25,p['cabinet_top']-40))
+        for name in ['Back','DustCover','HingeBase0','HingePin0','HingeSpacer0','HingeBacking0']:
+            original=source.getObject(name)
+            obj=detail.addObject('Part::Feature',name)
+            obj.Shape=original.Shape.common(crop)
+            obj.ViewObject.ShapeColor=original.ViewObject.ShapeColor
+            obj.ViewObject.DisplayMode='Flat Lines'
+            obj.ViewObject.Transparency=65 if name=='DustCover' else 0
+        detail.recompute()
+        view=Gui.getDocument(detail.Name).activeView()
+        view.setAnimationEnabled(False)
+        view.setCameraType('Orthographic')
+        view.setCameraOrientation(App.Rotation(App.Vector(1,-1,0),App.Vector(1,1,2),App.Vector(-1,1,1),'ZXY').Q)
+        view.fitAll();Gui.updateGui()
+        view.saveImage(str(ROOT/'previews/hinge-installation.png'),1400,1200,'White')
     finally:
         App.closeDocument(detail.Name)
         App.setActiveDocument(source.Name)

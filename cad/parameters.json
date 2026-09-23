@@ -1,6 +1,6 @@
 {
   "units": "mm",
-  "revision": "v0.8-t-fascia",
+  "revision": "v0.9-torque-hinges",
   "width": 450.0,
   "depth": 350.0,
   "closed_height": 210.7,
@@ -40,7 +40,7 @@
     "mount_span": 88.0,
     "mount_thickness_assumption": 2.0,
     "center_x": 70.0,
-    "center_y": 277.0
+    "center_y": 267.0
   },
   "amplifier": {
     "length": 125.0,
@@ -101,7 +101,7 @@
     "model": "8-F5 C8 inlet + switch + fuse holder",
     "orientation": "horizontal; vendor front drawing rotated 90 degrees",
     "center_x": 70.0,
-    "center_z": 104.5,
+    "center_z": 88.5,
     "cutout_width": 48.0,
     "cutout_height": 28.0,
     "cutout_radius": 3.0,
@@ -150,5 +150,34 @@
     "fit_clearance_assumption": 0.2,
     "installation_released": false,
     "note": "Selected 30 x 30 x 5 aluminium T extrusion, broad face forward and centred web rearward. Total outer dimensions and equal wall thickness assumed from vendor image. End gaps, rebate clearance, root radii, finish and fastening require physical confirmation."
+  },
+  "hinges": {
+    "model": "HFA5751-3434 black",
+    "center_x": [
+      100.0,
+      350.0
+    ],
+    "axis_length": 51.0,
+    "unfolded_height": 57.0,
+    "hole_pitch": 34.0,
+    "hole_diameter": 5.2,
+    "leaf_thickness": 4.5,
+    "overall_projection_assumption": 13.2,
+    "barrel_diameter_assumption": 12.5,
+    "knuckle_gap_assumption": 0.2,
+    "plate_height_assumption": 18.0,
+    "backing_thickness_assumption": 2.0,
+    "cover_hole_diameter_assumption": 5.5,
+    "wood_pilot_diameter_assumption": 3.0,
+    "wood_pilot_depth_assumption": 8.0,
+    "max_torque_user_reported_nm": 3.0,
+    "torque_scope": "User reports maximum 3 N.m; per-hinge interpretation provisional, range/tolerance/life not verified",
+    "initial_torque_target_per_hinge_nm": [
+      1.0,
+      1.2
+    ],
+    "acrylic_density_assumption_g_cm3": 1.18,
+    "installation_released": false,
+    "note": "Two adjustable friction hinges selected by user. 13.2 vs 12.8 mm drawings conflict; use 13.2 conservative projection with assumed barrel/axis. Neck and knuckle outlines simplified. Upper 2 mm spacer compensates rear cover inset; 2 mm aluminium backing plate, M5 clearance and wood pilots are installation assumptions. Fasteners, torque performance and acrylic strength unverified."
   }
 }

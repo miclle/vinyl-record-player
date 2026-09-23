@@ -20,7 +20,7 @@ def hole_sheet_page(book, sheet):
     dw, dh = vw*scale, vh*scale
     bottom = sheet['view']=='bottom'
     book.text(18,39,('底面仰视' if bottom else '前表面法向视图' if sheet['view']=='baffle_face' else
-                    '箱内向后看' if sheet['view']=='front' else '俯视')+
+                    '罩内向后看' if sheet['key']=='DustCover' else '箱内向后看' if sheet['view']=='front' else '俯视')+
               f'  1:{num(1/scale)}  /  板厚 {num(sheet["thickness_mm"])}',10)
     book.projection(sheet['projection'], ox, oy, scale)
     book.hdim(ox, oy-7, dw, f'{sheet["axes"][0]} {num(vw)}', oy)
@@ -39,12 +39,14 @@ def hole_sheet_page(book, sheet):
         book.line(x-1.6,y,x+1.6,y,MUTED)
         book.line(x,y-1.6,x,y+1.6,MUTED)
         identifier=h['id']
-        if h['kind']=='blind':
+        if h['id'].startswith('J'):
+            dx,dy=(-7,-10) if h['id'].endswith('1') else (7,-10)
+        elif h['kind']=='blind':
             dx,dy={1:(6,0),2:(-6,5),3:(-6,-7)}[int(identifier[-1])]
         elif identifier.startswith('F'):
             dx,dy=(5,5) if h['v_mm']<vh/2 else (5,-5)
         elif sheet['key']=='Back':
-            dx,dy={'H1':(16,-15),'H2':(22,-2),'H3':(19,7),'H4':(19,-7)}[identifier]
+            dx,dy={'H1':(16,15),'H2':(22,-2),'H3':(19,7),'H4':(19,-7)}[identifier]
         else:
             dx,dy=12,-12
         book.line(x,y,x+dx,y+dy,DIM)
@@ -61,7 +63,7 @@ def hole_sheet_page(book, sheet):
 
     # Locate sparse holes with explicit baseline dimensions as well as the table.
     if sheet['key']!='Bottom':
-        us=sorted({h['u_mm'] for h in sheet['holes']})
+        us=sorted({h['u_mm'] for h in sheet['holes'] if not h['id'].startswith('J')})
         for i,u in enumerate(us):
             book.hdim(ox,oy+dh+12+i*8,u*scale,num(u),oy+dh)
         dimensioned_holes=sheet['holes'][:2] if sheet['key']=='Back' else sheet['holes']

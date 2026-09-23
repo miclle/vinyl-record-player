@@ -10,7 +10,7 @@
 
 ## 当前 CAD 安装
 
-参数位于 [cad/parameters.json](../../cad/parameters.json) 的 `fascia`；[tools/fascia.py](../../tools/fascia.py) 计算型材和顶板切除体。模型中的 `Fascia`、`AcousticRoof` 都是静态实体，修改参数后按 [README 重建流程](../../README.md#v08-基线重建)先重建并验证基线，再重建机芯核对版、图册和导览。
+参数位于 [cad/parameters.json](../../cad/parameters.json) 的 `fascia`；[tools/fascia.py](../../tools/fascia.py) 计算型材和顶板切除体。模型中的 `Fascia`、`AcousticRoof` 都是静态实体，修改参数后按 [README 重建流程](../../README.md#v09-基线重建)先重建并验证基线，再重建机芯核对版、图册和导览。
 
 `face_height` 为正面高度，`overall_depth` 为从前饰面到筋板后端的总进深，`thickness` 为两部分的共同厚度。`end_gap_assumption` 是每端间隙；`fit_clearance_assumption` 同时用于前饰面背部、筋板后端与筋板下方的名义间隙。台阶深度由顶板高度和居中筋板位置计算，不是独立参数。
 

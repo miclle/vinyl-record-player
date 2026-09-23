@@ -14,6 +14,7 @@ import Part
 import TechDraw
 from feet import positions as foot_positions
 from drawing_details import panel_details, baffle_section
+from hinges import dimensions as hinge_dimensions
 from fascia import dimensions as fascia_dimensions
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -143,9 +144,11 @@ def collect(root=ROOT, project=True):
                 f"预孔分布圆 Ø{f(fs['mount_pitch_circle_assumption'])}，从 +X 起0°/120°/240°；全部脚座板孔尺寸为安装假设。"]
             add('Back',1,t,[f"通孔 Ø{f(p['bass_port']['inner_diameter']+2*p['bass_port']['wall_thickness'])}；后侧沉台 Ø{f(p['bass_port']['flange_diameter'])}，深 {f(p['bass_port']['flange_thickness'])}。",f"孔中心：距左边 {f(p['bass_port']['center_x']-t)}，距下边 {f(p['bass_port']['center_z']-zlo)}。"])
             inlet=p['ac_inlet']
+            hs=p['hinges']; hd=hinge_dimensions(p)
             cards[-1]['notes'] += [
                 f"AC 横装：{f(inlet['cutout_width'])}×{f(inlet['cutout_height'])}，R{f(inlet['cutout_radius'])}；中心局部 X/Z=({f(inlet['center_x']-t)}, {f(inlet['center_z']-zlo)})。",
-                f"2×Ø{f(inlet['mount_hole_diameter'])}，上下孔距 {f(inlet['mount_hole_pitch'])}；先实物试孔，螺钉长度与板厚适配未确认。"]
+                f"2×Ø{f(inlet['mount_hole_diameter'])}，上下孔距 {f(inlet['mount_hole_pitch'])}；先实物试孔，螺钉长度与板厚适配未确认。",
+                f"另有4×Ø{f(hs['wood_pilot_diameter_assumption'])} 深{f(hs['wood_pilot_depth_assumption'])}后侧铰链盲预孔，保留{f(t-hs['wood_pilot_depth_assumption'])} mm木厚；位置见 A-H02（假设）。"]
             add('ACInlet',3,None,[
                 '8-F5 两芯 C8 + 开关 + 保险座；横装，外形和端子按保守包络表示。',
                 f"法兰厚 {f(inlet['flange_thickness'])}；自前表面总深 {f(inlet['total_depth'])}；背后另留 {f(inlet['wire_clearance_assumption'])} 接线空间（暂估）。",
@@ -160,9 +163,9 @@ def collect(root=ROOT, project=True):
             add('Slat01',1,p['slat_thickness'],[f'矩形截面：面宽 {f(p["slat_face_width"])} × 法向厚 {f(p["slat_thickness"])}；整体后倾 {f(90-p["front_angle"])}°。',f'竖向节距 {f(p["slat_pitch"])}；前表面下缘首条 Z={f(zlo+2)}，共 {p["slat_count"]} 条。','尺寸表为倾斜安装包络；直接下料使用上方矩形备料尺寸。'],[f'Slat{i:02}' for i in range(2,p['slat_count']+1)])
             add('LightChannel',1,2,['模型为实心薄块；未建 U 形槽，不能作为型材截面图。'])
             add('LightDiffuser',1,1,['扩散片外廓占位。'])
-            add('DustCover',1,p['cover_wall'],['五面空心罩，底面开口；厚度适用于顶面和四侧。','本图为成形外廓，不是热弯展开图；弯曲半径、拼接未定义。'])
-            add('HingeBase0',1,None,['实心安装座占位；材料壁厚及安装孔未定义。'],['HingeBase1'])
-            add('HingePin0',1,None,['实心轴 Ø6 × 22；轴线沿 X，壁厚不适用。'],['HingePin1'])
+            add('DustCover',1,p['cover_wall'],['五面空心罩，底面开口；厚度适用于顶面和四侧。',f"后壁4×Ø{f(hs['cover_hole_diameter_assumption'])}通孔为安装假设；坐标见 A-H03。",'本图为成形外廓，不是热弯展开图；弯曲半径、拼接未定义。'])
+            add('HingeBase0',1,p['hinges']['leaf_thickness'],['HFA5751-3434 固定叶与两端轴筒；与活动叶合计1只采购合页。',f"展开{f(hs['unfolded_height'])}×{f(hs['axis_length'])}，孔距{f(hs['hole_pitch'])}×{f(hs['hole_pitch'])}，4×Ø{f(hs['hole_diameter'])}。",f"总厚{f(hs['overall_projection_assumption'])}、筒径{f(hs['barrel_diameter_assumption'])}；轴位及筒节细节为假设。",'木板侧盲预孔见 A-H02；紧固与保持扭矩待实测。'],['HingeBase1'])
+            add('HingePin0',1,p['hinges']['leaf_thickness'],['HFA5751-3434 活动叶与中间轴筒；旧轴对象ID保留。',f"沿X转轴；轴线Y={f(hd['axis'].y)}、Z={f(hd['axis'].z)}（安装假设）。",'用户提供最大3 N.m；单只口径暂按假设，范围/寿命待确认。',f"与上盖、{f(hd['spacer'])} mm补偿垫片及{f(hs['backing_thickness_assumption'])} mm内压板同步开合。"],['HingePin1'])
             add('Foot0',1,None,[
                 f"VE橡胶 Ø{f(fs['rubber_diameter'])}×{f(fs['rubber_height'])}；M{f(fs['stud_diameter'])} 外露{f(fs['stud_length'])}，总高{f(fs['rubber_height']+fs['stud_length'])}。",
                 f"未压缩离地高{f(p['foot_height'])}；低音最低点{f(p['foot_height']-p['woofer']['flange_thickness'])}（低于原20试验目标）。",
@@ -171,6 +174,11 @@ def collect(root=ROOT, project=True):
                 f"底盘 Ø{f(fs['flange_diameter'])}×{f(fs['flange_thickness'])}；圆柱 Ø{f(fs['barrel_diameter'])}×{f(fs['barrel_height'])}；总高{f(fs['flange_thickness']+fs['barrel_height'])}。",
                 f"M{f(fs['stud_diameter'])} 通孔示意；3×Ø{f(fs['mount_hole_diameter'])} 孔，分布圆 Ø{f(fs['mount_pitch_circle_assumption'])} 暂估。",
                 '底盘贴底板下表面、圆柱朝上穿板；有效螺纹、木螺钉、密封待实测。'],['FootMount1','FootMount2','FootMount3'])
+            for prefix,label in [('HingeSpacer','上盖外侧补偿垫片'),('HingeBacking','亚克力内侧压板')]:
+                add(prefix+'0',1,hd['spacer'] if prefix=='HingeSpacer' else hs['backing_thickness_assumption'],[label+'；铝板外廓见尺寸表（安装假设）。',
+                    f"2×Ø{f(hs['cover_hole_diameter_assumption'])}，局部X={f((hs['axis_length']-hs['hole_pitch'])/2)}/{f((hs['axis_length']+hs['hole_pitch'])/2)}，Z={f(hs['plate_height_assumption']/2)}。",
+                    f"中心X={'/'.join(f(x) for x in hs['center_x'])}；上孔整机Z={f(hd['top_hole_z'])}，见 A-H03。",
+                    '压紧力、孔边距、隔离垫及螺栓长度待实物试装。'],[prefix+'1'])
             ac=p['acoustic']
             add('Baffle',2,ac['baffle_thickness'],[f'后倾 {f(90-p["front_angle"])}°；法向板厚 {f(ac["baffle_thickness"])}；Y 向厚度 {f(ac["baffle_thickness"]/sin)}。',f'上下两边修 {f(90-p["front_angle"])}° 斜口至安装竖高 {f(ac["roof_bottom_z"]-zlo)}；前表面斜长 {f((ac["roof_bottom_z"]-zlo)/sin)}。',f'2 × Ø{f(p["fullrange"]["cutout_diameter"])} 法向孔；中心 X={" / ".join(f(x) for x in p["fullrange"]["center_x"])}，Z={f(p["fullrange"]["center_z"])}（整机坐标）。','正视孔为椭圆；固定螺孔未知。'])
             add('AcousticRoof',2,ac['roof_thickness'],[f'前横板进深 {f(ac["satellite_rear_y"]+ac["partition_thickness"])}；中央后伸部宽 {f(p["acoustic_divider_x"][1]+ac["partition_thickness"]-p["acoustic_divider_x"][0])}。',f'后伸部左缘 X={f(p["acoustic_divider_x"][0])}；后缘 Y={f(D-t)}。',f'轴承孔 Ø28；中心 X={f(p["platter_x"])}, Y={f(p["platter_y"])}（整机坐标）。'])

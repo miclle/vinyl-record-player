@@ -57,7 +57,7 @@ def create(doc,p):
                 f'<text x="750" y="558" class="note">前格栅后倾 {90-p["front_angle"]:g}° · 木壳厚 {p["wall"]:g}（估算）</text>',
                 '<line x1="60" y1="948" x2="1340" y2="948" stroke="#d8d3cc"/>',
                 f'<text x="60" y="978" class="note">* {H:g} 为当前闭盖总高；原图未明确测量基准。板厚、盖高及内部接口为本项目估算。</text>',
-                f'<text x="60" y="1006" class="note">线稿为机壳基准；深 {D:g} 不含 AC 法兰，含法兰 {D+p["ac_inlet"]["flange_thickness"]:g}。外观 / 空间评审用，非生产加工图。</text>','</svg>'])
+                f'<text x="60" y="1006" class="note">线稿为机壳基准；深 {D:g} 不含后凸合页；含合页总深 {D+p["hinges"]["overall_projection_assumption"]:g}。外观 / 空间评审用，非生产加工图。</text>','</svg>'])
     path=ROOT/'previews/dimensions.svg'
     path.write_text('\n'.join(out))
     from PySide import QtSvg,QtGui,QtCore
