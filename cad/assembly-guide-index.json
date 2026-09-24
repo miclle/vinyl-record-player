@@ -1,7 +1,7 @@
 {
   "revision": "v0.9-torque-hinges",
   "sources": {
-    "record-player.FCStd": "5a4bb9dac783ea440f5490d5570a165a21e94934f8468f65922f22982709a888"
+    "record-player.FCStd": "ae6afc1ea9249650e41f8a0203c66c320479d1ce56c80ad994470c74701d84c1"
   },
   "entries": [
     {
@@ -486,13 +486,13 @@
         "B-P04"
       ],
       "size_mm": [
-        418.0,
-        328.0,
+        422.0,
+        330.0,
         6.0
       ],
       "stock_mm": [
-        418.0,
-        328.0,
+        422.0,
+        330.0,
         6.0
       ]
     },

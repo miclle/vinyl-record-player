@@ -132,7 +132,10 @@ class DrawingPackTests(unittest.TestCase):
         self.assertAlmostEqual(sheets['AcousticRoof']['holes'][0]['v_mm'], 166.8)
         self.assertIn('余厚 4.3',' '.join(sheets['AcousticRoof']['notes']))
         self.assertEqual(sheets['FloatingDeck']['holes'][0]['u_mm'],
-                         params['platter_x'] - params['wall'] - 4)
+                         params['platter_x'] - params['wall'] - params['deck_side_clearance'])
+        self.assertEqual(sheets['FloatingDeck']['holes'][0]['v_mm'],
+                         params['platter_y'] - params['fascia']['thickness']
+                         - params['deck_front_fascia_clearance'])
         self.assertIn('baffle_section', data)
         self.assertEqual(data['baffle_section']['x_mm'], 225)
         self.assertIn('Baffle', [part['key'] for part in data['baffle_section']['parts']])

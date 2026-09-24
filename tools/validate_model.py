@@ -14,6 +14,21 @@ from model_sections import SECTION_NAMES, section_objects
 
 ROOT=Path(__file__).resolve().parents[1]
 
+
+def _deck_clearances(doc,p):
+    deck_bounds=doc.FloatingDeck.Shape.optimalBoundingBox(False)
+    left_bounds=doc.SideLeft.Shape.optimalBoundingBox(False)
+    right_bounds=doc.SideRight.Shape.optimalBoundingBox(False)
+    back_bounds=doc.Back.Shape.optimalBoundingBox(False)
+    fascia_bounds=fascia_dimensions(p)
+    return {
+        'front_to_fascia': deck_bounds.YMin-fascia_bounds['face_rear'],
+        'left': deck_bounds.XMin-left_bounds.XMax,
+        'right': right_bounds.XMin-deck_bounds.XMax,
+        'rear': back_bounds.YMin-deck_bounds.YMax,
+    }
+
+
 def validate():
     p=json.loads((ROOT/'cad/parameters.json').read_text())
     # Read a private copy so validation cannot mutate an open user's document.
@@ -131,11 +146,15 @@ def _validate_document(doc,p):
     metrics['overall_mm']=[bb.XLength,bb.YLength,bb.ZLength]
     expected_overall=[p['width'],p['depth']+max(p['ac_inlet']['flange_thickness'],p['hinges']['overall_projection_assumption']),p['closed_height']]
     checks['overall_matches_parameters']=all(abs(v-e)<1e-5 for v,e in zip(metrics['overall_mm'],expected_overall))
-    deck_bounds=doc.FloatingDeck.Shape.optimalBoundingBox(False)
-    back_bounds=doc.Back.Shape.optimalBoundingBox(False)
-    metrics['deck_rear_clearance_mm']=back_bounds.YMin-deck_bounds.YMax
-    checks['deck_rear_clearance_matches_parameters']=(p['deck_rear_clearance']>0 and
-        abs(metrics['deck_rear_clearance_mm']-p['deck_rear_clearance'])<1e-6)
+    deck_clearances=_deck_clearances(doc,p)
+    metrics['deck_clearances_mm']=deck_clearances
+    checks['deck_clearances_match_parameters']=(
+        min(p['deck_front_fascia_clearance'], p['deck_side_clearance'],
+            p['deck_rear_clearance']) > 0
+        and abs(deck_clearances['front_to_fascia']-p['deck_front_fascia_clearance'])<1e-6
+        and abs(deck_clearances['left']-p['deck_side_clearance'])<1e-6
+        and abs(deck_clearances['right']-p['deck_side_clearance'])<1e-6
+        and abs(deck_clearances['rear']-p['deck_rear_clearance'])<1e-6)
     drivers=[o for o in objects if hasattr(o,'DriverRole')]
     checks['one_woofer_two_fullrange']=len(drivers)==3 and sorted(o.DriverRole for o in drivers)==['fullrange','fullrange','woofer']
     metrics['driver_reservations_mm']={o.Name:{'role':o.DriverRole,'flange_diameter':float(o.FlangeDiameter),'cutout_diameter':float(o.CutoutDiameter),'depth':float(o.ReservedDepth),'total_height':float(o.TotalHeight),'flange_thickness':float(o.FlangeThickness)} for o in drivers}

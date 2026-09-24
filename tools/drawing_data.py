@@ -192,7 +192,12 @@ def collect(root=ROOT, project=True):
             add('AcousticDividerLeft',2,ac['partition_thickness'],[f'前缘倾斜 {f(90-p["front_angle"])}°；后缘 Y={f(D-t)}。',f'下前角 Y={f(front_bottom)}；上前角 Y={f(front_bottom+(ac["roof_bottom_z"]-zlo)/math.tan(math.radians(p["front_angle"])))}。','两块同形；板厚方向 X。整数备料后按斜前缘精确修切。'],['AcousticDividerRight'])
             add('BearingPocket',2,2,['外径 Ø28；内径 Ø24；底厚 2；杯顶开口。','仅适配基线通用轴承；当前机芯安装时须重新核对。'])
             add('BassPort',2,p['bass_port']['wall_thickness'],[f"通径 Ø{f(p['bass_port']['inner_diameter'])}；管壁 {f(p['bass_port']['wall_thickness'])}；总长 {f(p['bass_port']['length'])}（含法兰）。",f"法兰 Ø{f(p['bass_port']['flange_diameter'])} × {f(p['bass_port']['flange_thickness'])}；主体长 {f(p['bass_port']['length']-p['bass_port']['flange_thickness'])}。",'长度是当前试验初值，非已验证声学调谐。'])
-            add('FloatingDeck',2,p['deck_thickness'],['主轴通孔 Ø20.4（暂定）；机芯固定孔与外轮廓开口未设计。',hole(p['platter_x']-t-4,p['platter_y']-8)])
+            deck_x=t+p['deck_side_clearance']
+            deck_y=fd['face_rear']+p['deck_front_fascia_clearance']
+            add('FloatingDeck',2,p['deck_thickness'],[
+                '主轴通孔 Ø20.4（暂定）；机芯固定孔与外轮廓开口未设计。',
+                f"饰条后 {f(p['deck_front_fascia_clearance'])}、左右各 {f(p['deck_side_clearance'])}、后板前 {f(p['deck_rear_clearance'])} 名义间隙；浮动行程待验证。",
+                hole(p['platter_x']-deck_x,p['platter_y']-deck_y)])
             add('RearSupport',2,8,['对象由左右两块承托梁组成，逐块标注。'],split=True)
             add('Isolator0',2,None,['实心弹性支承 Ø16 × 8；刚度未定，壁厚不适用。'],['Isolator1','Isolator2'])
             for name,role,aliases in [('Woofer','woofer',[]),('TweeterLeft','fullrange',['TweeterRight'])]:

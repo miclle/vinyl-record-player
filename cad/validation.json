@@ -10,7 +10,7 @@
     "diagnostic_objects_excluded": true,
     "all_shapes_valid": true,
     "overall_matches_parameters": true,
-    "deck_rear_clearance_matches_parameters": true,
+    "deck_clearances_match_parameters": true,
     "one_woofer_two_fullrange": true,
     "driver_dimensions_match_parameters": true,
     "driver_geometry_matches_dimensions": true,
@@ -65,7 +65,12 @@
       363.2,
       210.7
     ],
-    "deck_rear_clearance_mm": 2.0,
+    "deck_clearances_mm": {
+      "front_to_fascia": 1.0,
+      "left": 2.0,
+      "right": 2.0,
+      "rear": 2.0
+    },
     "driver_reservations_mm": {
       "TweeterLeft": {
         "role": "fullrange",
@@ -288,7 +293,7 @@
       "remaining_roof_mm": 4.300000000000011,
       "rebate_to_baffle_seal_mm": 15.042772660961571,
       "closed_cover_gap_mm": 1.0,
-      "deck_gap_mm": 3.0,
+      "deck_gap_mm": 1.0,
       "collisions": [],
       "installation_released": false
     },
@@ -456,14 +461,14 @@
       "FloatingDeck": {
         "finished_local_bounds_mm": [
           [
-            418.0,
-            328.0,
+            422.0,
+            330.0,
             6.0
           ]
         ],
         "rectangular_stock_mm": [
-          418.0,
-          328.0,
+          422.0,
+          330.0,
           6.0
         ],
         "quantity": 1

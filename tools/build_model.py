@@ -35,6 +35,26 @@ def build_structure():
     hinge_parts = hinge_installation(p)
     fascia_shape, fascia_cuts = fascia_installation(p)
     fd = fascia_dimensions(p)
+    deck_side = p['deck_side_clearance']
+    deck_front = fd['face_rear'] + p['deck_front_fascia_clearance']
+    deck_rear = D - t - p['deck_rear_clearance']
+    deck_left = t + deck_side
+    deck_right = W - t - deck_side
+    deck_width = deck_right - deck_left
+    deck_depth = deck_rear - deck_front
+    isolator_centers = [(44,100), (W-44,100), (W/2,295)]
+    if min(deck_side, p['deck_front_fascia_clearance'], p['deck_rear_clearance']) <= 0:
+        raise ValueError('Floating deck clearances must be positive')
+    if deck_width <= 0 or deck_depth <= 0:
+        raise ValueError('Floating deck clearances leave no usable panel')
+    required_footprints = [('spindle hole', p['platter_x'], p['platter_y'], 10.2)]
+    required_footprints.extend(
+        (f'elastic support {i+1}', x, y, 8)
+        for i,(x,y) in enumerate(isolator_centers))
+    for name,x,y,radius in required_footprints:
+        if not (deck_left <= x-radius and x+radius <= deck_right
+                and deck_front <= y-radius and y+radius <= deck_rear):
+            raise ValueError(f'Floating deck excludes {name}')
     a = math.radians(p['front_angle'])
     inward = V(0, math.sin(a), -math.cos(a))
     front_y = lambda z: 8 + (z - (z0+t)) / math.tan(a)
@@ -198,10 +218,11 @@ def build_structure():
     support=Part.makeCompound([Part.makeBox(left-t-8,30,8,V(t+8,280,H-22)),
                                Part.makeBox(W-t-8-right-pt,30,8,V(right+pt,280,H-22))])
     add('RearSupport','后部两侧隔振承托梁',support,'Deck',GRAY)
-    for i,(x,y) in enumerate([(44,100),(W-44,100),(W/2,295)]):
+    for i,(x,y) in enumerate(isolator_centers):
         cyl('Isolator%d'%i,'弹性支承 %d（刚度待定）'%(i+1),8,8,V(x,y,H-14),'Deck',(0.12,0.15,0.16))
-    # Rear clearance is an installation assumption, not verified suspension travel.
-    deck_shape=Part.makeBox(W-2*t-8,D-t-8-p['deck_rear_clearance'],p['deck_thickness'],V(t+4,8,H-p['deck_thickness']))
+    # Clearances are installation assumptions, not verified suspension travel.
+    deck_shape=Part.makeBox(deck_width,deck_depth,p['deck_thickness'],
+                            V(deck_left,deck_front,H-p['deck_thickness']))
     deck_shape=deck_shape.cut(Part.makeCylinder(10.2,p['deck_thickness']+2,V(p['platter_x'],p['platter_y'],H-p['deck_thickness']-1)))
     deck=add('FloatingDeck','唱盘与唱臂共用浮动底板',deck_shape,'Deck',BLACK,material='结构底板 / 6 mm 占位；主轴孔 Ø20.4 待选型')
     amplifier=p['amplifier']
@@ -317,7 +338,8 @@ def build_structure():
         'AcousticDividerLeft':(V(1,0,0),pt,'整数矩形备料；前缘按精确斜线修切'),
         'AcousticDividerRight':(V(1,0,0),pt,'整数矩形备料；前缘按精确斜线修切'),
         'RearSupport':(V(0,0,1),8,'两块独立矩形梁'),
-        'FloatingDeck':(V(0,0,1),p['deck_thickness'],'矩形板；另开主轴孔，机芯安装接口待定'),
+        'FloatingDeck':(V(0,0,1),p['deck_thickness'],
+                        f"矩形板；饰条后 {p['deck_front_fascia_clearance']:g}、左右各 {deck_side:g}、后板前 {p['deck_rear_clearance']:g} mm 名义间隙；另开主轴孔，机芯安装接口待定"),
     }
     for i in range(n):
         stock_specs[f'Slat{i+1:02}']=(inward,p['slat_thickness'],'矩形截面成品条；整体倾斜安装，无需把截面切成斜四边形')

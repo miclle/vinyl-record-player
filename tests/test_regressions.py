@@ -22,13 +22,20 @@ import validate_model
 
 
 class ParameterValidationTests(unittest.TestCase):
-    def test_floating_deck_rear_clearance_survives_export_and_stock_sizing(self):
-        for clearance, depth in [(2.0, 328.0), (7.0, 323.0)]:
-            with self.subTest(clearance=clearance), tempfile.TemporaryDirectory() as tmp:
+    def test_floating_deck_clearances_survive_export_and_stock_sizing(self):
+        cases = [
+            ((1.0, 2.0, 2.0), (14.0, 6.0, 422.0, 330.0)),
+            ((4.0, 3.0, 7.0), (15.0, 9.0, 420.0, 322.0)),
+            ((7.0, 2.0, 2.0), (14.0, 12.0, 422.0, 324.0)),
+        ]
+        for (front, side, rear), (x_min, y_min, width, depth) in cases:
+            with self.subTest(front=front, side=side, rear=rear), tempfile.TemporaryDirectory() as tmp:
                 root = Path(tmp)
                 (root / 'cad').mkdir()
                 params = json.loads((ROOT / 'cad/parameters.json').read_text())
-                params['deck_rear_clearance'] = clearance
+                params['deck_front_fascia_clearance'] = front
+                params['deck_side_clearance'] = side
+                params['deck_rear_clearance'] = rear
                 (root / 'cad/parameters.json').write_text(json.dumps(params))
                 (root / 'cad/mechanism.json').write_bytes((ROOT / 'cad/mechanism.json').read_bytes())
                 with patch.object(build_model, 'ROOT', root):
@@ -38,11 +45,22 @@ class ParameterValidationTests(unittest.TestCase):
                 try:
                     deck = doc.FloatingDeck
                     bounds = deck.Shape.optimalBoundingBox(False)
-                    self.assertAlmostEqual(deck.Shape.distToShape(doc.Back.Shape)[0], clearance)
-                    self.assertAlmostEqual(bounds.YMin, 8.0)
+                    self.assertAlmostEqual(bounds.YMin-params['fascia']['thickness'], front)
+                    self.assertAlmostEqual(deck.Shape.distToShape(doc.SideLeft.Shape)[0], side)
+                    self.assertAlmostEqual(deck.Shape.distToShape(doc.SideRight.Shape)[0], side)
+                    self.assertAlmostEqual(deck.Shape.distToShape(doc.Back.Shape)[0], rear)
+                    self.assertEqual(validate_model._deck_clearances(doc,params), {
+                        'front_to_fascia': front,
+                        'left': side,
+                        'right': side,
+                        'rear': rear,
+                    })
+                    self.assertAlmostEqual(bounds.XMin, x_min)
+                    self.assertAlmostEqual(bounds.YMin, y_min)
                     self.assertAlmostEqual(bounds.YLength, depth)
-                    self.assertAlmostEqual(bounds.XLength, 418.0)
+                    self.assertAlmostEqual(bounds.XLength, width)
                     self.assertAlmostEqual(bounds.ZLength, 6.0)
+                    self.assertAlmostEqual(float(deck.StockLength), width)
                     self.assertAlmostEqual(float(deck.StockWidth), depth)
                     for name in ['SideLeft', 'SideRight', 'Back', 'AcousticRoof',
                                  'PowerTransformer', 'Amplifier', 'ACInlet',
@@ -50,6 +68,30 @@ class ParameterValidationTests(unittest.TestCase):
                         self.assertLess(deck.Shape.common(doc.getObject(name).Shape).Volume, 1e-6, name)
                 finally:
                     App.closeDocument(doc.Name)
+
+    def test_floating_deck_rejects_invalid_clearances(self):
+        params = json.loads((ROOT / 'cad/parameters.json').read_text())
+        cases = [
+            ({'deck_front_fascia_clearance': 0}, 'clearances must be positive'),
+            ({'deck_side_clearance': 0}, 'clearances must be positive'),
+            ({'deck_rear_clearance': 0}, 'clearances must be positive'),
+            ({'deck_side_clearance': 200}, 'excludes spindle hole'),
+            ({'deck_side_clearance': 30}, 'excludes elastic support 1'),
+            ({'deck_front_fascia_clearance': 90}, 'excludes elastic support 1'),
+            ({'deck_rear_clearance': 40}, 'excludes elastic support 3'),
+        ]
+        for changes,error in cases:
+            with self.subTest(changes=changes), tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp)
+                (root / 'cad').mkdir()
+                changed = json.loads(json.dumps(params))
+                changed.update(changes)
+                (root / 'cad/parameters.json').write_text(json.dumps(changed))
+                (root / 'cad/mechanism.json').write_bytes(
+                    (ROOT / 'cad/mechanism.json').read_bytes())
+                with patch.object(build_model, 'ROOT', root), self.assertRaisesRegex(
+                        ValueError, error):
+                    build_model.build_structure()
 
     def test_incompatible_model_replaces_success_report_and_closes_document(self):
         missing_neighbors = ['GrilleCloth', 'Fascia', 'LightChannel', 'LightDiffuser']

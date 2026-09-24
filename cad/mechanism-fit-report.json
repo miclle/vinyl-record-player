@@ -165,16 +165,16 @@
         ],
         "local_underbody_overlaps": [
           {
-            "part": "FloatingDeck",
-            "overlap_mm3": 134370.06
-          },
-          {
             "part": "AcousticRoof",
             "overlap_mm3": 14493.486
           },
           {
             "part": "AcousticDividerRight",
             "overlap_mm3": 86.9
+          },
+          {
+            "part": "FloatingDeck",
+            "overlap_mm3": 134370.06
           }
         ],
         "closed_cover_clearance_mm": 0.6999999999999886,
@@ -209,10 +209,6 @@
         ],
         "local_underbody_overlaps": [
           {
-            "part": "FloatingDeck",
-            "overlap_mm3": 164039.073
-          },
-          {
             "part": "BassPort",
             "overlap_mm3": 1049.176
           },
@@ -223,6 +219,10 @@
           {
             "part": "AcousticDividerRight",
             "overlap_mm3": 260.701
+          },
+          {
+            "part": "FloatingDeck",
+            "overlap_mm3": 164039.073
           }
         ],
         "closed_cover_clearance_mm": 5.699999999999989,
@@ -240,11 +240,6 @@
     "underbody_reservation_clear": false,
     "underbody_overlaps": [
       {
-        "part": "FloatingDeck",
-        "label": "现有承载板（机芯开口与孔位待调整）",
-        "overlap_mm3": 164039.073
-      },
-      {
         "part": "BassPort",
         "label": "后置倒相管 · Ø32 × 160 可换试验件",
         "overlap_mm3": 1049.176
@@ -258,6 +253,11 @@
         "part": "AcousticDividerRight",
         "label": "低音腔右全深隔板",
         "overlap_mm3": 260.701
+      },
+      {
+        "part": "FloatingDeck",
+        "label": "现有承载板（机芯开口与孔位待调整）",
+        "overlap_mm3": 164039.073
       }
     ],
     "display_closed_cover_clear": true,
@@ -273,5 +273,5 @@
     "合页及盖总成对示意机芯做1度开盖抽样；真实机芯和自动回臂运动未验证",
     "STEP 仅导出装配示意，包络及红色干涉体保留在 FCStd"
   ],
-  "model_sha256": "5a4bb9dac783ea440f5490d5570a165a21e94934f8468f65922f22982709a888"
+  "model_sha256": "ae6afc1ea9249650e41f8a0203c66c320479d1ce56c80ad994470c74701d84c1"
 }

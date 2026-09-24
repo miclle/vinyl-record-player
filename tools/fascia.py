@@ -25,7 +25,8 @@ def dimensions(p):
         raise ValueError('T fascia rebate must retain roof thickness and stay ahead of the chamber seal')
     return dict(length=p['width']-2*p['wall']-2*gap, x=p['wall']+gap,
                 bottom=top-height, web_bottom=web_bottom, rebate_floor=floor,
-                roof_front=front, rebate_rear=rear, rebate_depth=roof_top-floor,
+                face_rear=thickness, roof_front=front, rebate_rear=rear,
+                rebate_depth=roof_top-floor,
                 remaining_roof=floor-roof['roof_bottom_z'], seal_margin=baffle_front-rear)
 
 
