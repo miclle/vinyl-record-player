@@ -70,6 +70,18 @@ class MechanismStudyTests(unittest.TestCase):
                 self.assertAlmostEqual(b.XLength, 280)
                 self.assertAlmostEqual(b.YLength, 280)
                 self.assertAlmostEqual(b.ZLength, 11)
+                arm = saved.KitCurvedArm.Shape.optimalBoundingBox(False)
+                headshell = saved.KitHeadshell.Shape
+                head_bounds = headshell.optimalBoundingBox(False)
+                self.assertGreater(arm.XLength, 2 * cfg['appearance_assumptions']['arm_bend_radius'])
+                self.assertGreater(head_bounds.XLength, 50)  # Includes the side finger lift.
+                self.assertGreater(head_bounds.YLength, cfg['appearance_assumptions']['headshell_length'])
+                self.assertEqual(len(headshell.Solids), 1)
+                self.assertGreaterEqual(len(headshell.Faces), 20)  # Connector, two slots and top pads.
+                arm_parts = [saved.getObject(name).Shape.optimalBoundingBox(False) for name in
+                             ['KitCurvedArm', 'KitCounterweight', 'KitHeadshell', 'KitCartridge']]
+                self.assertAlmostEqual(max(b.YMax for b in arm_parts) - min(b.YMin for b in arm_parts),
+                                       cfg['arm_total_length'], places=5)
                 springs = saved.KitBase.Shape.Solids[1:]
                 self.assertEqual(len(springs), 3)
                 expected = [(231, 267.262794), (271.262794, 117), (80.737206, 117)]
@@ -155,6 +167,18 @@ class MechanismStudyTests(unittest.TestCase):
         cfg['total_height'] -= 1
         with self.assertRaisesRegex(ValueError, 'compression'):
             mechanism_study.measurement_datums(cfg, 150, 16)
+
+    def test_headshell_details_follow_nondefault_length_and_width(self):
+        cfg = json.loads((ROOT / 'cad/selected-mechanism.json').read_text())
+        appearance = cfg['appearance_assumptions']
+        for length, width in [(27, 22), (52, 14)]:
+            with self.subTest(length=length, width=width):
+                custom = dict(appearance, headshell_length=length, headshell_width=width)
+                shape, _, _ = mechanism_study.headshell_shape(App.Vector(),
+                                                               custom['headshell_yaw_degrees'],
+                                                               custom, 0)
+                self.assertTrue(shape.isValid())
+                self.assertEqual(len(shape.Solids), 1)
 
 
 if __name__ == '__main__':

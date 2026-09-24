@@ -2,7 +2,7 @@
 
 阅读尺寸图前，可先查看[整机全景与组件导览](assembly-guide.md)：另附一份两页 A2 PDF 和两张高清 PNG，以 35 个编号关联当前装配的部件、材料状态和下列图册中的详图号。
 
-基于当前已保存的单一主 CAD（`v0.9-torque-hinges` 结构与 `v0.4-measured-fit-study` 机芯参数），输出 **3 份 A3 横向矢量 PDF，共 42 页**。轮廓直接由 FreeCAD TechDraw 投影，包络尺寸由实体的 `optimalBoundingBox(False)` 读取；孔径、孔位和深度来自对应建模参数及板件局部基准，并通过回归检查核对保存实体。出图脚本仅读取已重建的 CAD，不修改源文件。
+基于当前已保存的单一主 CAD（`v0.9-torque-hinges` 结构与 `v0.5-curved-arm-appearance` 机芯参数），输出 **3 份 A3 横向矢量 PDF，共 42 页**。轮廓直接由 FreeCAD TechDraw 投影，包络尺寸由实体的 `optimalBoundingBox(False)` 读取；孔径、孔位和深度来自对应建模参数及板件局部基准，并通过回归检查核对保存实体。出图脚本仅读取已重建的 CAD，不修改源文件。
 
 机芯总览 C-00 与基座详图 C-P05 的支点半径、钟点位置由 `cad/selected-mechanism.json` 生成。非默认位置回归同时核对保存的弹簧实体、提取说明及两页 PDF 文字。
 

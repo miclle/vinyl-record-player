@@ -1,7 +1,7 @@
 {
   "revision": "v0.9-torque-hinges",
   "sources": {
-    "lumi-selected-mechanism-fit.FCStd": "7cbb4352b6e9e44f655ff82dbd97ceb1a4fc51bf750c6f056c7bc991138d3ed2"
+    "lumi-selected-mechanism-fit.FCStd": "63b75c7bc56b62f3b82d872682cd1e25b488c13d8d2ceaa01fe2153e7dc1368a"
   },
   "entries": [
     {
@@ -226,14 +226,14 @@
         "KitCurvedArm"
       ],
       "quantity": "1 件",
-      "material": "实心扫掠占位；真实管壁与材质未知",
+      "material": "参考图双弯外观；实心扫掠占位，真实管壁与材质未知",
       "drawings": [
         "C-P08"
       ],
       "size_mm": [
-        27.4,
-        201.08509,
-        15.384585
+        36.4,
+        151.636821,
+        15.372906
       ]
     },
     {
@@ -257,20 +257,20 @@
     {
       "code": "K07",
       "page": 1,
-      "title": "唱头壳与唱头",
+      "title": "连接套、唱头壳与唱头",
       "ids": [
         "KitHeadshell",
         "KitCartridge"
       ],
       "quantity": "各 1 件",
-      "material": "外观占位；唱头型号待确认",
+      "material": "双槽与指托按参考图近似；唱头型号待确认",
       "drawings": [
         "C-P09"
       ],
       "size_mm": [
-        18.0,
-        27.0,
-        6.0
+        58.279888,
+        67.31514,
+        13.0
       ]
     },
     {
@@ -286,7 +286,7 @@
         "C-P10"
       ],
       "size_mm": [
-        8.0,
+        11.0,
         8.0,
         27.0
       ]

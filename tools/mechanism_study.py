@@ -54,6 +54,65 @@ def local_underbody(cfg, seat):
     return motor.fuse(transmission).fuse(linkage).removeSplitter()
 
 
+def _placed(shape, origin, yaw_degrees):
+    """Rotate a local +X/-Y detail about Z, then move it into the assembly."""
+    shape.rotate(V(), V(0, 0, 1), yaw_degrees)
+    shape.translate(origin)
+    return shape
+
+
+def headshell_shape(rear, yaw_degrees, cfg, arm_z):
+    """Approximate the pictured slotted headshell, connector and finger lift."""
+    length = cfg['headshell_length']
+    width = cfg['headshell_width']
+    thickness = cfg['headshell_thickness']
+    if length < 24 or width < 12 or thickness <= 0:
+        raise ValueError('Headshell appearance requires length >= 24, width >= 12 and thickness > 0')
+    if not 0 <= cfg['arm_connector_overlap'] < cfg['arm_connector_length']:
+        raise ValueError('Arm connector overlap must be shorter than its positive length')
+    if cfg['arm_connector_diameter'] <= 0 or cfg['finger_lift_length'] <= 0:
+        raise ValueError('Arm connector diameter and finger lift length must be positive')
+    body_z = arm_z - cfg['arm_connector_diameter'] / 2
+    chamfer_depth = min(6.0, length * 0.12)
+    corner_inset = min(4.0, width * 0.18)
+    outline = [V(-width/2, 0, 0), V(width/2, 0, 0),
+               V(width/2, -length+chamfer_depth, 0),
+               V(width/2-corner_inset, -length, 0),
+               V(-width/2+corner_inset, -length, 0),
+               V(-width/2, -length+chamfer_depth, 0)]
+    body = Part.Face(Part.makePolygon(outline + [outline[0]])).extrude(V(0, 0, thickness))
+    # The photograph shows two long mounting slots near the cartridge end.
+    slot_width = min(4.0, width * 0.18)
+    slot_length = min(16.0, length * 0.31)
+    slot_front_margin = min(7.0, length * 0.26)
+    for x in (-width/4, width/4):
+        slot = Part.makeBox(slot_width, slot_length, thickness+2,
+                            V(x-slot_width/2, -length+slot_front_margin, -1))
+        body = body.cut(slot)
+    # Three shallow round pads reproduce the visible headshell top pattern.
+    pad_radius = min(3.3, width * 0.15)
+    for ratio in (0.25, 0.46, 0.67):
+        body = body.fuse(Part.makeCylinder(pad_radius, 0.8,
+                                           V(0, -length*ratio, thickness)))
+    body = _placed(body.removeSplitter(), V(rear.x, rear.y, body_z), yaw_degrees)
+    yaw = math.radians(yaw_degrees)
+    direction = V(math.sin(yaw), -math.cos(yaw), 0)
+    connector_start = rear - direction * (cfg['arm_connector_length'] - cfg['arm_connector_overlap'])
+    connector = Part.makeCylinder(cfg['arm_connector_diameter']/2,
+                                  cfg['arm_connector_length'], connector_start, direction)
+    # Start inside the shell wall so the lift remains one robust exported solid.
+    side = V(math.cos(yaw), math.sin(yaw), 0)
+    lift_root = rear + direction * (length*0.6) + side * (width/2-1)
+    finger_lift = Part.makeCylinder(1.5, cfg['finger_lift_length'], lift_root, side)
+    return body.fuse(connector).fuse(finger_lift).removeSplitter(), direction, body_z
+
+
+def cartridge_shape(rear, yaw_degrees, body_z, cfg):
+    """Place the cartridge under the front half of the pictured headshell."""
+    local = Part.makeBox(12, 19, 5, V(-6, -cfg['headshell_length']+4, -5))
+    return _placed(local, V(rear.x, rear.y, body_z), yaw_degrees)
+
+
 def closed_cover_metrics(lid, shapes):
     """Measure exact clearance, pruning parts whose bounding boxes are farther.
 
@@ -150,10 +209,23 @@ def add_study(doc, base_parameters, cfg):
     # User's total arm length is NOT pivot-to-stylus length. Temporarily use it
     # as the parked assembly's longitudinal span, including weight and head.
     arm_front = pivot.y + 33 - cfg['arm_total_length']
-    # Two tangent circular bends keep this unmeasured outline analytic. A
+    # Two tangent circular bends keep this unmeasured outline analytic. Their
+    # larger, forward position follows the selected-kit photograph; an
     # interpolated spline pipe produced unstable STEP volumes and slow booleans.
-    bend = 10.5
-    y0 = cy - 35
+    bend = a['arm_bend_radius']
+    y0 = cy + a['arm_bend_start_y_offset']
+    yaw = a['headshell_yaw_degrees']
+    exposed_connector = a['arm_connector_length'] - a['arm_connector_overlap']
+    shell_template, heading, template_shell_z = headshell_shape(V(), yaw, a, 0)
+    shell_front_offset_y = heading.y * exposed_connector + shell_template.BoundBox.YMin
+    target_arm_end_y = arm_front - shell_front_offset_y
+    # Rotating the tube downward slightly shortens its Y projection. Iterate to
+    # keep the final counterweight-to-head longitudinal envelope at 250 mm.
+    arm_end_y = target_arm_end_y
+    for _ in range(6):
+        slope = math.atan2(a['arm_front_drop'], pivot.y-arm_end_y)
+        rotated_end_y = pivot.y + (arm_end_y-pivot.y) * math.cos(slope)
+        arm_end_y += target_arm_end_y - rotated_end_y
     start = V(pivot.x, y0, pivot.z)
     middle = V(pivot.x+bend, y0-bend, pivot.z)
     end = V(pivot.x+2*bend, y0-2*bend, pivot.z)
@@ -161,18 +233,29 @@ def add_study(doc, base_parameters, cfg):
     edges = [Part.makeLine(pivot, start),
              Part.Arc(start, V(pivot.x+bend-q, y0-q, pivot.z), middle).toShape(),
              Part.Arc(middle, V(pivot.x+bend+q, y0-2*bend+q, pivot.z), end).toShape(),
-             Part.makeLine(end, V(pivot.x+2*bend, arm_front+16, pivot.z))]
+             Part.makeLine(end, V(pivot.x+2*bend, arm_end_y, pivot.z))]
     wire = Part.Wire(edges)
-    slope = math.degrees(math.atan2(9, pivot.y-(arm_front+16)))
+    slope = math.degrees(math.atan2(a['arm_front_drop'], pivot.y-arm_end_y))
     wire.rotate(pivot, V(1,0,0), slope)
     tangent = V(0, -math.cos(math.radians(slope)), -math.sin(math.radians(slope)))
-    circle = Part.Wire(Part.makeCircle(3.2, pivot, tangent))
+    circle = Part.Wire(Part.makeCircle(a['arm_tube_diameter']/2, pivot, tangent))
     add('KitCurvedArm', f"弯臂停放示意 · 总长{cfg['arm_total_length']:g}非有效臂长",
         wire.makePipeShell([circle], True, False), (0.72, 0.74, 0.76))
-    add('KitCounterweight', '后部配重外观示意', Part.makeCylinder(10, 16, V(pivot.x, pivot.y + 17, pivot.z), V(0, 1, 0)))
-    add('KitHeadshell', '唱头壳外观占位', Part.makeBox(18, 27, 6, V(pivot.x + 8, arm_front, pivot.z-15)))
-    add('KitCartridge', '随套装唱头占位（型号待核实）', Part.makeBox(12, 19, 5, V(pivot.x + 11, arm_front+1, pivot.z-20)))
-    add('KitArmRest', '停臂架示意 · 自带限位器未建模', Part.makeCylinder(4, 27, V(pivot.x + 2, cy + 25, platform_top)))
+    add('KitCounterweight', '后部配重外观示意',
+        Part.makeCylinder(10, 16, V(pivot.x, pivot.y + 17, pivot.z), V(0, 1, 0)),
+        (0.46, 0.47, 0.48))
+    rotation = App.Rotation(V(1, 0, 0), slope)
+    arm_end = pivot + rotation.multVec(V(2*bend, arm_end_y-pivot.y, 0))
+    shell_rear = arm_end + heading * exposed_connector
+    shell = shell_template.copy()
+    shell.translate(V(shell_rear.x, shell_rear.y, arm_end.z))
+    shell_z = template_shell_z + arm_end.z
+    add('KitHeadshell', '参考图弯臂连接套、开槽唱头壳与指托 · 外观估算', shell)
+    add('KitCartridge', '随套装唱头占位（型号待核实）',
+        cartridge_shape(shell_rear, yaw, shell_z, a))
+    limiter = Part.makeBox(11, 5, 8, V(pivot.x-3.5, cy+21, platform_top+17))
+    rest = Part.makeCylinder(4, 27, V(pivot.x + 2, cy + 25, platform_top))
+    add('KitArmRest', '停臂架与限位片示意', rest.fuse(limiter).removeSplitter())
 
     underbody = local_underbody(cfg, seat)
     envelope = add('UnderbodyReservation', '局部下探估算 · 电机／传动／回臂，覆盖不完整', underbody, (1.0, 0.60, 0.15), True)

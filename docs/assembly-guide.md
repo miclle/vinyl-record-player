@@ -1,6 +1,6 @@
 # 整机全景与组件导览
 
-[两页 A2 导览 PDF](../output/pdf/00-assembly-guide.pdf) 是三份尺寸图册的阅读入口，基于单一主 CAD 中的 `v0.9-torque-hinges` 结构和 `v0.4-measured-fit-study` 机芯制作。
+[两页 A2 导览 PDF](../output/pdf/00-assembly-guide.pdf) 是三份尺寸图册的阅读入口，基于单一主 CAD 中的 `v0.9-torque-hinges` 结构和 `v0.5-curved-arm-appearance` 机芯制作。
 
 - **第 1 页：整机全景。** 开盖三维视图标出外壳、格栅、透明盖、铰链、脚垫、机芯和旋钮。
 - **第 2 页：内部展开。** 移开台面、音腔顶板、障板等结构，显示扬声器、隔板、支承与电子模块；后部小图用半透明后板显示 AC 插座和接口板预留。

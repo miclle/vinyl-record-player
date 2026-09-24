@@ -211,9 +211,9 @@ def collect(root=ROOT, project=True):
                 'KitMatRings':(0.3,['四道装饰环：径向宽 0.5，高 0.3；不是唱片垫实物厚度。']),
                 'KitSpindle':(None,['实心主轴 Ø7 × 10；壁厚不适用。']),
                 'KitArmSupport':(None,[f"支座高 {f(cfg['arm_support_height'])} 为用户尺寸；外形、壁厚和连接未知。"]),
-                'KitCurvedArm':(None,['外径 Ø6.4；模型为实心扫掠占位，真实管壁厚未知。',f"用户总长{f(cfg['arm_total_length'])}暂作含配重/唱头纵向外廓，非有效臂长或管材下料长度。"]),
+                'KitCurvedArm':(None,[f"外径 Ø{f(cfg['appearance_assumptions']['arm_tube_diameter'])}；模型为实心扫掠占位，真实管壁厚未知。",f"用户总长{f(cfg['arm_total_length'])}暂作含配重/唱头纵向外廓，非有效臂长或管材下料长度。",'双弯位置与半径按参考图外观近似，不是折弯加工数据。']),
                 'KitCounterweight':(None,['实心配重包络 Ø20 × 16；壁厚不适用。']),
-                'KitHeadshell':(6,['长宽高为外观占位，未包含真实槽孔。']),
+                'KitHeadshell':(cfg['appearance_assumptions']['headshell_thickness'],['含连接套、双槽唱头壳、三枚顶面圆垫与侧向指托；尺寸按参考图外观近似。','槽孔仅用于识别外观，不是安装孔位。']),
                 'KitCartridge':(None,['唱头包络 12 × 19 × 5；实物规格与壁厚未知。']),
                 'KitArmRest':(None,['实心支架包络 Ø8 × 27；壁厚不适用。']),
             }
