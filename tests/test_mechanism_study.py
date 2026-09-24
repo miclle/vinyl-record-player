@@ -16,6 +16,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'tools'))
 import build_model
 import mechanism_study
+from model_sections import section_objects
 
 
 class MechanismStudyTests(unittest.TestCase):
@@ -97,7 +98,7 @@ class MechanismStudyTests(unittest.TestCase):
                     self.assertAlmostEqual(bounds.ZMin, 146.5)
                     self.assertAlmostEqual(bounds.ZLength, 10.5)
                 low = saved.UnderbodyReservation.Shape.optimalBoundingBox(False).ZMin
-                high = max(o.Shape.optimalBoundingBox(False).ZMax for o in saved.SelectedKit.Group)
+                high = max(o.Shape.optimalBoundingBox(False).ZMax for o in section_objects(saved, 'SelectedKit'))
                 self.assertAlmostEqual(low, 117)
                 self.assertAlmostEqual(high-low, 85)
                 self.assertLess(saved.UnderbodyReservation.Shape.Volume, 355*280*29.5)
@@ -115,7 +116,10 @@ class MechanismStudyTests(unittest.TestCase):
                     self.assertIn('AcousticRoof', [hit['part'] for hit in state['local_underbody_overlaps']])
                 self.assertAlmostEqual(fit['display_cover_clearance_mm'], 5.7)
                 self.assertAlmostEqual(fit['illustrative_cover_clearance_mm'], 0.7)
-                self.assertTrue(all(o.IsReference for o in saved.Mechanism.Group))
+                self.assertTrue(all(o.IsReference for o in section_objects(saved, 'Mechanism')))
+                self.assertFalse(any(o.TypeId == 'App::DocumentObjectGroup' for o in saved.Objects))
+                self.assertTrue(all(o in saved.RootObjects for o in saved.Objects
+                                    if o.TypeId == 'Part::Feature'))
                 self.assertEqual(list((root / 'cad').glob('*.FCStd')),
                                  [root / 'cad/record-player.FCStd'])
                 self.assertEqual(report['model_sha256'], hashlib.sha256(

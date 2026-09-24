@@ -53,7 +53,8 @@ class ParameterValidationTests(unittest.TestCase):
 
     def test_incompatible_model_replaces_success_report_and_closes_document(self):
         missing_neighbors = ['GrilleCloth', 'Fascia', 'LightChannel', 'LightDiffuser']
-        cases = ['old_schema', 'missing_property', 'missing_snapshot', 'invalid_snapshot', 'Feet'] + missing_neighbors
+        cases = ['old_schema', 'missing_property', 'missing_snapshot', 'invalid_snapshot',
+                 'missing_section', 'invalid_section'] + missing_neighbors
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             (root / 'cad').mkdir()
@@ -66,6 +67,7 @@ class ParameterValidationTests(unittest.TestCase):
             shutil.copy2(ROOT / 'tools/fascia.py', root / 'tools/fascia.py')
             shutil.copy2(ROOT / 'tools/hinges.py', root / 'tools/hinges.py')
             shutil.copy2(ROOT / 'tools/assembly_pose.py', root / 'tools/assembly_pose.py')
+            shutil.copy2(ROOT / 'tools/model_sections.py', root / 'tools/model_sections.py')
             for case in cases:
                 with self.subTest(case=case):
                     with patch.object(build_model, 'ROOT', root):
@@ -84,14 +86,12 @@ class ParameterValidationTests(unittest.TestCase):
                             doc.getObject('Woofer').removeProperty('TotalHeight')
                         elif case == 'missing_snapshot':
                             datum.removeProperty('BuildParametersJSON')
-                        elif case in missing_neighbors or case == 'Feet':
+                        elif case in missing_neighbors:
                             doc.removeObject(case)
-                            if case == 'Feet':
-                                # Removing only the group must not hide the missing-group
-                                # preflight behind a missing foot or mount error.
-                                for prefix in ('Foot', 'FootMount'):
-                                    for i in range(4):
-                                        self.assertIsNotNone(doc.getObject(f'{prefix}{i}'))
+                        elif case == 'missing_section':
+                            doc.getObject('Foot0').removeProperty('AssemblySection')
+                        elif case == 'invalid_section':
+                            doc.getObject('Foot0').AssemblySection = 'Bogus'
                         else:
                             datum.BuildParametersJSON = '{invalid'
                         doc.recompute()
@@ -111,9 +111,15 @@ class ParameterValidationTests(unittest.TestCase):
                     self.assertEqual(json.loads(report_path.read_text()), result)
                     self.assertEqual(opened_after, opened_before)
                     self.assertTrue(result['errors'])
-                    if case in missing_neighbors or case == 'Feet':
+                    if case in missing_neighbors or case in ('missing_section', 'invalid_section'):
                         self.assertFalse(result['checks']['required_model_fields_present'])
-                        self.assertIn(case, '\n'.join(result['errors']))
+                        if case == 'missing_section':
+                            expected = 'Foot0.AssemblySection'
+                        elif case == 'invalid_section':
+                            expected = "Foot0.AssemblySection='Bogus'"
+                        else:
+                            expected = case
+                        self.assertIn(expected, '\n'.join(result['errors']))
                     # Exercise the actual CLI exit path and overwrite a stale successful report.
                     report_path.write_text('{"passed": true}')
                     run = subprocess.run([sys.executable, str(root / 'tools/validate_model.py')],
@@ -299,8 +305,9 @@ class MacroReloadTests(unittest.TestCase):
                 (root / 'feet.py').write_text(f'value = {version}\n')
                 (root / 'fascia.py').write_text(f'value = {version}\n')
                 (root / 'hinges.py').write_text(f'value = {version}\n')
-                (root / 'build_model.py').write_text(f'from types import SimpleNamespace\nclass Doc:\n    StudyBasis = SimpleNamespace(ConfigurationJSON="{{}}")\n    def save(self): pass\ndef deliver():\n    return Doc(), {{"cover_angle_open":70}}, {version}\n')
-                (root / 'mechanism_study.py').write_text(f'def render_study(*a): pass\ndef save_report(*a): pass\nvalue={version}\n')
+                (root / 'model_sections.py').write_text(f'value = {version}\n')
+                (root / 'build_model.py').write_text('from types import SimpleNamespace\nimport model_sections\nclass Doc:\n    StudyBasis = SimpleNamespace(ConfigurationJSON="{}")\n    def save(self): pass\ndef deliver():\n    return Doc(), {"cover_angle_open":70}, model_sections.value\n')
+                (root / 'mechanism_study.py').write_text('import model_sections\ndef render_study(*a): pass\ndef save_report(*a): pass\nvalue=model_sections.value\n')
                 (root / 'assembly_pose.py').write_text('def set_cover_angle(*a): pass\n')
                 (root / 'render_views.py').write_text(f'def render(*args):\n    return {version}\n')
                 (root / 'dimension_sheet.py').write_text(f'def create(*args):\n    return {version}\n')
@@ -309,14 +316,17 @@ class MacroReloadTests(unittest.TestCase):
                 gui=types.ModuleType('FreeCADGui')
                 gui.activeDocument=lambda: types.SimpleNamespace(activeView=lambda: types.SimpleNamespace(fitAll=lambda: None))
                 with patch.dict(sys.modules, {'FreeCADGui': gui}):
-                    for name in ['ac_inlet', 'feet', 'fascia', 'hinges', 'build_model', 'render_views', 'dimension_sheet', 'mechanism_study', 'assembly_pose']:
+                    for name in ['ac_inlet', 'feet', 'fascia', 'hinges', 'model_sections',
+                                 'build_model', 'render_views', 'dimension_sheet',
+                                 'mechanism_study', 'assembly_pose']:
                         sys.modules.pop(name, None)
                     env = {'__file__': str(macro), '__name__': '__main__'}
                     write_sources(1)
                     exec(compile(macro.read_bytes(), str(macro), 'exec'), env)
                     write_sources(2)  # Same size, immediate edit: also exercises stale bytecode.
                     exec(compile(macro.read_bytes(), str(macro), 'exec'), env)
-                    self.assertEqual(env['groups'], 2)
+                    self.assertEqual(env['sections'], 2)
+                    self.assertEqual(env['model_sections'].value, 2)
                     self.assertEqual(env['mechanism_study'].value, 2)
                     self.assertEqual(env['render_views'].render(), 2)
                     self.assertEqual(env['dimension_sheet'].create(), 2)
@@ -397,10 +407,14 @@ class DrawingAnnotationTests(unittest.TestCase):
             params = json.loads((ROOT / 'cad/parameters.json').read_text())
             params.update(platter_diameter=310, pivot_distance=202, arm_effective_length=220,
                           front_angle=70, wall=14, closed_height=216, revision='v0.3-review')
-            group = types.SimpleNamespace(Group=[types.SimpleNamespace(Shape=Part.makeBox(1, 1, 1))])
+            section_names = ['Cabinet', 'Front', 'Deck', 'SelectedKit', 'Controls', 'Cover', 'Feet']
+            objects = [types.SimpleNamespace(TypeId='Part::Feature', AssemblySection=name,
+                                             Shape=Part.makeBox(1, 1, 1))
+                       for name in section_names]
             cfg=json.loads((ROOT/'cad/mechanism.json').read_text())
             cfg.update(platter_diameter=310,platter_center_x=params['platter_x'],platter_center_y=params['platter_y'])
-            doc = types.SimpleNamespace(getObject=lambda name: group, StudyBasis=types.SimpleNamespace(ConfigurationJSON=json.dumps(cfg)))
+            doc = types.SimpleNamespace(Objects=objects,
+                                        StudyBasis=types.SimpleNamespace(ConfigurationJSON=json.dumps(cfg)))
             svg = module.create(doc, params).read_text()
             for expected in ['Ø310', '弯臂机芯尺寸待确认', '后倾 20°', '木壳厚 14', '* 216', 'v0.3-review']:
                 with self.subTest(expected=expected):

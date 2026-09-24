@@ -14,6 +14,7 @@ from ac_inlet import installation as inlet_installation
 from feet import installation as feet_installation
 from hinges import installation as hinge_installation, dimensions as hinge_dimensions
 from fascia import dimensions as fascia_dimensions, installation as fascia_installation
+from model_sections import assign_section, section_objects
 
 ROOT = Path(__file__).resolve().parents[1]
 V = App.Vector
@@ -44,13 +45,12 @@ def build_structure():
             raise RuntimeError(f'Save manual edits separately and close {opened.Name} before rebuilding')
     doc = App.newDocument('RecordPlayerAssembly')
     doc.Label = '黑胶唱片机整机 · 安装待确认'
-    groups = {}
+    sections = {}
     for name, label in [('Cabinet','01 胡桃木外壳'), ('Front','02 倾斜格栅与灯光'),
                         ('Deck','03 浮动唱盘底板'), ('Mechanism','04 唱盘与唱臂包络'),
                         ('Audio','05 一低音两全频与独立音腔'), ('Electronics','06 电子空间占位'),
                         ('Cover','07 透明盖与铰链'), ('Feet','08 脚垫')]:
-        groups[name] = doc.addObject('App::DocumentObjectGroup', name)
-        groups[name].Label = label
+        sections[name] = []
 
     def add(name, label, shape, group, color, basis='估算 / 待选型', material='概念件', transparency=0):
         if shape.isNull() or not shape.isValid() or not shape.Solids:
@@ -59,7 +59,8 @@ def build_structure():
         obj.Label, obj.Shape = label, shape
         obj.addProperty('App::PropertyString','DimensionBasis','Design').DimensionBasis = basis
         obj.addProperty('App::PropertyString','MaterialNote','Design').MaterialNote = material
-        groups[group].addObject(obj)
+        assign_section(obj, group)
+        sections[group].append(obj)
         if App.GuiUp:
             obj.ViewObject.ShapeColor = color
             obj.ViewObject.LineColor = (0.10,0.10,0.10)
@@ -354,18 +355,18 @@ def build_structure():
     info.addProperty('App::PropertyVector','StylusPoint','Geometry').StylusPoint=stylus
     info.addProperty('App::PropertyVector','CoverHinge','Geometry').CoverHinge=hinge_dimensions(p)['axis']
     doc.recompute()
-    return doc,p,groups
+    return doc,p,sections
 
 
 def build():
     from mechanism_study import add_study
     cfg = json.loads((ROOT / 'cad/mechanism.json').read_text())
-    doc,p,groups = build_structure()
+    doc,p,sections = build_structure()
     try:
         report = add_study(doc,p,cfg)
-        for name in ['SelectedKit', 'Controls', 'FitAnalysis']:
-            groups[name] = doc.getObject(name)
-        return doc,p,groups,report
+        for name in [*sections, 'SelectedKit', 'Controls', 'FitAnalysis']:
+            sections[name] = section_objects(doc, name)
+        return doc,p,sections,report
     except Exception:
         App.closeDocument(doc.Name)
         raise
@@ -374,7 +375,7 @@ def build():
 def deliver():
     from mechanism_study import save_report
     from assembly_pose import initialize, set_cover_angle
-    doc,p,groups,report=build()
+    doc,p,sections,report=build()
     initialize(doc)
     solids=[o for o in doc.Objects if o.TypeId=='Part::Feature' and o.Shape.Solids
             and not getattr(o,'IsDiagnostic',False) and not getattr(o,'IsReference',False)]
@@ -405,13 +406,13 @@ def deliver():
         writer.writerow(['ID','零件','分组','材料说明','尺寸依据','包络X_mm','包络Y_mm','包络Z_mm'])
         for obj in solids:
             b=obj.Shape.optimalBoundingBox(False)
-            group=next(name for name,g in groups.items() if obj in g.Group)
-            writer.writerow([obj.Name,obj.Label,group,getattr(obj,'MaterialNote','机芯概念占位'),
+            section=obj.AssemblySection
+            writer.writerow([obj.Name,obj.Label,section,getattr(obj,'MaterialNote','机芯概念占位'),
                              getattr(obj,'DimensionBasis','尺寸待确认'),
                              round(b.XLength,3),round(b.YLength,3),round(b.ZLength,3)])
     if not all(report['geometry_checks'].values()):
         raise RuntimeError('Mechanism geometry/export validation failed')
-    return doc,p,groups
+    return doc,p,sections
 
 
 if __name__=='__main__':

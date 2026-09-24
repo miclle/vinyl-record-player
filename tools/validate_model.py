@@ -10,6 +10,7 @@ from hinges import check_installation as check_hinges
 from ac_inlet import installation as inlet_installation
 from feet import installation as feet_installation
 from fascia import dimensions as fascia_dimensions, installation as fascia_installation
+from model_sections import SECTION_NAMES, section_objects
 
 ROOT=Path(__file__).resolve().parents[1]
 
@@ -62,7 +63,6 @@ def _validate_document(doc,p):
         'PowerTransformer': ['Shape'],
         'Amplifier': ['Shape'],
         'ACInlet': ['Shape','ElectricalReleased','InstallationReleased'],
-        'Feet': ['Group'],
     }
     for name in ['BassPort','BearingPocket','AcousticRoof','AcousticRear','AcousticDividerLeft','AcousticDividerRight','Baffle','Bottom','Back','FloatingDeck']:
         required[name]=['Shape']
@@ -86,19 +86,25 @@ def _validate_document(doc,p):
     for name in moving_names():
         required[name].append('ClosedPlacement')
     required['StudyBasis']=['ConfigurationJSON','Status']
-    for name in ['SelectedKit','Controls','Mechanism','FitAnalysis']:
-        required[name]=['Group']
     for name in ['KitBase','KitPlatter','KitMatRings','KitSpindle','KitArmSupport','KitCurvedArm','KitCounterweight','KitHeadshell','KitCartridge','KitArmRest','UnderbodyReservation']:
         required[name]=['Shape','IsDiagnostic']
+    for obj in doc.Objects:
+        if obj.TypeId == 'Part::Feature':
+            required.setdefault(obj.Name, []).append('AssemblySection')
     missing=[]
+    invalid_sections=[]
     for name,properties in required.items():
         obj=doc.getObject(name)
         if obj is None:
             missing.append(name)
         else:
             missing.extend(name+'.'+prop for prop in properties if not hasattr(obj,prop))
-    checks['required_model_fields_present']=not missing
-    if not checks['build_parameters_match'] or not checks['mechanism_parameters_match'] or missing:
+            if (obj.TypeId == 'Part::Feature' and hasattr(obj, 'AssemblySection')
+                    and obj.AssemblySection not in SECTION_NAMES):
+                invalid_sections.append(f'{name}.AssemblySection={obj.AssemblySection!r}')
+    checks['required_model_fields_present']=not missing and not invalid_sections
+    if (not checks['build_parameters_match'] or not checks['mechanism_parameters_match']
+            or missing or invalid_sections):
         result['errors']=[]
         if not checks['build_parameters_match']:
             result['errors'].append('模型参数快照缺失、无效或与当前参数不一致，请重新生成模型')
@@ -106,12 +112,19 @@ def _validate_document(doc,p):
             result['errors'].append('机芯参数快照与当前参数不一致，请重新生成整机')
         if missing:
             result['errors'].append('模型缺少必需对象或属性：'+', '.join(missing))
+        if invalid_sections:
+            result['errors'].append('模型零件分类无效：'+', '.join(invalid_sections))
         return finish()
     set_cover_angle(doc,p,0)
     objects=[o for o in doc.Objects if o.TypeId=='Part::Feature' and not o.Shape.isNull()
              and not getattr(o,'IsDiagnostic',False) and not getattr(o,'IsReference',False)]
-    checks['reference_objects_excluded']=bool(doc.Mechanism.Group) and all(getattr(o,'IsReference',False) for o in doc.Mechanism.Group)
-    checks['diagnostic_objects_excluded']=bool(doc.FitAnalysis.Group) and all(getattr(o,'IsDiagnostic',False) for o in doc.FitAnalysis.Group)
+    references=section_objects(doc, 'Mechanism')
+    diagnostics=section_objects(doc, 'FitAnalysis')
+    checks['flat_part_tree']=(not any(o.TypeId == 'App::DocumentObjectGroup' for o in doc.Objects)
+                              and all(o in doc.RootObjects for o in doc.Objects
+                                      if o.TypeId == 'Part::Feature'))
+    checks['reference_objects_excluded']=bool(references) and all(getattr(o,'IsReference',False) for o in references)
+    checks['diagnostic_objects_excluded']=bool(diagnostics) and all(getattr(o,'IsDiagnostic',False) for o in diagnostics)
     checks['all_shapes_valid']=all(o.Shape.isValid() and len(o.Shape.Solids)>0 for o in objects)
     compound=Part.makeCompound([o.Shape for o in objects]);bb=compound.BoundBox
     metrics['part_count']=len(objects);metrics['solid_count']=len(compound.Solids)
@@ -141,8 +154,8 @@ def _validate_document(doc,p):
         and abs(float(o.ReservedDepth)+float(o.FlangeThickness)-float(o.TotalHeight))<1e-6
         for o in drivers)
     checks['platter_diameter']=abs(doc.KitPlatter.Shape.optimalBoundingBox(False).XLength-cfg['platter_diameter'])<1e-6
-    mechanisms=doc.SelectedKit.Group+doc.Controls.Group
-    stationary=doc.getObject('Cabinet').Group+mechanisms+doc.getObject('Deck').Group+[doc.Fascia]
+    mechanisms=section_objects(doc, 'SelectedKit', 'Controls')
+    stationary=section_objects(doc, 'Cabinet')+mechanisms+section_objects(doc, 'Deck')+[doc.Fascia]
     lid=doc.getObject('DustCover').Shape
     def volume(a,b):
         if not a.BoundBox.intersect(b.BoundBox):return 0.0
@@ -176,7 +189,7 @@ def _validate_document(doc,p):
         reserved.append((o.Name,full))
     reservation_collisions=[]
     for name,shape in reserved:
-        for boundary in boundaries+[doc.getObject('BassPort')]+mechanisms+doc.getObject('Electronics').Group:
+        for boundary in boundaries+[doc.getObject('BassPort')]+mechanisms+section_objects(doc, 'Electronics'):
             v=volume(shape,boundary.Shape)
             if v>1e-5:reservation_collisions.append({'part':name,'boundary':boundary.Name,'volume_mm3':v})
     for i,(name,shape) in enumerate(reserved):
@@ -367,7 +380,7 @@ def check_acoustics(doc,p,reserved):
                            'AcousticRear','AcousticDividerLeft','AcousticDividerRight','BearingPocket']]
     # Purchased assemblies close the new panel openings in the nominal CAD.
     # Do not cap missing mounts: a real saved-geometry leak must still fail.
-    walls.extend(o.Shape for o in doc.Feet.Group)
+    walls.extend(o.Shape for o in section_objects(doc, 'Feet'))
     barrier=walls[0].multiFuse(walls[1:]+caps)
     # The outside remains connected; closed acoustic voids form separate solids.
     region=Part.makeBox(W+4,D+4,H+4,V(-2,-2,-2))

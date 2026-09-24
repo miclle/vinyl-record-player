@@ -8,7 +8,7 @@ from hinges import moving_names, rotation as hinge_rotation
 ROOT=Path(__file__).resolve().parents[1]
 
 
-def render(doc,p,groups):
+def render(doc,p,sections):
     view=Gui.activeDocument().activeView()
     view.stopAnimating()
     view.setAnimationEnabled(False)
@@ -36,11 +36,11 @@ def render(doc,p,groups):
     doc.getObject('ACInlet').ViewObject.Visibility=True
     view.setCameraOrientation(App.Rotation(App.Vector(1,0,0),180).Q);view.fitAll();save('bottom.png')
     # Top view intentionally omits the cover to show mechanical layout.
-    for obj in groups['Cover'].Group:obj.ViewObject.Visibility=False
+    for obj in sections['Cover']:obj.ViewObject.Visibility=False
     view.setCameraOrientation(App.Rotation().Q);view.fitAll();save('top.png')
     visible={obj.Name:obj.ViewObject.Visibility for obj in doc.Objects if obj.TypeId=='Part::Feature'}
     for key in ['Front','SelectedKit','Controls','Deck']:
-        for obj in groups[key].Group:obj.ViewObject.Visibility=False
+        for obj in sections[key]:obj.ViewObject.Visibility=False
     for name in ['AcousticRoof','Baffle','BearingPocket']:
         doc.getObject(name).ViewObject.Visibility=False
     floor=doc.getObject('Bottom')
@@ -50,7 +50,7 @@ def render(doc,p,groups):
     view.viewTop();view.fitAll();save('audio-layout.png')
     floor.ViewObject.ShapeColor=floor_color
     for name,value in visible.items():doc.getObject(name).ViewObject.Visibility=value
-    for obj in groups['Cover'].Group:obj.ViewObject.Visibility=True
+    for obj in sections['Cover']:obj.ViewObject.Visibility=True
     iso()
     doc.recompute()
     render_foot_detail(doc)

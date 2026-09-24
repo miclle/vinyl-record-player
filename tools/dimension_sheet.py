@@ -8,14 +8,14 @@ from pathlib import Path
 import FreeCAD as App
 import Part
 import TechDraw
+from model_sections import section_objects
 
 ROOT=Path(__file__).resolve().parents[1]
 
 
 def create(doc,p):
     def projection(names,direction,rotation):
-        objs=[]
-        for name in names:objs.extend(doc.getObject(name).Group)
+        objs=section_objects(doc, *names)
         svg=TechDraw.projectToSVG(Part.makeCompound([o.Shape for o in objs]),App.Vector(*direction))
         svg=re.sub(r'\bid\s*=\s*"[^"]*"','',svg).replace('stroke-width="1.0"','stroke-width="0.35"')
         return '<g transform="rotate(%s)">%s</g>'%(rotation,svg)

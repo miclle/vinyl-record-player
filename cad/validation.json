@@ -5,6 +5,7 @@
     "build_parameters_match": true,
     "mechanism_parameters_match": true,
     "required_model_fields_present": true,
+    "flat_part_tree": true,
     "reference_objects_excluded": true,
     "diagnostic_objects_excluded": true,
     "all_shapes_valid": true,

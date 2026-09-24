@@ -9,6 +9,7 @@ import math
 from pathlib import Path
 import FreeCAD as App
 import Part
+from model_sections import assign_section, section_objects
 from hinges import moving_names, rotation as hinge_rotation, check_installation, interference_volume
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -135,25 +136,14 @@ def closed_cover_metrics(lid, shapes):
 def add_study(doc, base_parameters, cfg):
     """Add the measured mechanism study to the generated main assembly."""
     measurement_datums(cfg, 0)  # Reject inconsistent measurement chains before opening documents.
-    groups = {name: doc.getObject(name) for name in
-              ['Cabinet', 'Front', 'Deck', 'Audio', 'Electronics', 'Cover', 'Feet']}
-    controls = doc.addObject('App::DocumentObjectGroup', 'Controls')
-    controls.Label = '原外观旋钮占位（套装控制接口待确认）'
+    obstacle_sections = ['Cabinet', 'Front', 'Deck', 'Audio', 'Electronics', 'Cover', 'Feet']
     for name in ['ControlBase', 'ControlKnob']:
         obj = doc.getObject(name)
-        doc.Mechanism.removeObject(obj)
-        controls.addObject(obj)
-    doc.Mechanism.Label = '历史参考 · 通用机芯（不参与当前装配）'
-    for obj in doc.Mechanism.Group:
+        assign_section(obj, 'Controls')
+    for obj in section_objects(doc, 'Mechanism'):
         obj.addProperty('App::PropertyBool', 'IsReference', 'Design').IsReference = True
         if App.GuiUp:
             obj.ViewObject.Visibility = False
-    if App.GuiUp:
-        doc.Mechanism.ViewObject.Visibility = False
-    kit = doc.addObject('App::DocumentObjectGroup', 'SelectedKit')
-    kit.Label = '当前弯臂机芯 · 部分实测／局部估算'
-    analysis = doc.addObject('App::DocumentObjectGroup', 'FitAnalysis')
-    analysis.Label = '安装包络与干涉 · 非实物零件'
     # Preserve inherited electronic spaces without claiming the kit needs a preamp.
     doc.getObject('Amplifier').Label = '功放板 · 含散热片整体包络（用户提供尺寸）'
     doc.getObject('PhonoBoard').Label = '备用电子预留区（不代表另需唱放）'
@@ -167,7 +157,7 @@ def add_study(doc, base_parameters, cfg):
         obj.Label, obj.Shape = label, shape
         obj.addProperty('App::PropertyBool', 'IsDiagnostic', 'Study').IsDiagnostic = diagnostic
         obj.addProperty('App::PropertyString', 'DimensionBasis', 'Study').DimensionBasis = cfg['assumption_note']
-        (analysis if diagnostic else kit).addObject(obj)
+        assign_section(obj, 'FitAnalysis' if diagnostic else 'SelectedKit')
         if App.GuiUp:
             obj.ViewObject.ShapeColor = color
             obj.ViewObject.DisplayMode = 'Flat Lines'
@@ -261,7 +251,7 @@ def add_study(doc, base_parameters, cfg):
     envelope = add('UnderbodyReservation', '局部下探估算 · 电机／传动／回臂，覆盖不完整', underbody, (1.0, 0.60, 0.15), True)
     if App.GuiUp:
         envelope.ViewObject.Transparency = 65
-    obstacles = [o for group in groups.values() for o in group.Group]
+    obstacles = section_objects(doc, *obstacle_sections)
     overlaps = []
     for obj in obstacles:
         if not underbody.BoundBox.intersect(obj.Shape.BoundBox):
@@ -274,14 +264,15 @@ def add_study(doc, base_parameters, cfg):
                 hit.ViewObject.Transparency = 10
     hinge_checks, hinge_metrics = check_installation(doc, base_parameters)
     lid = doc.getObject('DustCover').Shape
-    lid_overlap, lid_clearance = closed_cover_metrics(lid, [o.Shape for o in kit.Group])
+    kit = section_objects(doc, 'SelectedKit')
+    lid_overlap, lid_clearance = closed_cover_metrics(lid, [o.Shape for o in kit])
     roof_top = doc.getObject('AcousticRoof').Shape.optimalBoundingBox(False).ZMax
     states = []
     moving = Part.makeCompound([doc.getObject(name).Shape for name in moving_names()])
     for compression in cfg['spring_compression_range']:
         state = measurement_datums(cfg, h, compression)
         shifted_parts = []
-        for obj in kit.Group:
+        for obj in kit:
             shape = obj.Shape.copy()
             shape.translate(V(0, 0, state['seat_z_mm']-seat))
             shifted_parts.append((obj.Name, shape))
@@ -377,29 +368,29 @@ def render_study(doc, cfg):
     save('mechanism-open.png')
     for name,original in originals.items():doc.getObject(name).Placement=original
     for name in ['Cover', 'SelectedKit', 'Controls', 'Front', 'Deck']:
-        for obj in doc.getObject(name).Group:
+        for obj in section_objects(doc, name):
             obj.ViewObject.Visibility = False
-    for obj in doc.getObject('Cabinet').Group:
+    for obj in section_objects(doc, 'Cabinet'):
         obj.ViewObject.Transparency = 75
     doc.getObject('AcousticRoof').ViewObject.Visibility = False
     doc.getObject('BearingPocket').ViewObject.Visibility = False
-    for obj in doc.getObject('FitAnalysis').Group:
+    for obj in section_objects(doc, 'FitAnalysis'):
         obj.ViewObject.Visibility = obj.Name in ['UnderbodyReservation', 'InterferenceAcousticRoof']
     save('mechanism-clearance.png')
     doc.getObject('AcousticRoof').ViewObject.Visibility = True
     doc.getObject('BearingPocket').ViewObject.Visibility = True
-    for obj in doc.getObject('FitAnalysis').Group:
+    for obj in section_objects(doc, 'FitAnalysis'):
         obj.ViewObject.Visibility = False
-    for obj in doc.getObject('Cabinet').Group:
+    for obj in section_objects(doc, 'Cabinet'):
         obj.ViewObject.Transparency = 0
     for name in ['Cover', 'SelectedKit', 'Controls', 'Front', 'Deck']:
-        for obj in doc.getObject(name).Group:
+        for obj in section_objects(doc, name):
             obj.ViewObject.Visibility = True
     doc.recompute()
     visibility = {o.Name: o.ViewObject.Visibility for o in doc.Objects if o.TypeId == 'Part::Feature'}
     for obj in doc.Objects:
         if obj.TypeId == 'Part::Feature':
-            obj.ViewObject.Visibility = obj in doc.SelectedKit.Group or obj.Name == 'UnderbodyReservation'
+            obj.ViewObject.Visibility = obj in section_objects(doc, 'SelectedKit') or obj.Name == 'UnderbodyReservation'
     view.viewRight()
     view.fitAll()
     from pivy import coin

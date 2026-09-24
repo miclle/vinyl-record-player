@@ -26,7 +26,7 @@
 | 原机扬声器 | 2 × 2 英寸全频 + 1 × 4 英寸低音 | 本方案改用用户提供的 SC-2103 拆机件，尺寸与 HYM 不同 |
 | 灯光 | 3000 K | 建立灯带与扩散片实体，CAD 色彩只作示意 |
 
-上述原机唱盘与唱臂参数保留在 `cad/parameters.json`，驱动主 CAD 中隐藏的 `Mechanism` 历史参考组及图册附录。当前 `SelectedKit` 使用 `cad/mechanism.json`：Ø280 mm 唱盘借用直臂配图作占位，弯臂按照片近似停放外观，没有已确认的轴距、有效臂长、超距或偏置角。详见[机芯尺寸依据](mechanism.md#尺寸依据)。
+上述原机唱盘与唱臂参数保留在 `cad/parameters.json`，驱动主 CAD 中 `AssemblySection=Mechanism` 的隐藏历史参考件及图册附录。当前 `AssemblySection=SelectedKit` 的对象使用 `cad/mechanism.json`：Ø280 mm 唱盘借用直臂配图作占位，弯臂按照片近似停放外观，没有已确认的轴距、有效臂长、超距或偏置角。详见[机芯尺寸依据](mechanism.md#尺寸依据)。
 
 ## 外观分析
 

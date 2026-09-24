@@ -18,6 +18,7 @@ from drawing_details import panel_details, baffle_section
 from hinges import dimensions as hinge_dimensions
 from fascia import dimensions as fascia_dimensions
 from mechanism_notes import spring_positions_note
+from model_sections import section_objects
 
 ROOT = Path(__file__).resolve().parents[1]
 V = App.Vector
@@ -220,7 +221,7 @@ def collect(root=ROOT, project=True):
             for name,(thickness,notes) in kitnotes.items():
                 add(name,3,thickness,notes+['部分尺寸已实测；近似轮廓与支点不可直接用于加工。'],source='main')
             # Baseline generic mechanism is historical context, kept in a compact appendix.
-            for obj in base.Mechanism.Group:
+            for obj in section_objects(base, 'Mechanism'):
                 if obj.Name not in covered:
                     add(obj.Name,4,None,['历史参考通用机芯；不参与当前装配或 STEP。','壁厚未定义；此处只记录现存实体的 XYZ 包络。'],source='reference')
             physical={o.Name for o in base.Objects if o.TypeId=='Part::Feature'
@@ -238,7 +239,7 @@ def collect(root=ROOT, project=True):
                 ('generic','基线通用机芯 / 历史对照',base,['Mechanism'],('top','front','right')),
             ]
             for key,title,doc,groups,views in specs:
-                objects=[o for g in groups for o in doc.getObject(g).Group]
+                objects=section_objects(doc, *groups)
                 if key=='internal':
                     objects=[o for o in objects if o.Name not in ['AcousticRoof','SideRight','SideLeft','Back','Baffle','AcousticRear']]
                 # Bottom view of the full assembly includes the downward-facing woofer.
