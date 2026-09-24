@@ -17,6 +17,7 @@ from reportlab.lib.colors import HexColor
 from reportlab.graphics import renderPDF
 from svglib.svglib import svg2rlg
 from drawing_detail_pages import hole_sheet_page, section_page
+from mechanism_notes import spring_positions_note
 
 ROOT=Path(__file__).resolve().parents[1]
 MM=72/25.4
@@ -212,7 +213,7 @@ def intro(book,data):
         '备料与厚度：木板另列整数矩形备料 L × W × T；斜板需按成形轮廓修切。板厚按法向计，空心罩标壁厚；未知厚度明确注明。名义板厚须实测，锯缝、贴皮和装配余量另核。',
         '投影约定：这是独立命名的正投影视图集，布局不采用统一第一角或第三角排列；各视图比例单独注明。小件可放大，薄件侧视尺寸文字记录真实厚度。打印采用 A3、100% 实际大小。',
         '同形件：侧板、格栅、隔板、脚垫等用代表件图形加数量，安装位置见附表。左右后板及承托梁按独立实体分别出图，避免把跨空区包络当成单块尺寸。',
-        '当前配置：整机六面图采用选定弯臂核对版；共用结构取基线同形实体。选定机芯安装未放行，355 × 280 × 45 为参考 / 假设包络，不能视为已确认供应商尺寸。',
+        '当前配置：整机六面图采用选定弯臂核对版；共用结构取基线同形实体。选定机芯采用部分实测尺寸；局部下探轮廓仍为估算，安装未放行。',
     ]
     y=127
     for paragraph in paragraphs:
@@ -307,10 +308,13 @@ def make_books(data,out,font):
                 f'顶板 Z={num(ac["roof_bottom_z"])}..{num(roof_top)}；底板上表面 Z={num(p["foot_height"]+p["wall"])}；后部电源和功放区与前部全频腔分隔。'])
         else:
             cfg=data['mechanism']
+            compress_min, compress_max = cfg['spring_compression_range']
+            depth_min = cfg['seat_to_motor_bottom'] - cfg['spring_free_height'] + compress_min
+            depth_max = cfg['seat_to_motor_bottom'] - cfg['spring_free_height'] + compress_max
             assembly_page(book,assemblies['selected-kit'],['top','front','right'],'选定弯臂机芯 / 停放姿态','C-00',[
-                f'参考平面包络 {num(cfg["nominal_width"])} × {num(cfg["nominal_depth"])}；假设下探深度 {num(cfg["underbody_depth_assumption"])}；唱盘 Ø{num(cfg["platter_diameter"])} × {num(cfg["platter_thickness"])}。',
-                '上图投影是已建模的上部外观实体；不把矩形下探诊断包络当成实体机芯或零件。',
-                f'安装面 Z={num(H)}；音腔顶板顶面 Z={num(roof_top)}，现有净深 {num(H-roof_top)}；假设下探多需 {num(max(0,cfg["underbody_depth_assumption"]-(H-roof_top)))}，真实安装方案尚未确认。'])
+                f'图示宽 {num(cfg["nominal_width"])}；实测唱盘 Ø{num(cfg["platter_diameter"])} × {num(cfg["platter_thickness"])}，总高 {num(cfg["total_height"])}；平台 {num(cfg["platform_width"])} × {num(cfg["platform_length"])} × {num(cfg["platform_thickness"])}。',
+                f'弹簧自由高 {num(cfg["spring_free_height"])}，估计压缩{num(compress_min)}–{num(compress_max)}；本图显示压缩 {num(cfg["display_spring_compression"])}。支点{spring_positions_note(cfg)}，不能据此钻孔。',
+                f'承托面 Z={num(H)}；电机下探约{num(depth_min)}–{num(depth_max)}；现有顶板净深 {num(H-roof_top)}。图示仅含上部及弹簧，局部底部估算体另见核对模型。'])
         pages={}
         for card in cards:
             pages.setdefault(card['drawing_code'],[]).append(card)

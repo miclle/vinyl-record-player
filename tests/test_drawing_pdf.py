@@ -13,6 +13,57 @@ AVAILABLE=importlib.util.find_spec('reportlab') and importlib.util.find_spec('sv
 @unittest.skipUnless(AVAILABLE, 'PDF runtime dependencies are separate from FreeCAD')
 class PDFProjectionTests(unittest.TestCase):
     @unittest.skipUnless(os.environ.get('FREECAD_RESOURCES'), 'Set FREECAD_RESOURCES for the full drawing pipeline')
+    def test_nondefault_spring_positions_match_saved_solids_and_both_pdf_notes(self):
+        import json
+        import shutil
+        import subprocess
+        import tempfile
+        import reportlab
+        from pypdf import PdfReader
+        import drawing_pack
+
+        resources = Path(os.environ['FREECAD_RESOURCES'])
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / 'cad').mkdir()
+            for name in ['parameters.json', 'lumi-three-driver.FCStd', 'selected-mechanism.json']:
+                shutil.copy2(ROOT / 'cad' / name, root / 'cad' / name)
+            path = root / 'cad/selected-mechanism.json'
+            cfg = json.loads(path.read_text())
+            cfg.update(spring_clock_hours=[2.5, 5, 9], spring_radius=100)
+            path.write_text(json.dumps(cfg))
+            script = '''import sys,json,math
+from pathlib import Path
+sys.path.insert(0,sys.argv[1])
+import FreeCAD as App
+import mechanism_study as m,drawing_data
+m.ROOT=Path(sys.argv[2])
+doc,cfg,report=m.build_study()
+App.closeDocument(doc.Name)
+doc=App.openDocument(str(m.ROOT/'cad/lumi-selected-mechanism-fit.FCStd'))
+for spring,hour in zip(doc.KitBase.Shape.Solids[1:],cfg['spring_clock_hours']):
+    b=spring.optimalBoundingBox(False)
+    assert abs(b.Center.x-(cfg['platter_center_x']+100*math.sin(hour*math.pi/6)))<1e-5
+    assert abs(b.Center.y-(cfg['platter_center_y']+100*math.cos(hour*math.pi/6)))<1e-5
+App.closeDocument(doc.Name)
+data=drawing_data.collect(m.ROOT)
+(m.ROOT/'data.json').write_text(json.dumps(data))
+'''
+            subprocess.run([str(resources / 'bin/python'), '-c', script,
+                            str(ROOT / 'tools'), str(root)],
+                           env=dict(os.environ, PYTHONPATH=str(resources / 'lib')),
+                           check=True, capture_output=True, text=True)
+            data = json.loads((root / 'data.json').read_text())
+            card = next(c for c in data['cards'] if c['key'] == 'KitBase')
+            self.assertIn('R100，约2.5/5/9点', ' '.join(card['notes']))
+            font = Path(reportlab.__file__).parent / 'fonts/Vera.ttf'
+            drawing_pack.make_books(data, root, font)
+            pdf = PdfReader(root / '03-mechanism-and-electronics.pdf')
+            for code in ['C-00', 'C-P05']:
+                page = next(p for p in pdf.pages if code in p.extract_text() and '2.5/5/9' in p.extract_text())
+                self.assertNotIn('1/4/8', page.extract_text())
+
+    @unittest.skipUnless(os.environ.get('FREECAD_RESOURCES'), 'Set FREECAD_RESOURCES for the full drawing pipeline')
     def test_all_books_complete_with_position_tables_and_stable_part_codes(self):
         import hashlib
         import json

@@ -1,23 +1,83 @@
 """Candidate curved-arm kit overlay. Preserves the existing assembly unchanged.
 
-Builds an explicitly unconfirmed envelope and reports interference, rather than
-silently resizing speaker chambers to fit an unmeasured bought-in mechanism.
+Uses partial measurements and explicitly assumed local envelopes. Reports fit
+conflicts without cutting the cabinet from incomplete bought-in part dimensions.
 """
 import hashlib
 import json
+import math
 import shutil
 import tempfile
 from pathlib import Path
 import FreeCAD as App
 import Part
-from hinges import moving_names, rotation as hinge_rotation, check_installation
+from hinges import moving_names, rotation as hinge_rotation, check_installation, interference_volume
 
 ROOT = Path(__file__).resolve().parents[1]
 V = App.Vector
 
 
+def measurement_datums(cfg, support_z, compression=None):
+    """Keep support plane, spring seat and platform faces distinct."""
+    compression = cfg['display_spring_compression'] if compression is None else compression
+    lo, hi = cfg['spring_compression_range']
+    if not 0 <= lo <= compression <= hi < cfg['spring_free_height']:
+        raise ValueError('Invalid spring compression range or display state')
+    if not math.isclose(cfg['total_height'], cfg['seat_to_motor_bottom'] +
+                        cfg['platform_thickness'] + cfg['arm_support_height']):
+        raise ValueError('Measured height chain must equal total_height')
+    height = cfg['spring_free_height'] - compression
+    seat = support_z + height
+    cx, cy = cfg['platter_center_x'], cfg['platter_center_y']
+    points = [[cx + cfg['spring_radius'] * math.sin(hour * math.pi / 6),
+               cy + cfg['spring_radius'] * math.cos(hour * math.pi / 6)]
+              for hour in cfg['spring_clock_hours']]
+    return dict(support_z_mm=support_z, spring_height_mm=height,
+                spring_compression_mm=compression, seat_z_mm=seat,
+                platform_top_z_mm=seat + cfg['platform_thickness'],
+                lowest_z_mm=seat - cfg['seat_to_motor_bottom'],
+                highest_z_mm=seat + cfg['platform_thickness'] + cfg['arm_support_height'],
+                motor_depth_below_support_mm=cfg['seat_to_motor_bottom'] - height,
+                spring_centers_xy_mm=points)
+
+
+def local_underbody(cfg, seat):
+    """Illustrative local regions, NOT a complete or verified machining envelope."""
+    a = cfg['appearance_assumptions']
+    cx, cy = cfg['platter_center_x'], cfg['platter_center_y']
+    mx, my = a['motor_offset']
+    motor = Part.makeCylinder(a['motor_diameter']/2, cfg['seat_to_motor_bottom'],
+                             V(cx+mx, cy+my, seat-cfg['seat_to_motor_bottom']))
+    transmission = Part.makeCylinder(a['transmission_diameter']/2, a['transmission_depth'],
+                                    V(cx, cy, seat-a['transmission_depth']))
+    width, depth, height = a['return_size']
+    rx, ry = a['return_offset']
+    linkage = Part.makeBox(width, depth, height, V(cx+rx-width/2, cy+ry-depth/2, seat-height))
+    return motor.fuse(transmission).fuse(linkage).removeSplitter()
+
+
+def closed_cover_metrics(lid, shapes):
+    """Measure exact clearance, pruning parts whose bounding boxes are farther.
+
+    Intersecting boxes use zero as their lower bound, including containment;
+    only separated boxes can provide a positive distance lower bound.
+    """
+    overlap = sum(interference_volume(lid, shape) for shape in shapes)
+    if overlap > 1e-5:
+        return overlap, 0.0
+    best = float('inf')
+    for shape in shapes:
+        b = shape.BoundBox
+        box = Part.makeBox(b.XLength, b.YLength, b.ZLength, V(b.XMin,b.YMin,b.ZMin))
+        bound = 0 if lid.common(box).Volume > 1e-9 else lid.distToShape(box)[0]
+        if bound < best:
+            best = min(best, lid.distToShape(shape)[0])
+    return overlap, best
+
+
 def build_study():
     cfg = json.loads((ROOT / 'cad/selected-mechanism.json').read_text())
+    measurement_datums(cfg, 0)  # Reject inconsistent measurement chains before opening documents.
     base_path = ROOT / 'cad/lumi-three-driver.FCStd'
     output_path = ROOT / 'cad/lumi-selected-mechanism-fit.FCStd'
     # Reopening a saved file changes its document name; also match its real path.
@@ -32,7 +92,7 @@ def build_study():
         try:
             base_parameters = json.loads(source.getObject('GeometryDatums').BuildParametersJSON)
             doc = App.newDocument('LumiMechanismStudy')
-            doc.Label = '弯臂机芯装配核对 · 尺寸待确认'
+            doc.Label = '弯臂机芯装配核对 · 部分实测 v0.4'
             groups = {}
             for group_name in ['Cabinet', 'Front', 'Deck', 'Audio', 'Electronics', 'Cover', 'Feet']:
                 group = doc.addObject('App::DocumentObjectGroup', group_name)
@@ -47,7 +107,7 @@ def build_study():
         finally:
             App.closeDocument(source.Name)
     kit = doc.addObject('App::DocumentObjectGroup', 'SelectedKit')
-    kit.Label = '指定弯臂款 · 外观占位'
+    kit.Label = '指定弯臂款 · 部分实测／局部估算'
     analysis = doc.addObject('App::DocumentObjectGroup', 'FitAnalysis')
     analysis.Label = '安装包络与干涉 · 非实物零件'
     # Preserve inherited electronic spaces without claiming the kit needs a preamp.
@@ -72,38 +132,67 @@ def build_study():
         return obj
 
     h = base_parameters['cabinet_top']
+    datums = measurement_datums(cfg, h)
+    a = cfg['appearance_assumptions']
+    seat, platform_top = datums['seat_z_mm'], datums['platform_top_z_mm']
     cx, cy, radius = cfg['platter_center_x'], cfg['platter_center_y'], cfg['platter_diameter'] / 2
-    left, front = cx - radius, cy - cfg['nominal_depth'] / 2
-    right = left + cfg['nominal_width']
-    plate = Part.makeCylinder(radius, 2, V(cx, cy, h))
-    wing = Part.makeBox(right - (cx + radius - 25), 80, 2, V(cx + radius - 25, cy + 45, h))
-    add('KitBase', '一体机芯基座外观占位', plate.fuse(wing))
-    platter_top = h + 2 + cfg['platter_thickness']
-    add('KitPlatter', f"候选 Ø{cfg['platter_diameter']:g} 唱盘（弯臂尺寸待确认）", Part.makeCylinder(radius, cfg['platter_thickness'], V(cx, cy, h + 2)))
+    right = cx - radius + cfg['nominal_width']
+    plate = Part.makeCylinder(radius, a['base_disc_thickness'], V(cx, cy, seat))
+    wing = Part.makeBox(cfg['platform_width'], cfg['platform_length'], cfg['platform_thickness'],
+                       V(right-cfg['platform_width'], cy+a['platform_rear_offset']-cfg['platform_length'], seat))
+    # Hollow sleeves depict spring outside space only; wire/rate are unmeasured.
+    springs = []
+    sr = a['spring_outer_diameter']/2
+    for sx, sy in datums['spring_centers_xy_mm']:
+        outer = Part.makeCylinder(sr, datums['spring_height_mm'], V(sx, sy, h))
+        inner = Part.makeCylinder(sr-a['spring_wall'], datums['spring_height_mm'], V(sx, sy, h))
+        springs.append(outer.cut(inner))
+    add('KitBase', '机芯基座与三弹簧 · 平台实测／弹簧外径暂估',
+        Part.makeCompound([plate.fuse(wing).removeSplitter(), *springs]))
+    platter_bottom = platform_top + a['platter_bottom_above_platform']
+    platter_top = platter_bottom + cfg['platter_thickness']
+    add('KitPlatter', f"实测唱盘 Ø{cfg['platter_diameter']:g} × {cfg['platter_thickness']:g} mm",
+        Part.makeCylinder(radius, cfg['platter_thickness'], V(cx, cy, platter_bottom)))
     rings = []
     for r in [radius * 0.3, radius * 0.54, radius * 0.72, radius - 4]:
         rings.append(Part.makeCylinder(r, 0.3, V(cx, cy, platter_top)).cut(Part.makeCylinder(r - 0.5, 0.3, V(cx, cy, platter_top))))
     add('KitMatRings', '唱盘表面环纹示意', Part.makeCompound(rings), (0.24, 0.25, 0.26))
     add('KitSpindle', '机芯主轴示意', Part.makeCylinder(3.5, 10, V(cx, cy, platter_top)), (0.72, 0.74, 0.76))
-    pivot = V(right - 45, cy + 96, h + 35)
-    add('KitArmSupport', '机芯自带唱臂支座示意', Part.makeBox(25, 33, 35, V(pivot.x - 12.5, pivot.y - 16.5, h)))
-    curve = Part.BSplineCurve()
-    curve.interpolate([pivot, V(pivot.x, cy + 46, h + 35), V(pivot.x + 3, cy - 12, h + 32),
-                       V(pivot.x + 19, cy - 56, h + 28), V(pivot.x + 33, cy - 86, h + 27),
-                       V(pivot.x + 21, cy - 106, h + 27)])
-    wire = Part.Wire(curve.toShape())
-    circle = Part.Wire(Part.makeCircle(3.2, pivot, curve.tangent(curve.FirstParameter)[0]))
-    add('KitCurvedArm', '弯臂外观近似（停放姿态）', wire.makePipeShell([circle], True, False), (0.72, 0.74, 0.76))
-    add('KitCounterweight', '后部配重外观示意', Part.makeCylinder(10, 16, V(pivot.x, pivot.y + 17, h + 35), V(0, 1, 0)))
-    add('KitHeadshell', '唱头壳外观占位', Part.makeBox(18, 27, 6, V(pivot.x + 8, cy - 130, h + 21)))
-    add('KitCartridge', '随套装唱头占位（型号待核实）', Part.makeBox(12, 19, 5, V(pivot.x + 11, cy - 129, h + 16)))
-    add('KitArmRest', '停臂架外观示意', Part.makeCylinder(4, 27, V(pivot.x + 2, cy + 25, h)))
+    upper_height = cfg['arm_support_height']
+    pivot = V(right - 45, cy + 96, platform_top + upper_height - 10)
+    add('KitArmSupport', f"唱臂支座 · 高{upper_height:g}实测／外形暂估",
+        Part.makeBox(25, 33, upper_height, V(pivot.x - 12.5, pivot.y - 16.5, platform_top)))
+    # User's total arm length is NOT pivot-to-stylus length. Temporarily use it
+    # as the parked assembly's longitudinal span, including weight and head.
+    arm_front = pivot.y + 33 - cfg['arm_total_length']
+    # Two tangent circular bends keep this unmeasured outline analytic. A
+    # interpolated spline pipe produced unstable STEP volumes and slow booleans.
+    bend = 10.5
+    y0 = cy - 35
+    start = V(pivot.x, y0, pivot.z)
+    middle = V(pivot.x+bend, y0-bend, pivot.z)
+    end = V(pivot.x+2*bend, y0-2*bend, pivot.z)
+    q = bend / math.sqrt(2)
+    edges = [Part.makeLine(pivot, start),
+             Part.Arc(start, V(pivot.x+bend-q, y0-q, pivot.z), middle).toShape(),
+             Part.Arc(middle, V(pivot.x+bend+q, y0-2*bend+q, pivot.z), end).toShape(),
+             Part.makeLine(end, V(pivot.x+2*bend, arm_front+16, pivot.z))]
+    wire = Part.Wire(edges)
+    slope = math.degrees(math.atan2(9, pivot.y-(arm_front+16)))
+    wire.rotate(pivot, V(1,0,0), slope)
+    tangent = V(0, -math.cos(math.radians(slope)), -math.sin(math.radians(slope)))
+    circle = Part.Wire(Part.makeCircle(3.2, pivot, tangent))
+    add('KitCurvedArm', f"弯臂停放示意 · 总长{cfg['arm_total_length']:g}非有效臂长",
+        wire.makePipeShell([circle], True, False), (0.72, 0.74, 0.76))
+    add('KitCounterweight', '后部配重外观示意', Part.makeCylinder(10, 16, V(pivot.x, pivot.y + 17, pivot.z), V(0, 1, 0)))
+    add('KitHeadshell', '唱头壳外观占位', Part.makeBox(18, 27, 6, V(pivot.x + 8, arm_front, pivot.z-15)))
+    add('KitCartridge', '随套装唱头占位（型号待核实）', Part.makeBox(12, 19, 5, V(pivot.x + 11, arm_front+1, pivot.z-20)))
+    add('KitArmRest', '停臂架示意 · 自带限位器未建模', Part.makeCylinder(4, 27, V(pivot.x + 2, cy + 25, platform_top)))
 
-    underbody = Part.makeBox(cfg['nominal_width'], cfg['nominal_depth'], cfg['underbody_depth_assumption'],
-                             V(left, front, h - cfg['underbody_depth_assumption']))
-    envelope = add('UnderbodyReservation', f"机芯下探包络 · {cfg['underbody_depth_assumption']:g} mm 为假设", underbody, (1.0, 0.60, 0.15), True)
+    underbody = local_underbody(cfg, seat)
+    envelope = add('UnderbodyReservation', '局部下探估算 · 电机／传动／回臂，覆盖不完整', underbody, (1.0, 0.60, 0.15), True)
     if App.GuiUp:
-        envelope.ViewObject.Transparency = 80
+        envelope.ViewObject.Transparency = 65
     obstacles = [o for group in groups.values() for o in group.Group]
     overlaps = []
     for obj in obstacles:
@@ -116,14 +205,47 @@ def build_study():
             if App.GuiUp:
                 hit.ViewObject.Transparency = 10
     hinge_checks, hinge_metrics = check_installation(doc, base_parameters)
-    upper = Part.makeCompound([o.Shape for o in kit.Group])
     lid = doc.getObject('DustCover').Shape
-    lid_overlap = lid.common(upper).Volume
+    lid_overlap, lid_clearance = closed_cover_metrics(lid, [o.Shape for o in kit.Group])
     roof_top = doc.getObject('AcousticRoof').Shape.optimalBoundingBox(False).ZMax
+    states = []
+    moving = Part.makeCompound([doc.getObject(name).Shape for name in moving_names()])
+    for compression in cfg['spring_compression_range']:
+        state = measurement_datums(cfg, h, compression)
+        shifted_parts = []
+        for obj in kit.Group:
+            shape = obj.Shape.copy()
+            shape.translate(V(0, 0, state['seat_z_mm']-seat))
+            shifted_parts.append((obj.Name, shape))
+        bottom = local_underbody(cfg, state['seat_z_mm'])
+        hits = []
+        for obj in obstacles:
+            if bottom.BoundBox.intersect(obj.Shape.BoundBox):
+                volume = bottom.common(obj.Shape).Volume
+                if volume > 1e-5:
+                    hits.append(dict(part=obj.Name, overlap_mm3=round(volume, 3)))
+        sweep_hits = []
+        angles = sorted(set([float(n) for n in range(int(base_parameters['cover_angle_open'])+1)] +
+                            [base_parameters['cover_angle_open']]))
+        for angle in angles:
+            lid_state = moving.copy()
+            lid_state.Placement = hinge_rotation(base_parameters, angle).multiply(lid_state.Placement)
+            for name, shape in shifted_parts:
+                volume = interference_volume(lid_state, shape)
+                if volume > 1e-5:
+                    sweep_hits.append(dict(angle_degrees=angle, part=name, overlap_mm3=round(volume, 3)))
+        state_overlap, state_clearance = closed_cover_metrics(lid, [shape for _, shape in shifted_parts])
+        state.update(local_underbody_overlaps=hits,
+                     closed_cover_clearance_mm=state_clearance,
+                     closed_cover_overlap_mm3=state_overlap,
+                     upper_vertical_lid_gap_mm=base_parameters['closed_height']-base_parameters['cover_wall']-state['highest_z_mm'],
+                     cover_sweep_collisions=sweep_hits, cover_sweep_sample_count=len(angles),
+                     roof_depth_deficit_mm=max(0, state['motor_depth_below_support_mm']-(h-roof_top)))
+        states.append(state)
     study = doc.addObject('App::FeaturePython', 'StudyBasis')
     study.addProperty('App::PropertyString', 'ConfigurationJSON').ConfigurationJSON = json.dumps(cfg, ensure_ascii=False, sort_keys=True)
     study.addProperty('App::PropertyString', 'BaseSHA256').BaseSHA256 = hashlib.sha256(base_path.read_bytes()).hexdigest()
-    study.addProperty('App::PropertyString', 'Status').Status = 'PENDING_DIMENSIONS_AND_MOUNTING_REDESIGN'
+    study.addProperty('App::PropertyString', 'Status').Status = 'PARTIAL_MEASUREMENTS_PENDING_MOUNTING_REDESIGN'
     doc.recompute()
     physical = [o for o in doc.Objects if o.TypeId == 'Part::Feature' and not getattr(o, 'IsDiagnostic', False)]
     import Import
@@ -137,9 +259,12 @@ def build_study():
         'base_sha256': study.BaseSHA256, 'assumptions': cfg,
         'geometry_checks': {
             'all_shapes_valid': all(o.Shape.isValid() for o in physical),
+            'local_envelope_valid': underbody.isValid(),
             'step_valid': exported.isValid(),
             'step_solids_match': len(exported.Solids) == len(expected.Solids),
             **hinge_checks,
+            'spring_endpoints_closed_cover_clear': all(s['closed_cover_overlap_mm3'] < 1e-5 for s in states),
+            'spring_endpoints_cover_sweep_clear': all(not s['cover_sweep_collisions'] for s in states),
             'step_volume_matches': abs(exported.Volume - expected.Volume) / expected.Volume < 1e-7,
         },
         'hinges': hinge_metrics,
@@ -149,15 +274,23 @@ def build_study():
             'mounting_holes_confirmed': cfg['mounting_holes_confirmed'],
             'status': study.Status,
             'nominal_plan_mm': [cfg['nominal_width'], cfg['nominal_depth']],
-            'underbody_depth_assumption_mm': cfg['underbody_depth_assumption'],
+            'display_datums': datums,
+            'spring_states': states,
+            'underbody_coverage_complete': False,
+            'spring_positions_confirmed': cfg['spring_positions_confirmed'],
             'existing_roof_depth_below_mount_mm': h - roof_top,
-            'additional_roof_clearance_needed_mm': max(0, cfg['underbody_depth_assumption'] - (h - roof_top)),
+            'additional_roof_clearance_needed_mm': max(s['roof_depth_deficit_mm'] for s in states),
             'underbody_reservation_clear': not overlaps,
             'underbody_overlaps': overlaps,
-            'illustrative_closed_cover_clear': lid_overlap < 1e-5,
-            'illustrative_cover_clearance_mm': lid.distToShape(upper)[0],
+            'display_closed_cover_clear': lid_overlap < 1e-5,
+            'display_cover_clearance_mm': lid_clearance,
+            'illustrative_closed_cover_clear': lid_overlap < 1e-5 and all(s['closed_cover_overlap_mm3'] < 1e-5 for s in states),
+            'illustrative_cover_clearance_mm': min([lid_clearance] + [s['closed_cover_clearance_mm'] for s in states]),
         },
-        'limitations': ['尺寸图属于直臂配图，弯臂款尺寸尚未确认', '下探体为保守矩形空间，不是真实机芯轮廓，重叠不代表实物必然碰撞',
+        'limitations': ['除弯臂外用户确认与直臂图一致；部分尺寸已实测，安装接口仍未确认',
+                        '局部下探体的平面位置和轮廓为估算，覆盖不完整；无重叠不证明实际无干涉，有重叠不证明实物必然碰撞',
+                        '弹簧座与平台下表面共面为解释假设；0–5压缩范围不是测定行程，未包含动态余量',
+                        '250总长暂作停放纵向外廓；唱臂限位角、有效臂长和播放运动未知',
                         '合页及盖总成对示意机芯做1度开盖抽样；真实机芯和自动回臂运动未验证', 'STEP 仅导出装配示意，包络及红色干涉体保留在 FCStd'],
     }
     (ROOT / 'cad/mechanism-fit-report.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
@@ -166,7 +299,7 @@ def build_study():
 
 def render_study(doc, cfg):
     import FreeCADGui as Gui
-    view = Gui.activeDocument().activeView()
+    view = Gui.getDocument(doc.Name).activeView()
     view.stopAnimating()
     view.setAnimationEnabled(False)
     view.setCameraType('Orthographic')
@@ -203,6 +336,25 @@ def render_study(doc, cfg):
         for obj in doc.getObject(name).Group:
             obj.ViewObject.Visibility = True
     doc.recompute()
+    visibility = {o.Name: o.ViewObject.Visibility for o in doc.Objects if o.TypeId == 'Part::Feature'}
+    for obj in doc.Objects:
+        if obj.TypeId == 'Part::Feature':
+            obj.ViewObject.Visibility = obj in doc.SelectedKit.Group or obj.Name == 'UnderbodyReservation'
+    view.viewRight()
+    view.fitAll()
+    from pivy import coin
+    scene = view.getCameraNode()
+    mapping, aspect = scene.viewportMapping.getValue(), scene.aspectRatio.getValue()
+    scene.height.setValue(max(cfg['nominal_depth']/1.6, cfg['total_height']) * 1.15)
+    scene.aspectRatio.setValue(1.6)
+    scene.viewportMapping.setValue(coin.SoCamera.LEAVE_ALONE)
+    Gui.updateGui()
+    view.saveImage(str(ROOT / 'previews/selected-mechanism-side.png'), 1600, 1000, 'White')
+    scene.viewportMapping.setValue(mapping)
+    scene.aspectRatio.setValue(aspect)
+    for name, visible in visibility.items():
+        doc.getObject(name).ViewObject.Visibility = visible
+    view.setCameraOrientation(rotation.Q)
     view.fitAll()
     doc.save()
 

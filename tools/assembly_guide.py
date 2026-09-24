@@ -27,7 +27,7 @@ CATALOG = [
     ('C01', 1, '透明防尘盖', ['DustCover'], '1 件', '烟灰亚克力；壁厚为暂估'),
     ('C02', 1, '可调定位合页与安装板', [f'{prefix}{i}' for i in range(2) for prefix in ('HingeBase','HingePin','HingeSpacer','HingeBacking')], '2 只 + 2 垫片 + 2 压板', '锌合金合页；铝垫片及压板为安装假设'),
     ('C03', 1, '脚垫与固定座', [f'Foot{i}' for i in range(4)]+[f'FootMount{i}' for i in range(4)], '4 套', '已购橡胶脚垫与镀黑锌座；安装孔距暂估'),
-    ('K01', 1, '一体机芯基座', ['KitBase'], '1 件', '采购机芯外观占位；材质待确认'),
+    ('K01', 1, '机芯基座与三弹簧', ['KitBase'], '1 座 + 3 弹簧', '平台部分实测；弹簧套筒仅示意外廓'),
     ('K02', 1, '唱盘与表面环纹', ['KitPlatter', 'KitMatRings'], '1 盘 + 4 道环纹', '环纹是外观示意，不代表独立唱片垫'),
     ('K03', 1, '机芯主轴', ['KitSpindle'], '1 件', '外观占位；材质与接口待确认'),
     ('K04', 1, '唱臂支座', ['KitArmSupport'], '1 件', '采购机芯自带；外观占位'),
@@ -101,7 +101,8 @@ def overview_targets(entries):
                      'C03': ('Foot1', (1, 0, 0)),
                      'K01': ('KitBase', (0.93, 0.85, 1)),
                      'K02': ('KitPlatter', (0.33, 0.4, 1)),
-                     'K04': ('KitArmSupport', (0.1, 0, 0.4)),
+                     'K04': ('KitArmSupport', (1, 0, 0.8)),
+                     'K08': ('KitArmRest', (1, 0, 0.45)),
                      'K05': ('KitCurvedArm', (0.75, 0.25, 0.6))})
     return overview
 

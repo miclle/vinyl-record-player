@@ -1,26 +1,72 @@
 {
-  "revision": "v0.3-fit-study",
+  "revision": "v0.4-measured-fit-study",
   "selected_option": "28高端弯臂机芯全套餐装好直接用 自动回臂",
   "base_sha256": "81d51068af41dedd9441c15a46fadac504ad8094132bc3344a52a547fd5f6aef",
   "assumptions": {
-    "revision": "v0.3-fit-study",
+    "revision": "v0.4-measured-fit-study",
     "selected_option": "28高端弯臂机芯全套餐装好直接用 自动回臂",
     "product_url": "https://item.taobao.com/item.htm?id=712086565319&skuId=5162746531784",
-    "dimension_status": "unconfirmed_for_selected_curved_arm_variant",
+    "dimension_status": "user_measured_partial_with_approximate_supports",
     "dimension_reference": "references/selected-mechanism/straight-arm-dimensions.png",
     "appearance_reference": "references/selected-mechanism/selected-curved-arm-kit.png",
     "nominal_width": 355.0,
     "nominal_depth": 280.0,
     "platter_diameter": 280.0,
-    "platter_thickness": 10.0,
+    "platter_thickness": 11.0,
     "platter_center_x": 176.0,
     "platter_center_y": 172.0,
-    "underbody_depth_assumption": 45.0,
     "mounting_holes_confirmed": false,
-    "assumption_note": "355/280/10 mm 来自直臂配图，只作候选弯臂款占位参考；45 mm 下探深度为本项目假设，未获得商家数据。唱臂外观按选定款照片近似，无循迹或安装尺寸承诺。"
+    "assumption_note": "2026-09-24 用户确认除弯臂外与直臂图一致；355 平面总宽按图，唱盘 Ø280×11、总高85、平台128×108×5、上下40及弹簧数据来自用户。250为唱臂总长，暂作含配重/唱头的纵向外廓，不作为有效臂长。平台与弹簧座共面、唱盘高度、马达位置/直径、传动及回臂外形、弹簧直径均为估算；底部覆盖不完整，不可据此开孔。",
+    "total_height": 85.0,
+    "platform_thickness": 5.0,
+    "platform_length": 128.0,
+    "platform_width": 108.0,
+    "arm_support_height": 40.0,
+    "seat_to_motor_bottom": 40.0,
+    "arm_total_length": 250.0,
+    "arm_has_limiter": true,
+    "arm_has_rest": true,
+    "spring_free_height": 15.5,
+    "spring_compression_range": [
+      0.0,
+      5.0
+    ],
+    "display_spring_compression": 5.0,
+    "spring_radius": 110.0,
+    "spring_clock_hours": [
+      1.0,
+      4.0,
+      8.0
+    ],
+    "spring_positions_confirmed": false,
+    "datum_note": "12 点朝后、3 点朝右；弹簧安装座底面暂与平台下表面共面。40 + 5 + 40 = 85；15.5 为自由高度，0–5 为观察估计范围，非测定行程。",
+    "appearance_assumptions": {
+      "base_disc_thickness": 2.0,
+      "platform_rear_offset": 110.0,
+      "platter_bottom_above_platform": 2.0,
+      "spring_outer_diameter": 16.0,
+      "spring_wall": 1.5,
+      "motor_diameter": 45.0,
+      "motor_offset": [
+        105.0,
+        25.0
+      ],
+      "transmission_diameter": 160.0,
+      "transmission_depth": 20.0,
+      "return_size": [
+        80.0,
+        90.0,
+        30.0
+      ],
+      "return_offset": [
+        120.0,
+        60.0
+      ]
+    }
   },
   "geometry_checks": {
     "all_shapes_valid": true,
+    "local_envelope_valid": true,
     "step_valid": true,
     "step_solids_match": true,
     "hinge_mount_holes_clear": true,
@@ -29,6 +75,8 @@
     "hinge_fixed_neighbors_clear": true,
     "hinge_cover_assembly_sweep_clear": true,
     "hinge_installation_unreleased": true,
+    "spring_endpoints_closed_cover_clear": true,
+    "spring_endpoints_cover_sweep_clear": true,
     "step_volume_matches": true
   },
   "hinges": {
@@ -51,103 +99,153 @@
     "installation_released": false,
     "dimensions_confirmed": false,
     "mounting_holes_confirmed": false,
-    "status": "PENDING_DIMENSIONS_AND_MOUNTING_REDESIGN",
+    "status": "PARTIAL_MEASUREMENTS_PENDING_MOUNTING_REDESIGN",
     "nominal_plan_mm": [
       355.0,
       280.0
     ],
-    "underbody_depth_assumption_mm": 45.0,
+    "display_datums": {
+      "support_z_mm": 146.5,
+      "spring_height_mm": 10.5,
+      "spring_compression_mm": 5.0,
+      "seat_z_mm": 157.0,
+      "platform_top_z_mm": 162.0,
+      "lowest_z_mm": 117.0,
+      "highest_z_mm": 202.0,
+      "motor_depth_below_support_mm": 29.5,
+      "spring_centers_xy_mm": [
+        [
+          231.0,
+          267.2627944162883
+        ],
+        [
+          271.2627944162883,
+          117.00000000000003
+        ],
+        [
+          80.73720558371178,
+          116.99999999999994
+        ]
+      ]
+    },
+    "spring_states": [
+      {
+        "support_z_mm": 146.5,
+        "spring_height_mm": 15.5,
+        "spring_compression_mm": 0.0,
+        "seat_z_mm": 162.0,
+        "platform_top_z_mm": 167.0,
+        "lowest_z_mm": 122.0,
+        "highest_z_mm": 207.0,
+        "motor_depth_below_support_mm": 24.5,
+        "spring_centers_xy_mm": [
+          [
+            231.0,
+            267.2627944162883
+          ],
+          [
+            271.2627944162883,
+            117.00000000000003
+          ],
+          [
+            80.73720558371178,
+            116.99999999999994
+          ]
+        ],
+        "local_underbody_overlaps": [
+          {
+            "part": "FloatingDeck",
+            "overlap_mm3": 134370.06
+          },
+          {
+            "part": "AcousticRoof",
+            "overlap_mm3": 15033.486
+          }
+        ],
+        "closed_cover_clearance_mm": 0.6999999999999886,
+        "closed_cover_overlap_mm3": 0.0,
+        "upper_vertical_lid_gap_mm": 0.6999999999999886,
+        "cover_sweep_collisions": [],
+        "cover_sweep_sample_count": 71,
+        "roof_depth_deficit_mm": 10.5
+      },
+      {
+        "support_z_mm": 146.5,
+        "spring_height_mm": 10.5,
+        "spring_compression_mm": 5.0,
+        "seat_z_mm": 157.0,
+        "platform_top_z_mm": 162.0,
+        "lowest_z_mm": 117.0,
+        "highest_z_mm": 202.0,
+        "motor_depth_below_support_mm": 29.5,
+        "spring_centers_xy_mm": [
+          [
+            231.0,
+            267.2627944162883
+          ],
+          [
+            271.2627944162883,
+            117.00000000000003
+          ],
+          [
+            80.73720558371178,
+            116.99999999999994
+          ]
+        ],
+        "local_underbody_overlaps": [
+          {
+            "part": "FloatingDeck",
+            "overlap_mm3": 164039.073
+          },
+          {
+            "part": "BassPort",
+            "overlap_mm3": 1026.127
+          },
+          {
+            "part": "AcousticRoof",
+            "overlap_mm3": 38133.849
+          }
+        ],
+        "closed_cover_clearance_mm": 5.699999999999989,
+        "closed_cover_overlap_mm3": 0.0,
+        "upper_vertical_lid_gap_mm": 5.699999999999989,
+        "cover_sweep_collisions": [],
+        "cover_sweep_sample_count": 71,
+        "roof_depth_deficit_mm": 15.5
+      }
+    ],
+    "underbody_coverage_complete": false,
+    "spring_positions_confirmed": false,
     "existing_roof_depth_below_mount_mm": 14.0,
-    "additional_roof_clearance_needed_mm": 31.0,
+    "additional_roof_clearance_needed_mm": 15.5,
     "underbody_reservation_clear": false,
     "underbody_overlaps": [
       {
-        "part": "GrilleCloth",
-        "label": "透声布外观占位（非实心材料）",
-        "overlap_mm3": 4082.5
-      },
-      {
-        "part": "Slat07",
-        "label": "横向木格栅 07",
-        "overlap_mm3": 5262.146
-      },
-      {
-        "part": "Slat08",
-        "label": "横向木格栅 08",
-        "overlap_mm3": 7455.0
-      },
-      {
-        "part": "RearSupport",
-        "label": "后部两侧隔振承托梁",
-        "overlap_mm3": 39120.0
-      },
-      {
-        "part": "Isolator0",
-        "label": "弹性支承 1（刚度待定）",
-        "overlap_mm3": 1608.495
-      },
-      {
-        "part": "Isolator2",
-        "label": "弹性支承 3（刚度待定）",
-        "overlap_mm3": 1608.495
-      },
-      {
         "part": "FloatingDeck",
         "label": "现有承载板（机芯开口与孔位待调整）",
-        "overlap_mm3": 594438.892
+        "overlap_mm3": 164039.073
       },
       {
         "part": "BassPort",
         "label": "后置倒相管 · Ø32 × 160 可换试验件",
-        "overlap_mm3": 13519.609
-      },
-      {
-        "part": "Baffle",
-        "label": "左右全频斜面障板",
-        "overlap_mm3": 68546.385
+        "overlap_mm3": 1026.127
       },
       {
         "part": "AcousticRoof",
         "label": "三音腔共用顶板 · 中部延伸至后板",
-        "overlap_mm3": 589457.983
-      },
-      {
-        "part": "BearingPocket",
-        "label": "通用轴承密封避让杯（选定机芯待重做）",
-        "overlap_mm3": 5152.212
-      },
-      {
-        "part": "AcousticRear",
-        "label": "左右全频腔后板 · 密封试装",
-        "overlap_mm3": 29992.0
-      },
-      {
-        "part": "AcousticDividerLeft",
-        "label": "低音腔左全深隔板",
-        "overlap_mm3": 48223.108
-      },
-      {
-        "part": "AcousticDividerRight",
-        "label": "低音腔右全深隔板",
-        "overlap_mm3": 48223.108
-      },
-      {
-        "part": "TweeterLeft",
-        "label": "左全频 · SC-2103 安装占位",
-        "overlap_mm3": 3217.692
-      },
-      {
-        "part": "TweeterRight",
-        "label": "右全频 · SC-2103 安装占位",
-        "overlap_mm3": 2835.704
+        "overlap_mm3": 38133.849
       }
     ],
+    "display_closed_cover_clear": true,
+    "display_cover_clearance_mm": 5.699999999999989,
     "illustrative_closed_cover_clear": true,
-    "illustrative_cover_clearance_mm": 16.19999999999999
+    "illustrative_cover_clearance_mm": 0.6999999999999886
   },
   "limitations": [
-    "尺寸图属于直臂配图，弯臂款尺寸尚未确认",
-    "下探体为保守矩形空间，不是真实机芯轮廓，重叠不代表实物必然碰撞",
+    "除弯臂外用户确认与直臂图一致；部分尺寸已实测，安装接口仍未确认",
+    "局部下探体的平面位置和轮廓为估算，覆盖不完整；无重叠不证明实际无干涉，有重叠不证明实物必然碰撞",
+    "弹簧座与平台下表面共面为解释假设；0–5压缩范围不是测定行程，未包含动态余量",
+    "250总长暂作停放纵向外廓；唱臂限位角、有效臂长和播放运动未知",
     "合页及盖总成对示意机芯做1度开盖抽样；真实机芯和自动回臂运动未验证",
     "STEP 仅导出装配示意，包络及红色干涉体保留在 FCStd"
   ]

@@ -79,6 +79,23 @@ def installation(p):
     return items
 
 
+def interference_volume(first, second):
+    """A solid bounding-box probe rejects hollow-cover false positives cheaply.
+
+    Unlike surface distance, this also preserves full-solid containment. The
+    second shape is wholly inside its box; zero box intersection proves zero
+    part intersection without running a boolean against a curved arm surface.
+    """
+    bounds = second.BoundBox
+    if not first.BoundBox.intersect(bounds):
+        return 0.0
+    box = Part.makeBox(bounds.XLength, bounds.YLength, bounds.ZLength,
+                       V(bounds.XMin, bounds.YMin, bounds.ZMin))
+    if first.common(box).Volume < 1e-9:
+        return 0.0
+    return first.common(second).Volume
+
+
 def check_installation(doc, p, step=1):
     """Check saved solids, fastener paths and sampled motion against all neighbors."""
     h = p['hinges']; d = dimensions(p)
@@ -113,10 +130,9 @@ def check_installation(doc, p, step=1):
     for angle in angles:
         shape = moving.copy(); shape.rotate(d['axis'],V(1,0,0),-angle)
         for obj in stationary:
-            if shape.BoundBox.intersect(obj.Shape.BoundBox):
-                overlap = shape.common(obj.Shape).Volume
-                if overlap > 1e-5:
-                    collisions.append(dict(angle_degrees=angle,part=obj.Name,volume_mm3=round(overlap,6)))
+            overlap = interference_volume(shape, obj.Shape)
+            if overlap > 1e-5:
+                collisions.append(dict(angle_degrees=angle,part=obj.Name,volume_mm3=round(overlap,6)))
     # Check all stationary hinge hardware against neighbors as well.
     fixed_hits = []
     for i in range(2):

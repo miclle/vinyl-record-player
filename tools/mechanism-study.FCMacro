@@ -1,6 +1,11 @@
 # Read fresh source each run, including when reusing a FreeCAD session.
 from pathlib import Path
+import importlib
+import sys
 
 study_path = Path(__file__).resolve().with_name('mechanism_study.py')
+sys.path.insert(0, str(study_path.parent))
+import hinges
+importlib.reload(hinges)
 exec(compile(study_path.read_bytes(), str(study_path), 'exec'),
      {'__file__': str(study_path), '__name__': '__main__'})

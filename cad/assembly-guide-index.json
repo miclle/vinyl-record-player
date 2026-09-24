@@ -2,7 +2,7 @@
   "revision": "v0.9-torque-hinges",
   "sources": {
     "lumi-three-driver.FCStd": "81d51068af41dedd9441c15a46fadac504ad8094132bc3344a52a547fd5f6aef",
-    "lumi-selected-mechanism-fit.FCStd": "b52229e33a256b037cd60afa710bd1f51faf7b3adadc45e2d8f49e161223841b"
+    "lumi-selected-mechanism-fit.FCStd": "4cf5da0fbe4428309208e76f4b747dcd010b213002ecd39e7c777aaf267d1b73"
   },
   "entries": [
     {
@@ -149,19 +149,19 @@
     {
       "code": "K01",
       "page": 1,
-      "title": "一体机芯基座",
+      "title": "机芯基座与三弹簧",
       "ids": [
         "KitBase"
       ],
-      "quantity": "1 件",
-      "material": "采购机芯外观占位；材质待确认",
+      "quantity": "1 座 + 3 弹簧",
+      "material": "平台部分实测；弹簧套筒仅示意外廓",
       "drawings": [
         "C-P05"
       ],
       "size_mm": [
         355.0,
         280.0,
-        2.0
+        15.5
       ]
     },
     {
@@ -180,7 +180,7 @@
       "size_mm": [
         280.0,
         280.0,
-        10.0
+        11.0
       ]
     },
     {
@@ -216,7 +216,7 @@
       "size_mm": [
         25.0,
         33.0,
-        35.0
+        40.0
       ]
     },
     {
@@ -232,9 +232,9 @@
         "C-P08"
       ],
       "size_mm": [
-        39.564967,
-        204.777971,
-        14.795341
+        27.4,
+        201.08509,
+        15.384585
       ]
     },
     {

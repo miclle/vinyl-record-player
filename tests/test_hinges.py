@@ -54,6 +54,16 @@ class HingeTests(unittest.TestCase):
         self.assertIn('BackingObstacle',[c['part'] for c in metrics['collisions']])
         self.assertLess(self.doc.DustCover.Shape.common(obstacle.Shape).Volume,1e-6)
 
+    def test_compound_distance_must_not_hide_contained_solids(self):
+        first = Part.makeCompound([Part.makeBox(10,10,10),
+                                   Part.makeBox(10,10,10,App.Vector(20,0,0))])
+        second = Part.makeBox(1,1,1,App.Vector(22,2,2))
+        self.assertGreater(first.distToShape(second)[0], 0)
+        self.assertAlmostEqual(hinges.interference_volume(first,second),1)
+        self.assertAlmostEqual(hinges.interference_volume(second,first),1)
+        outside = Part.makeBox(1,1,1,App.Vector(15,2,2))
+        self.assertEqual(hinges.interference_volume(first,outside),0)
+
     def test_drawing_holes_follow_saved_mounting_positions(self):
         from drawing_details import panel_details
         data={s['key']:s for s in panel_details(self.doc,self.p,None,False)}

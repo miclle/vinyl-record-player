@@ -16,6 +16,7 @@ from feet import positions as foot_positions
 from drawing_details import panel_details, baffle_section
 from hinges import dimensions as hinge_dimensions
 from fascia import dimensions as fascia_dimensions
+from mechanism_notes import spring_positions_note
 
 ROOT = Path(__file__).resolve().parents[1]
 V = App.Vector
@@ -205,19 +206,19 @@ def collect(root=ROOT, project=True):
             for name,note in [('ControlBase','Ø34 × 2，实心底座。'),('ControlKnob','Ø32 × 14，实心旋钮占位。')]:
                 add(name,3,None,[note,'壁厚不适用；控制接口待选定套装确认。'])
             kitnotes={
-                'KitBase':(2,['基座外观薄板厚 2；不是已确认的机芯底板。']),
-                'KitPlatter':(cfg['platter_thickness'],['Ø280 与厚 10 来自直臂配图，仅作弯臂款占位。']),
+                'KitBase':(None,[f"平台 {f(cfg['platform_width'])}×{f(cfg['platform_length'])}×{f(cfg['platform_thickness'])} 为用户尺寸；圆盘基座厚度暂估。",f"含3个弹簧外廓套筒：{spring_positions_note(cfg)}；自由高{f(cfg['spring_free_height'])}，压缩量按{f(cfg['spring_compression_range'][0])}–{f(cfg['spring_compression_range'][1])}估计。", f"本图压缩{f(cfg['display_spring_compression'])}，弹簧高{f(cfg['spring_free_height']-cfg['display_spring_compression'])}；表中Z包含基座厚度。"]),
+                'KitPlatter':(cfg['platter_thickness'],[f"唱盘 Ø{f(cfg['platter_diameter'])} × {f(cfg['platter_thickness'])} 为用户实测；轴向安装位置仍为估算。"]),
                 'KitMatRings':(0.3,['四道装饰环：径向宽 0.5，高 0.3；不是唱片垫实物厚度。']),
                 'KitSpindle':(None,['实心主轴 Ø7 × 10；壁厚不适用。']),
-                'KitArmSupport':(None,['实心支座外观占位，壁厚和连接方式未知。']),
-                'KitCurvedArm':(None,['外径 Ø6.4；模型为实心扫掠占位，真实管壁厚未知。','下表为弯曲臂整体包络，非管材下料长度。']),
+                'KitArmSupport':(None,[f"支座高 {f(cfg['arm_support_height'])} 为用户尺寸；外形、壁厚和连接未知。"]),
+                'KitCurvedArm':(None,['外径 Ø6.4；模型为实心扫掠占位，真实管壁厚未知。',f"用户总长{f(cfg['arm_total_length'])}暂作含配重/唱头纵向外廓，非有效臂长或管材下料长度。"]),
                 'KitCounterweight':(None,['实心配重包络 Ø20 × 16；壁厚不适用。']),
                 'KitHeadshell':(6,['长宽高为外观占位，未包含真实槽孔。']),
                 'KitCartridge':(None,['唱头包络 12 × 19 × 5；实物规格与壁厚未知。']),
                 'KitArmRest':(None,['实心支架包络 Ø8 × 27；壁厚不适用。']),
             }
             for name,(thickness,notes) in kitnotes.items():
-                add(name,3,thickness,notes+['弯臂款尺寸均待实测，不能据此定安装孔。'],source='study')
+                add(name,3,thickness,notes+['部分尺寸已实测；近似轮廓与支点不可直接用于加工。'],source='study')
             # Baseline generic mechanism is historical context, kept in a compact appendix.
             for obj in base.Mechanism.Group:
                 if obj.Name not in covered['baseline']:
@@ -242,7 +243,7 @@ def collect(root=ROOT, project=True):
             specs=[
                 ('selected-closed','选定弯臂机芯版 / 闭盖六面图',study,['Cabinet','Front','Deck','SelectedKit','Controls','Cover','Feet'],('top','front','right','bottom','rear','left')),
                 ('internal','内部布置 / 移除盖与台面',base,['Cabinet','Audio','Electronics'],('top','front','right')),
-                ('selected-kit','选定弯臂机芯 / 外观与安装包络',study,['SelectedKit','Controls'],('top','front','right')),
+                ('selected-kit','选定弯臂机芯 / 外观与安装包络',study,['SelectedKit'],('top','front','right')),
                 ('generic','基线通用机芯 / 历史对照',base,['Mechanism'],('top','front','right')),
             ]
             for key,title,doc,groups,views in specs:
