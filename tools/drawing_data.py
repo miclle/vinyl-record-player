@@ -9,6 +9,7 @@ import math
 import tempfile
 from pathlib import Path
 
+from assembly_pose import set_cover_angle
 import FreeCAD as App
 import Part
 import TechDraw
@@ -56,7 +57,7 @@ def collect(root=ROOT, project=True):
     root = Path(root)
     p = json.loads((root / 'cad/parameters.json').read_text())
     cfg = json.loads((root / 'cad/selected-mechanism.json').read_text())
-    source_paths = [root / 'cad/lumi-three-driver.FCStd', root / 'cad/lumi-selected-mechanism-fit.FCStd']
+    source_paths = [root / 'cad/lumi-selected-mechanism-fit.FCStd']
     hashes = {path.name: hashlib.sha256(path.read_bytes()).hexdigest() for path in source_paths}
     docs = []
     try:
@@ -66,23 +67,22 @@ def collect(root=ROOT, project=True):
                 copy = Path(tmp) / f'DrawingReadOnly{i}.FCStd'
                 copy.write_bytes(path.read_bytes())
                 docs.append(App.openDocument(str(copy)))
-            base, study = docs
+            base = study = docs[0]
             if json.loads(base.GeometryDatums.BuildParametersJSON) != p:
-                raise ValueError('Baseline parameter snapshot differs; rebuild the model first')
-            if study.StudyBasis.BaseSHA256 != hashes[source_paths[0].name]:
-                raise ValueError('Mechanism study is stale; rebuild the study first')
+                raise ValueError('Structure parameter snapshot differs; rebuild the model first')
             if json.loads(study.StudyBasis.ConfigurationJSON) != cfg:
-                raise ValueError('Mechanism parameter snapshot differs; rebuild the study first')
+                raise ValueError('Mechanism parameter snapshot differs; rebuild the model first')
+            set_cover_angle(base,p,0)
             cards = []
-            covered = {'baseline': set(), 'study': set()}
-            def add(name, volume, thickness, notes=(), aliases=(), split=False, source='baseline', main=None):
-                doc = base if source == 'baseline' else study
+            covered = set()
+            def add(name, volume, thickness, notes=(), aliases=(), split=False, source='main', main=None):
+                doc = base
                 obj = doc.getObject(name)
                 if obj is None:
                     raise ValueError(f'Missing drawing object {name}')
                 shapes = obj.Shape.Solids if split else [obj.Shape]
                 names = [name, *aliases]
-                covered[source].update(names)
+                covered.update(names)
                 for i, shape in enumerate(shapes, 1):
                     dims, pos = bounds(shape)
                     # Largest projected face is used as the primary view.
@@ -218,27 +218,18 @@ def collect(root=ROOT, project=True):
                 'KitArmRest':(None,['实心支架包络 Ø8 × 27；壁厚不适用。']),
             }
             for name,(thickness,notes) in kitnotes.items():
-                add(name,3,thickness,notes+['部分尺寸已实测；近似轮廓与支点不可直接用于加工。'],source='study')
+                add(name,3,thickness,notes+['部分尺寸已实测；近似轮廓与支点不可直接用于加工。'],source='main')
             # Baseline generic mechanism is historical context, kept in a compact appendix.
             for obj in base.Mechanism.Group:
-                if obj.Name not in covered['baseline']:
-                    add(obj.Name,4,None,['基线通用机芯占位；选定机芯版不含此件。','壁厚未定义；此处只记录现存实体的 XYZ 包络。'])
-            # Shared parts are represented by the baseline sheets; verify shape parity.
-            for obj in study.Objects:
-                if obj.TypeId != 'Part::Feature' or getattr(obj,'IsDiagnostic',False):
-                    continue
-                if obj.Name in covered['baseline']:
-                    original=base.getObject(obj.Name)
-                    if any(abs(x-y)>1e-5 for x,y in zip(bounds(obj.Shape)[0]+bounds(obj.Shape)[1],bounds(original.Shape)[0]+bounds(original.Shape)[1])) or abs(obj.Shape.Volume-original.Shape.Volume)>1e-4:
-                        raise ValueError(f'Shared object changed in study: {obj.Name}')
-                    covered['study'].add(obj.Name)
-            coverage={}
-            for key,doc in [('baseline',base),('study',study)]:
-                names={o.Name for o in doc.Objects if o.TypeId=='Part::Feature' and not getattr(o,'IsDiagnostic',False)}
-                coverage[key+'_count']=len(names)
-                coverage[key+'_missing']=sorted(names-covered[key])
-                if coverage[key+'_missing']:
-                    raise ValueError(f'Undrawn physical objects: {coverage[key+"_missing"]}')
+                if obj.Name not in covered:
+                    add(obj.Name,4,None,['历史参考通用机芯；不参与当前装配或 STEP。','壁厚未定义；此处只记录现存实体的 XYZ 包络。'],source='reference')
+            physical={o.Name for o in base.Objects if o.TypeId=='Part::Feature'
+                      and not getattr(o,'IsDiagnostic',False) and not getattr(o,'IsReference',False)}
+            references={o.Name for o in base.Objects if o.TypeId=='Part::Feature' and getattr(o,'IsReference',False)}
+            coverage={'physical_count':len(physical),'reference_count':len(references),
+                      'missing':sorted((physical|references)-covered)}
+            if coverage['missing']:
+                raise ValueError(f'Undrawn objects: {coverage["missing"]}')
             assemblies=[]
             specs=[
                 ('selected-closed','选定弯臂机芯版 / 闭盖六面图',study,['Cabinet','Front','Deck','SelectedKit','Controls','Cover','Feet'],('top','front','right','bottom','rear','left')),

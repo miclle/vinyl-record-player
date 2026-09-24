@@ -30,10 +30,11 @@ class ParameterValidationTests(unittest.TestCase):
                 params = json.loads((ROOT / 'cad/parameters.json').read_text())
                 params['deck_rear_clearance'] = clearance
                 (root / 'cad/parameters.json').write_text(json.dumps(params))
+                (root / 'cad/selected-mechanism.json').write_bytes((ROOT / 'cad/selected-mechanism.json').read_bytes())
                 with patch.object(build_model, 'ROOT', root):
                     doc, _, _ = build_model.deliver()
                     App.closeDocument(doc.Name)
-                doc = App.openDocument(str(root / 'cad/lumi-three-driver.FCStd'))
+                doc = App.openDocument(str(root / 'cad/lumi-selected-mechanism-fit.FCStd'))
                 try:
                     deck = doc.FloatingDeck
                     bounds = deck.Shape.optimalBoundingBox(False)
@@ -58,11 +59,13 @@ class ParameterValidationTests(unittest.TestCase):
             (root / 'cad').mkdir()
             (root / 'tools').mkdir()
             shutil.copy2(ROOT / 'cad/parameters.json', root / 'cad/parameters.json')
+            (root / 'cad/selected-mechanism.json').write_bytes((ROOT / 'cad/selected-mechanism.json').read_bytes())
             shutil.copy2(ROOT / 'tools/validate_model.py', root / 'tools/validate_model.py')
             shutil.copy2(ROOT / 'tools/ac_inlet.py', root / 'tools/ac_inlet.py')
             shutil.copy2(ROOT / 'tools/feet.py', root / 'tools/feet.py')
             shutil.copy2(ROOT / 'tools/fascia.py', root / 'tools/fascia.py')
             shutil.copy2(ROOT / 'tools/hinges.py', root / 'tools/hinges.py')
+            shutil.copy2(ROOT / 'tools/assembly_pose.py', root / 'tools/assembly_pose.py')
             for case in cases:
                 with self.subTest(case=case):
                     with patch.object(build_model, 'ROOT', root):
@@ -126,6 +129,7 @@ class ParameterValidationTests(unittest.TestCase):
             params = json.loads((ROOT / 'cad/parameters.json').read_text())
             params['power_transformer']['center_x'] = 360.0
             (root / 'cad/parameters.json').write_text(json.dumps(params))
+            (root / 'cad/selected-mechanism.json').write_bytes((ROOT / 'cad/selected-mechanism.json').read_bytes())
             with patch.object(build_model, 'ROOT', root):
                 doc, _, _ = build_model.deliver()
                 App.closeDocument(doc.Name)
@@ -141,6 +145,7 @@ class ParameterValidationTests(unittest.TestCase):
             root = Path(tmp)
             (root / 'cad').mkdir()
             shutil.copy2(ROOT / 'cad/parameters.json', root / 'cad/parameters.json')
+            (root / 'cad/selected-mechanism.json').write_bytes((ROOT / 'cad/selected-mechanism.json').read_bytes())
             with patch.object(build_model, 'ROOT', root):
                 doc, params, _ = build_model.deliver()
                 woofer = doc.getObject('Woofer')
@@ -163,6 +168,7 @@ class ParameterValidationTests(unittest.TestCase):
             root = Path(tmp)
             (root / 'cad').mkdir()
             shutil.copy2(ROOT / 'cad/parameters.json', root / 'cad/parameters.json')
+            (root / 'cad/selected-mechanism.json').write_bytes((ROOT / 'cad/selected-mechanism.json').read_bytes())
             with patch.object(build_model, 'ROOT', root):
                 doc, _, _ = build_model.deliver()
                 App.closeDocument(doc.Name)
@@ -178,6 +184,7 @@ class ParameterValidationTests(unittest.TestCase):
                     else:
                         params['revision'] = 'different-build'
                     (root / 'cad/parameters.json').write_text(json.dumps(params))
+                    (root / 'cad/selected-mechanism.json').write_bytes((ROOT / 'cad/selected-mechanism.json').read_bytes())
                     result = validate_model.validate()
                     with self.subTest(change=change):
                         self.assertFalse(result['passed'])
@@ -189,6 +196,7 @@ class AcousticLayoutTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp); (root/'cad').mkdir()
             shutil.copy2(ROOT/'cad/parameters.json',root/'cad/parameters.json')
+            shutil.copy2(ROOT/'cad/selected-mechanism.json',root/'cad/selected-mechanism.json')
             with patch.object(build_model,'ROOT',root):
                 doc,p,_=build_model.deliver()
             try:
@@ -218,6 +226,7 @@ class AcousticLayoutTests(unittest.TestCase):
             p=json.loads((ROOT/'cad/parameters.json').read_text())
             p['acoustic']['satellite_rear_y']=100.0
             (root/'cad/parameters.json').write_text(json.dumps(p))
+            (root / 'cad/selected-mechanism.json').write_bytes((ROOT / 'cad/selected-mechanism.json').read_bytes())
             with patch.object(build_model,'ROOT',root):
                 doc,_,_=build_model.deliver();App.closeDocument(doc.Name)
             with patch.object(validate_model,'ROOT',root),contextlib.redirect_stdout(io.StringIO()):
@@ -243,6 +252,7 @@ class AcousticLayoutTests(unittest.TestCase):
                 if case=='amplifier':p[case].update(x=180.0,y=55.0)
                 if case=='power_transformer':p[case].update(center_x=224.3,center_y=110.0)
                 (root/'cad/parameters.json').write_text(json.dumps(p))
+                (root / 'cad/selected-mechanism.json').write_bytes((ROOT / 'cad/selected-mechanism.json').read_bytes())
                 with patch.object(build_model,'ROOT',root):
                     doc,_,_=build_model.deliver();App.closeDocument(doc.Name)
                 with patch.object(validate_model,'ROOT',root),contextlib.redirect_stdout(io.StringIO()):
@@ -261,6 +271,7 @@ class AcousticLayoutTests(unittest.TestCase):
                 with self.subTest(length=length):
                     p['bass_port']['length']=length
                     (root/'cad/parameters.json').write_text(json.dumps(p))
+                    (root / 'cad/selected-mechanism.json').write_bytes((ROOT / 'cad/selected-mechanism.json').read_bytes())
                     with patch.object(build_model,'ROOT',root):
                         doc,_,_=build_model.deliver();App.closeDocument(doc.Name)
                     with patch.object(validate_model,'ROOT',root),contextlib.redirect_stdout(io.StringIO()):
@@ -277,7 +288,10 @@ class AcousticLayoutTests(unittest.TestCase):
 class MacroReloadTests(unittest.TestCase):
     def test_macro_reads_new_source_for_all_modules(self):
         with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
+            root = Path(tmp)/'tools'
+            root.mkdir()
+            (root.parent/'cad').mkdir()
+            (root.parent/'cad/mechanism-fit-report.json').write_text('{}')
             macro = root / 'build.FCMacro'
             shutil.copy2(ROOT / 'tools/build.FCMacro', macro)
             def write_sources(version):
@@ -285,25 +299,71 @@ class MacroReloadTests(unittest.TestCase):
                 (root / 'feet.py').write_text(f'value = {version}\n')
                 (root / 'fascia.py').write_text(f'value = {version}\n')
                 (root / 'hinges.py').write_text(f'value = {version}\n')
-                (root / 'build_model.py').write_text(f'def deliver():\n    return {version}, {version}, {version}\n')
+                (root / 'build_model.py').write_text(f'from types import SimpleNamespace\nclass Doc:\n    StudyBasis = SimpleNamespace(ConfigurationJSON="{{}}")\n    def save(self): pass\ndef deliver():\n    return Doc(), {{"cover_angle_open":70}}, {version}\n')
+                (root / 'mechanism_study.py').write_text(f'def render_study(*a): pass\ndef save_report(*a): pass\nvalue={version}\n')
+                (root / 'assembly_pose.py').write_text('def set_cover_angle(*a): pass\n')
                 (root / 'render_views.py').write_text(f'def render(*args):\n    return {version}\n')
                 (root / 'dimension_sheet.py').write_text(f'def create(*args):\n    return {version}\n')
             saved_path = sys.path[:]
             try:
-                with patch.dict(sys.modules, {'FreeCADGui': types.ModuleType('FreeCADGui')}):
-                    for name in ['ac_inlet', 'feet', 'fascia', 'hinges', 'build_model', 'render_views', 'dimension_sheet']:
+                gui=types.ModuleType('FreeCADGui')
+                gui.activeDocument=lambda: types.SimpleNamespace(activeView=lambda: types.SimpleNamespace(fitAll=lambda: None))
+                with patch.dict(sys.modules, {'FreeCADGui': gui}):
+                    for name in ['ac_inlet', 'feet', 'fascia', 'hinges', 'build_model', 'render_views', 'dimension_sheet', 'mechanism_study', 'assembly_pose']:
                         sys.modules.pop(name, None)
                     env = {'__file__': str(macro), '__name__': '__main__'}
                     write_sources(1)
                     exec(compile(macro.read_bytes(), str(macro), 'exec'), env)
                     write_sources(2)  # Same size, immediate edit: also exercises stale bytecode.
                     exec(compile(macro.read_bytes(), str(macro), 'exec'), env)
-                    self.assertEqual(env['doc'], 2)
+                    self.assertEqual(env['groups'], 2)
+                    self.assertEqual(env['mechanism_study'].value, 2)
                     self.assertEqual(env['render_views'].render(), 2)
                     self.assertEqual(env['dimension_sheet'].create(), 2)
                     self.assertIsNotNone(env.get('ac_inlet'))
                     self.assertEqual(env['ac_inlet'].value, 2)
                     self.assertEqual(env['hinges'].value, 2)
+            finally:
+                sys.path[:] = saved_path
+
+    def test_toggle_macro_reads_current_pose_modules(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / 'tools'
+            root.mkdir()
+            macro = root / 'toggle-cover.FCMacro'
+            shutil.copy2(ROOT / 'tools/toggle-cover.FCMacro', macro)
+            state = types.SimpleNamespace(CoverAngle=0)
+            doc = types.SimpleNamespace(
+                AssemblyState=state,
+                GeometryDatums=types.SimpleNamespace(BuildParametersJSON='{"cover_angle_open": 70}'),
+            )
+            doc.getObject = lambda name: state if name == 'AssemblyState' else None
+            app = types.ModuleType('FreeCAD')
+            app.ActiveDocument = doc
+            gui = types.ModuleType('FreeCADGui')
+            gui.activeDocument = lambda: types.SimpleNamespace(
+                activeView=lambda: types.SimpleNamespace(fitAll=lambda: None))
+            gui.updateGui = lambda: None
+
+            def write_sources(version):
+                (root / 'hinges.py').write_text(f'value = {version}\n')
+                (root / 'assembly_pose.py').write_text(
+                    'from hinges import value\n'
+                    'def set_cover_angle(doc, parameters, angle):\n'
+                    '    doc.loaded_version = value\n'
+                    '    doc.AssemblyState.CoverAngle = angle\n')
+
+            saved_path = sys.path[:]
+            try:
+                with patch.dict(sys.modules, {'FreeCAD': app, 'FreeCADGui': gui}):
+                    write_sources(1)
+                    exec(compile(macro.read_bytes(), str(macro), 'exec'),
+                         {'__file__': str(macro), '__name__': '__main__'})
+                    self.assertEqual(doc.loaded_version, 1)
+                    write_sources(2)
+                    exec(compile(macro.read_bytes(), str(macro), 'exec'),
+                         {'__file__': str(macro), '__name__': '__main__'})
+                    self.assertEqual(doc.loaded_version, 2)
             finally:
                 sys.path[:] = saved_path
 
@@ -338,9 +398,11 @@ class DrawingAnnotationTests(unittest.TestCase):
             params.update(platter_diameter=310, pivot_distance=202, arm_effective_length=220,
                           front_angle=70, wall=14, closed_height=216, revision='v0.3-review')
             group = types.SimpleNamespace(Group=[types.SimpleNamespace(Shape=Part.makeBox(1, 1, 1))])
-            doc = types.SimpleNamespace(getObject=lambda name: group)
+            cfg=json.loads((ROOT/'cad/selected-mechanism.json').read_text())
+            cfg.update(platter_diameter=310,platter_center_x=params['platter_x'],platter_center_y=params['platter_y'])
+            doc = types.SimpleNamespace(getObject=lambda name: group, StudyBasis=types.SimpleNamespace(ConfigurationJSON=json.dumps(cfg)))
             svg = module.create(doc, params).read_text()
-            for expected in ['Ø310', '轴距 202', '有效臂长 220', '后倾 20°', '木壳厚 14', '* 216', 'v0.3-review']:
+            for expected in ['Ø310', '弯臂机芯尺寸待确认', '后倾 20°', '木壳厚 14', '* 216', 'v0.3-review']:
                 with self.subTest(expected=expected):
                     self.assertIn(expected, svg)
             line = re.search(r'd="M([\d.]+),([\d.]+) H([\d.]+)"/><text[^>]*>Ø310', svg)

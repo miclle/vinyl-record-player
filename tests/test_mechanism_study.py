@@ -1,7 +1,8 @@
-"""Verify candidate-envelope diagnostics without modifying delivered models."""
+"""Verify measured mechanism diagnostics in the generated main model."""
+import csv
+import hashlib
 import json
 import shutil
-import subprocess
 import sys
 import tempfile
 import unittest
@@ -9,39 +10,44 @@ from pathlib import Path
 from unittest.mock import patch
 
 import FreeCAD as App
+import Part
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'tools'))
+import build_model
 import mechanism_study
 
 
 class MechanismStudyTests(unittest.TestCase):
+    def copy_inputs(self, root):
+        (root / 'cad').mkdir()
+        for name in ['parameters.json', 'selected-mechanism.json']:
+            shutil.copy2(ROOT / 'cad' / name, root / 'cad' / name)
+
     def test_reopened_output_blocks_rebuild_without_changing_files_or_edits(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            (root / 'cad').mkdir()
-            for name in ['lumi-three-driver.FCStd', 'selected-mechanism.json', 'lumi-selected-mechanism-fit.FCStd']:
-                shutil.copy2(ROOT / 'cad' / name, root / 'cad' / name)
-            with patch.object(mechanism_study, 'ROOT', root):
+            self.copy_inputs(root)
+            with patch.object(build_model, 'ROOT', root):
+                doc, _, _ = build_model.deliver()
+                App.closeDocument(doc.Name)
                 output = root / 'cad/lumi-selected-mechanism-fit.FCStd'
                 alias = root / 'reopened-study.FCStd'
                 alias.symlink_to(output)
                 for opened_path in [output, alias]:
                     with self.subTest(opened_path=opened_path.name):
                         reopened = App.openDocument(str(opened_path))
-                        self.assertNotEqual(reopened.Name, 'LumiMechanismStudy')
+                        self.assertNotEqual(reopened.Name, 'LumiAssembly')
                         reopened.KitPlatter.Label = 'unsaved user edit'
                         documents_before = set(App.listDocuments())
                         files_before = {p.name: p.read_bytes() for p in (root / 'cad').iterdir()}
                         try:
                             with self.assertRaisesRegex(RuntimeError, 'close'):
-                                mechanism_study.build_study()
+                                build_model.deliver()
                             self.assertEqual(set(App.listDocuments()), documents_before)
                             self.assertEqual(reopened.KitPlatter.Label, 'unsaved user edit')
                             self.assertEqual(
-                                {p.name: p.read_bytes() for p in (root / 'cad').iterdir()},
-                                files_before,
-                            )
+                                {p.name: p.read_bytes() for p in (root / 'cad').iterdir()}, files_before)
                         finally:
                             for name in set(App.listDocuments()) - documents_before:
                                 App.closeDocument(name)
@@ -50,72 +56,82 @@ class MechanismStudyTests(unittest.TestCase):
     def test_saved_measurements_support_positions_and_two_height_states(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            (root / 'cad').mkdir()
-            for name in ['lumi-three-driver.FCStd', 'selected-mechanism.json']:
-                shutil.copy2(ROOT / 'cad' / name, root / 'cad' / name)
-            with patch.object(mechanism_study, 'ROOT', root):
-                doc, cfg, report = mechanism_study.build_study()
-                App.closeDocument(doc.Name)
-                saved = App.openDocument(str(root / 'cad/lumi-selected-mechanism-fit.FCStd'))
-                try:
-                    self.assertTrue(all(report['geometry_checks'].values()))
-                    self.assertEqual(json.loads(saved.StudyBasis.ConfigurationJSON), cfg)
-                    b = saved.KitPlatter.Shape.optimalBoundingBox(False)
-                    self.assertAlmostEqual(b.XLength, 280)
-                    self.assertAlmostEqual(b.YLength, 280)
-                    self.assertAlmostEqual(b.ZLength, 11)
-                    # Read the three saved spring sleeves, not just computed metadata.
-                    springs = saved.KitBase.Shape.Solids[1:]
-                    self.assertEqual(len(springs), 3)
-                    expected = [(231, 267.262794), (271.262794, 117), (80.737206, 117)]
-                    for spring, (x, y) in zip(springs, expected):
-                        bounds = spring.optimalBoundingBox(False)
-                        self.assertAlmostEqual(bounds.Center.x, x, places=5)
-                        self.assertAlmostEqual(bounds.Center.y, y, places=5)
-                        self.assertAlmostEqual(bounds.ZMin, 146.5)
-                        self.assertAlmostEqual(bounds.ZLength, 10.5)
-                    low = saved.UnderbodyReservation.Shape.optimalBoundingBox(False).ZMin
-                    high = max(o.Shape.optimalBoundingBox(False).ZMax for o in saved.SelectedKit.Group)
-                    self.assertAlmostEqual(low, 117)
-                    self.assertAlmostEqual(high-low, 85)
-                    self.assertLess(saved.UnderbodyReservation.Shape.Volume, 355*280*29.5)
-                    fit = report['fit']
-                    self.assertFalse(fit['installation_released'])
-                    self.assertFalse(fit['underbody_coverage_complete'])
-                    states = fit['spring_states']
-                    self.assertEqual([s['motor_depth_below_support_mm'] for s in states], [24.5, 29.5])
-                    self.assertEqual([s['roof_depth_deficit_mm'] for s in states], [10.5, 15.5])
-                    self.assertAlmostEqual(states[0]['upper_vertical_lid_gap_mm'], 0.7)
-                    self.assertAlmostEqual(states[1]['upper_vertical_lid_gap_mm'], 5.7)
-                    for state in states:
-                        self.assertEqual(state['cover_sweep_sample_count'], 71)
-                        self.assertEqual(state['cover_sweep_collisions'], [])
-                        self.assertIn('AcousticRoof', [hit['part'] for hit in state['local_underbody_overlaps']])
-                    self.assertAlmostEqual(fit['display_cover_clearance_mm'], 5.7)
-                    self.assertAlmostEqual(fit['illustrative_cover_clearance_mm'], 0.7)
-                    self.assertIsNone(saved.getObject('Mechanism'))
-                finally:
-                    App.closeDocument(saved.Name)
+            self.copy_inputs(root)
+            with patch.object(build_model, 'ROOT', root):
+                doc, _, _ = build_model.deliver()
+            report = json.loads((root / 'cad/mechanism-fit-report.json').read_text())
+            App.closeDocument(doc.Name)
+            saved = App.openDocument(str(root / 'cad/lumi-selected-mechanism-fit.FCStd'))
+            try:
+                cfg = json.loads((root / 'cad/selected-mechanism.json').read_text())
+                self.assertTrue(all(report['geometry_checks'].values()))
+                self.assertEqual(json.loads(saved.StudyBasis.ConfigurationJSON), cfg)
+                b = saved.KitPlatter.Shape.optimalBoundingBox(False)
+                self.assertAlmostEqual(b.XLength, 280)
+                self.assertAlmostEqual(b.YLength, 280)
+                self.assertAlmostEqual(b.ZLength, 11)
+                springs = saved.KitBase.Shape.Solids[1:]
+                self.assertEqual(len(springs), 3)
+                expected = [(231, 267.262794), (271.262794, 117), (80.737206, 117)]
+                for spring, (x, y) in zip(springs, expected):
+                    bounds = spring.optimalBoundingBox(False)
+                    self.assertAlmostEqual(bounds.Center.x, x, places=5)
+                    self.assertAlmostEqual(bounds.Center.y, y, places=5)
+                    self.assertAlmostEqual(bounds.ZMin, 146.5)
+                    self.assertAlmostEqual(bounds.ZLength, 10.5)
+                low = saved.UnderbodyReservation.Shape.optimalBoundingBox(False).ZMin
+                high = max(o.Shape.optimalBoundingBox(False).ZMax for o in saved.SelectedKit.Group)
+                self.assertAlmostEqual(low, 117)
+                self.assertAlmostEqual(high-low, 85)
+                self.assertLess(saved.UnderbodyReservation.Shape.Volume, 355*280*29.5)
+                fit = report['fit']
+                self.assertFalse(fit['installation_released'])
+                self.assertFalse(fit['underbody_coverage_complete'])
+                states = fit['spring_states']
+                self.assertEqual([s['motor_depth_below_support_mm'] for s in states], [24.5, 29.5])
+                self.assertEqual([s['roof_depth_deficit_mm'] for s in states], [10.5, 15.5])
+                self.assertAlmostEqual(states[0]['upper_vertical_lid_gap_mm'], 0.7)
+                self.assertAlmostEqual(states[1]['upper_vertical_lid_gap_mm'], 5.7)
+                for state in states:
+                    self.assertEqual(state['cover_sweep_sample_count'], 71)
+                    self.assertEqual(state['cover_sweep_collisions'], [])
+                    self.assertIn('AcousticRoof', [hit['part'] for hit in state['local_underbody_overlaps']])
+                self.assertAlmostEqual(fit['display_cover_clearance_mm'], 5.7)
+                self.assertAlmostEqual(fit['illustrative_cover_clearance_mm'], 0.7)
+                self.assertTrue(all(o.IsReference for o in saved.Mechanism.Group))
+                self.assertEqual(list((root / 'cad').glob('*.FCStd')),
+                                 [root / 'cad/lumi-selected-mechanism-fit.FCStd'])
+                self.assertEqual(report['model_sha256'], hashlib.sha256(
+                    (root / 'cad/lumi-selected-mechanism-fit.FCStd').read_bytes()).hexdigest())
+                with (root / 'cad/parts.csv').open(encoding='utf-8-sig') as f:
+                    ids = {row['ID'] for row in csv.DictReader(f)}
+                physical = [o for o in saved.Objects if o.TypeId == 'Part::Feature'
+                            and not getattr(o, 'IsReference', False)
+                            and not getattr(o, 'IsDiagnostic', False)]
+                self.assertEqual(ids, {o.Name for o in physical})
+                exported = Part.read(str(root / 'cad/lumi-selected-mechanism-fit.step'))
+                self.assertEqual(len(exported.Solids), sum(len(o.Shape.Solids) for o in physical))
+                self.assertLess(abs(exported.Volume-sum(o.Shape.Volume for o in physical))/exported.Volume,
+                                1e-7)
+            finally:
+                App.closeDocument(saved.Name)
 
-    def test_free_spring_collision_fails_cli_despite_clear_display_state(self):
+    def test_free_spring_collision_fails_build_despite_clear_display_state(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            (root / 'cad').mkdir()
-            (root / 'tools').mkdir()
-            for name in ['lumi-three-driver.FCStd', 'selected-mechanism.json']:
-                shutil.copy2(ROOT / 'cad' / name, root / 'cad' / name)
-            script = root / 'tools/mechanism_study.py'
-            shutil.copy2(ROOT / 'tools/mechanism_study.py', script)
+            self.copy_inputs(root)
             path = root / 'cad/selected-mechanism.json'
             cfg = json.loads(path.read_text())
             cfg['spring_free_height'] = 16.5
             path.write_text(json.dumps(cfg))
-            result = subprocess.run(
-                [sys.executable, '-c',
-                 'import sys,runpy; sys.path.insert(0,sys.argv[1]); runpy.run_path(sys.argv[2],run_name="__main__")',
-                 str(ROOT / 'tools'), str(script)], capture_output=True, text=True)
-            self.assertNotEqual(result.returncode, 0)
-            self.assertIn('geometry/export validation failed', result.stderr)
+            try:
+                with patch.object(build_model, 'ROOT', root):
+                    with self.assertRaisesRegex(RuntimeError, 'geometry/export validation failed'):
+                        build_model.deliver()
+            finally:
+                failed = App.getDocument('LumiAssembly')
+                if failed is not None:
+                    App.closeDocument(failed.Name)
             report = json.loads((root / 'cad/mechanism-fit-report.json').read_text())
             fit = report['fit']
             self.assertTrue(fit['display_closed_cover_clear'])

@@ -1,7 +1,6 @@
 {
   "revision": "v0.4-measured-fit-study",
   "selected_option": "28高端弯臂机芯全套餐装好直接用 自动回臂",
-  "base_sha256": "81d51068af41dedd9441c15a46fadac504ad8094132bc3344a52a547fd5f6aef",
   "assumptions": {
     "revision": "v0.4-measured-fit-study",
     "selected_option": "28高端弯臂机芯全套餐装好直接用 自动回臂",
@@ -65,10 +64,7 @@
     }
   },
   "geometry_checks": {
-    "all_shapes_valid": true,
     "local_envelope_valid": true,
-    "step_valid": true,
-    "step_solids_match": true,
     "hinge_mount_holes_clear": true,
     "hinge_mount_material_and_blind_depth": true,
     "hinge_saved_shapes_match": true,
@@ -77,6 +73,9 @@
     "hinge_installation_unreleased": true,
     "spring_endpoints_closed_cover_clear": true,
     "spring_endpoints_cover_sweep_clear": true,
+    "all_shapes_valid": true,
+    "step_valid": true,
+    "step_solids_match": true,
     "step_volume_matches": true
   },
   "hinges": {
@@ -248,5 +247,6 @@
     "250总长暂作停放纵向外廓；唱臂限位角、有效臂长和播放运动未知",
     "合页及盖总成对示意机芯做1度开盖抽样；真实机芯和自动回臂运动未验证",
     "STEP 仅导出装配示意，包络及红色干涉体保留在 FCStd"
-  ]
+  ],
+  "model_sha256": "7cbb4352b6e9e44f655ff82dbd97ceb1a4fc51bf750c6f056c7bc991138d3ed2"
 }

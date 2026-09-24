@@ -39,7 +39,7 @@ def render(doc,p,groups):
     for obj in groups['Cover'].Group:obj.ViewObject.Visibility=False
     view.setCameraOrientation(App.Rotation().Q);view.fitAll();save('top.png')
     visible={obj.Name:obj.ViewObject.Visibility for obj in doc.Objects if obj.TypeId=='Part::Feature'}
-    for key in ['Front','Mechanism','Deck']:
+    for key in ['Front','SelectedKit','Controls','Deck']:
         for obj in groups[key].Group:obj.ViewObject.Visibility=False
     for name in ['AcousticRoof','Baffle','BearingPocket']:
         doc.getObject(name).ViewObject.Visibility=False
@@ -53,7 +53,6 @@ def render(doc,p,groups):
     for obj in groups['Cover'].Group:obj.ViewObject.Visibility=True
     iso()
     doc.recompute()
-    doc.save()
     render_foot_detail(doc)
     render_hinge_detail(doc,p)
     (ROOT/'cad/render.done').write_text('Rendered closed, open, front, right, bottom, top, rear, internal, audio-layout from FreeCAD viewport.\n')

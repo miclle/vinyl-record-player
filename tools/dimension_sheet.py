@@ -19,10 +19,10 @@ def create(doc,p):
         svg=TechDraw.projectToSVG(Part.makeCompound([o.Shape for o in objs]),App.Vector(*direction))
         svg=re.sub(r'\bid\s*=\s*"[^"]*"','',svg).replace('stroke-width="1.0"','stroke-width="0.35"')
         return '<g transform="rotate(%s)">%s</g>'%(rotation,svg)
-    external=['Cabinet','Front','Deck','Mechanism','Cover','Feet']
+    external=['Cabinet','Front','Deck','SelectedKit','Controls','Cover','Feet']
     front=projection(external,(0,-1,0),90)
     right=projection(external,(1,0,0),-90)
-    top=projection(['Cabinet','Front','Deck','Mechanism'],(0,0,1),0)
+    top=projection(['Cabinet','Front','Deck','SelectedKit','Controls'],(0,0,1),0)
     png=base64.b64encode((ROOT/'previews/open.png').read_bytes()).decode()
     W,D,H=p['width'],p['depth'],p['closed_height'];s=1.15
     out=['''<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1030" viewBox="0 0 1400 1030">
@@ -51,9 +51,10 @@ def create(doc,p):
     vdim(635,510-D*s,D*s,80+W*s,f'{D:.1f}')
     vdim(1245,865-H*s,H*s,800+D*s,f'{H:.1f} *')
     # The platter diameter is tied to its projected geometric boundary.
-    diameter=p['platter_diameter']
-    hdim(80+(p['platter_x']-diameter/2)*s,510-p['platter_y']*s,diameter*s,510-p['platter_y']*s,f'Ø{diameter:g}')
-    out.extend([f'<text x="750" y="532" class="note">轴距 {p["pivot_distance"]:g} · 有效臂长 {p["arm_effective_length"]:g} · 一低音两全频占位</text>',
+    cfg=json.loads(doc.StudyBasis.ConfigurationJSON)
+    diameter=cfg['platter_diameter']
+    hdim(80+(cfg['platter_center_x']-diameter/2)*s,510-cfg['platter_center_y']*s,diameter*s,510-cfg['platter_center_y']*s,f'Ø{diameter:g}')
+    out.extend([f'<text x="750" y="532" class="note">弯臂机芯尺寸待确认 · 一低音两全频占位</text>',
                 f'<text x="750" y="558" class="note">前格栅后倾 {90-p["front_angle"]:g}° · 木壳厚 {p["wall"]:g}（估算）</text>',
                 '<line x1="60" y1="948" x2="1340" y2="948" stroke="#d8d3cc"/>',
                 f'<text x="60" y="978" class="note">* {H:g} 为当前闭盖总高；原图未明确测量基准。板厚、盖高及内部接口为本项目估算。</text>',

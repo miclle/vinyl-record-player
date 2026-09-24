@@ -17,7 +17,6 @@ class DrawingPackTests(unittest.TestCase):
     def test_nondefault_hinge_notes_match_saved_geometry_and_hole_sheets(self):
         from unittest.mock import patch
         import build_model
-        import mechanism_study
         import drawing_data
         import Part
 
@@ -30,12 +29,15 @@ class DrawingPackTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp); (root/'cad').mkdir()
             (root/'cad/parameters.json').write_text(json.dumps(p))
+            (root / 'cad/selected-mechanism.json').write_bytes((ROOT / 'cad/selected-mechanism.json').read_bytes())
             shutil.copy2(ROOT/'cad/selected-mechanism.json',root/'cad/selected-mechanism.json')
             with patch.object(build_model,'ROOT',root):
                 doc,_,_=build_model.deliver()
             App.closeDocument(doc.Name)
-            saved=App.openDocument(str(root/'cad/lumi-three-driver.FCStd'))
+            saved=App.openDocument(str(root/'cad/lumi-selected-mechanism-fit.FCStd'))
             try:
+                from assembly_pose import set_cover_angle
+                set_cover_angle(saved,p,0)
                 self.assertEqual(saved.HingeBacking0.Shape.optimalBoundingBox(False).YLength,3)
                 self.assertEqual(saved.HingeBacking0.Shape.optimalBoundingBox(False).ZLength,20)
                 self.assertIn('3 mm 铝板',saved.HingeBacking0.MaterialNote)
@@ -46,9 +48,6 @@ class DrawingPackTests(unittest.TestCase):
                 self.assertTrue(saved.Back.Shape.isInside(App.Vector(83,342.8,130),1e-6,False))
             finally:
                 App.closeDocument(saved.Name)
-            with patch.object(mechanism_study,'ROOT',root):
-                study,_,_=mechanism_study.build_study()
-            App.closeDocument(study.Name)
             data=drawing_data.collect(root,project=False)
         cards={c['key']:c for c in data['cards']}
         sheets={s['key']:s for s in data['hole_sheets']}
@@ -72,9 +71,10 @@ class DrawingPackTests(unittest.TestCase):
         before = {p: hashlib.sha256(p.read_bytes()).hexdigest() for p in paths}
         data = drawing_data.collect(ROOT, project=False)
         cards = {c['key']: c for c in data['cards']}
-        self.assertEqual(data['coverage']['baseline_missing'], [])
-        self.assertEqual(data['coverage']['study_missing'], [])
-        self.assertEqual(data['coverage']['baseline_count'], 71)
+        self.assertEqual(data['coverage']['missing'], [])
+        self.assertEqual(data['coverage']['physical_count'], 65)
+        self.assertEqual(data['coverage']['reference_count'], 16)
+        self.assertEqual(set(data['sources']), {'lumi-selected-mechanism-fit.FCStd'})
         self.assertNotIn('LowerRail', cards)
         self.assertEqual(cards['GrilleCloth']['drawing_code'], 'A-P03')
         self.assertEqual(cards['GrilleCloth']['drawing_column'], 1)
@@ -151,8 +151,9 @@ class DrawingPackTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp);(root/'cad').mkdir()
             (root/'cad/parameters.json').write_text(json.dumps(p))
+            (root / 'cad/selected-mechanism.json').write_bytes((ROOT / 'cad/selected-mechanism.json').read_bytes())
             with patch.object(build_model,'ROOT',root):
-                doc,_,_=build_model.build()
+                doc,_,_,_=build_model.build()
             try:
                 sheets={s['key']:s for s in panel_details(doc,p,drawing_data.project_shape,True)}
                 for sheet in sheets.values():
@@ -198,7 +199,7 @@ class DrawingPackTests(unittest.TestCase):
             root=Path(tmp)
             (root/'cad').mkdir()
             for name in ('parameters.json','selected-mechanism.json',
-                         'lumi-three-driver.FCStd','lumi-selected-mechanism-fit.FCStd'):
+                         'lumi-selected-mechanism-fit.FCStd'):
                 shutil.copy2(ROOT/'cad'/name,root/'cad'/name)
             before=set(App.listDocuments())
             for name,key in [('parameters.json','wall'),('selected-mechanism.json','nominal_width')]:

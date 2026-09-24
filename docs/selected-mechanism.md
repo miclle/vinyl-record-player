@@ -28,7 +28,7 @@
 
 ## CAD 与核对结果
 
-[FreeCAD 核对装配](../cad/lumi-selected-mechanism-fit.FCStd) 和 [STEP](../cad/lumi-selected-mechanism-fit.step) 沿用 v0.9 可调定位合页版的外壳与电子、音响布局，并替换上部机芯外观。[三单元基线](../cad/lumi-three-driver.FCStd) 保持独立，是本核对版的生成输入，须保留。两份文件可独立打开，但修改基线不会自动更新本核对版；需要按下方步骤重新生成。
+[整机主模型](../cad/lumi-selected-mechanism-fit.FCStd) 与[闭盖 STEP](../cad/lumi-selected-mechanism-fit.step)由结构参数和机芯参数一次生成。主文件默认开盖 70°，结构、所选机芯、历史参考及安装诊断分别分组；后两组默认隐藏。历史通用机芯不进入当前装配或 STEP。无需保留另一份基线 CAD。
 
 | 继承部件 | 用户提供的外廓 | 仍待确认 |
 |---|---|---|
@@ -57,26 +57,23 @@
 
 下一步用实物纸模板复核三个弹簧位置、接触直径及马达位置／外廓，测定承重高度并确认安装座与平台的高度关系。随后确定台面开口、局部密封避让和隔振支承；当前支点角度及底部轮廓不能直接用于钻孔。功放板还需补齐安装孔位、端子位置并核对供电、输出通道、负载和分频接法；套装不意味着能直接驱动当前三个扬声器。
 
-当前核对版继承合页中心 X=100／350 mm、AC 插座中心 Z=88.5 mm 和变压器中心 Y=267 mm；这些位置由基线控制，不在机芯参数中重复定义。详见[合页参数与联动重建](../references/hinges/README.md#参数与重建)。
+当前核对版继承合页中心 X=100／350 mm、AC 插座中心 Z=88.5 mm 和变压器中心 Y=267 mm；这些位置由结构参数控制，不在机芯参数中重复定义。详见[合页参数与联动重建](../references/hinges/README.md#参数与重建)。
 
 浮动台面也继承基线的 418 × 328 × 6 mm 尺寸和 2 mm 名义后缝，由 `deck_rear_clearance` 控制。主轴孔、支承位置及台面高度未变；后缝尚未按实物隔振运动验证，见[设计依据](design-basis.md)。
 
-参数入口按部件区分：[基线参数](../cad/parameters.json) 控制外壳、扬声器、变压器、功放及合页安装；[机芯参数](../cad/selected-mechanism.json) 控制弯臂机芯占位及下探假设。
+参数入口按部件区分：[结构参数](../cad/parameters.json) 控制外壳、扬声器、变压器、功放及合页安装；[机芯参数](../cad/selected-mechanism.json) 控制弯臂机芯占位及下探假设。
 
-1. 先把手动改动另存。基线参数有变化时，按 [README](../README.md#v09-基线重建) 重建基线并运行 `tools/validate_model.py`；报告必须与刚保存的基线一致。
-2. 关闭核对版文档，包括重新打开的 `lumi-selected-mechanism-fit.FCStd`。核对版脚本同时检查文档名及解析符号链接后的文件路径，拒绝覆盖仍打开的目标。
-3. 在 FreeCAD 执行 `tools/mechanism-study.FCMacro`，生成核对版 FCStd、STEP、`mechanism-fit-report.json` 和三张预览。仅改机芯参数时可以直接执行此步，但输入基线须是已验证的当前版本。
-4. 核对报告中的 `geometry_checks` 与 `fit`。几何及 STEP 检查通过不表示安装放行；当前 `installation_released=false`，仍有下探包络重叠。
+1. 先把手动改动另存并关闭主模型。修改结构或机芯参数后均执行 `tools/build.FCMacro`，一次重建全部实体、STEP、报告与预览；无需先生成另一份 CAD。
+2. 运行 `tools/validate_model.py`，再按图册与导览文档重新出图。几何检查通过不表示安装放行，当前 `installation_released=false`，仍有假设下探包络重叠。
+3. 报告中的 `model_sha256` 绑定最终保存的主文件。手动另存或覆盖后如需使用报告，应重新生成并核对哈希。
 
-核对版读取已保存的 `lumi-three-driver.FCStd`，不会自动读取最新基线 JSON 重建外壳，也不包含基线 GUI 内尚未保存的修改。报告的 `base_sha256` 绑定输入 FCStd；基线保存后若字节变化，应重建核对版再使用报告。
-
-无 GUI 时可在仓库根目录运行；先按 [README](../README.md#v09-基线重建) 设置 `FREECAD_RESOURCES`：
+无 GUI 时按 [README](../README.md#整机重建) 设置 `FREECAD_RESOURCES` 后执行：
 
 ```sh
 PYTHONPATH="${FREECAD_RESOURCES:?请先设置 FreeCAD 运行环境}/lib" \
-  "$FREECAD_RESOURCES/bin/python" tools/mechanism_study.py
+  "$FREECAD_RESOURCES/bin/python" tools/build_model.py
 ```
 
-该入口生成 CAD 与报告，不刷新 GUI 颜色和预览。`tools/validate_model.py` 当前的 52 项检查只针对基线，包含台面后缝与参数的一致性检查，不能用来宣称此款机芯已适配。
+终端入口不刷新 GUI 颜色和预览。查看开合使用 `tools/toggle-cover.FCMacro`；它只切换当前文档，不自动保存。出图、导览与验证在临时副本中恢复闭盖基准，不受保存的展示角度影响。
 
 音响布局详见 [SC-2103 三音腔设计](audio-layout.md)。低音腔向后延伸后，顶板与倒相管仍需按弯臂机芯真实底部重新核对。`BearingPocket` 是基线通用轴承的密封避让杯，在核对版中作为现有结构保留，不代表适配了选定机芯。

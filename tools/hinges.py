@@ -124,7 +124,7 @@ def check_installation(doc, p, step=1):
     names = moving_names()
     moving = Part.makeCompound([doc.getObject(n).Shape for n in names])
     stationary = [o for o in doc.Objects if o.TypeId=='Part::Feature' and o.Name not in names
-                  and not getattr(o,'IsDiagnostic',False)]
+                  and not getattr(o,'IsDiagnostic',False) and not getattr(o,'IsReference',False)]
     collisions = []
     angles = sorted(set([float(a) for a in range(0,int(p['cover_angle_open'])+1,step)]+[p['cover_angle_open']]))
     for angle in angles:

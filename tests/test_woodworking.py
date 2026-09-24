@@ -31,8 +31,9 @@ class WoodworkingTests(unittest.TestCase):
                 p['fullrange']['center_x']=[80,370]
                 p['acoustic_divider_x']=[129,313]
                 (root/'cad/parameters.json').write_text(json.dumps(p))
+                (root / 'cad/selected-mechanism.json').write_bytes((ROOT / 'cad/selected-mechanism.json').read_bytes())
                 with patch.object(build_model,'ROOT',root):
-                    doc,_,_=build_model.build()
+                    doc,_,_,_=build_model.build()
                 try:
                     normal=App.Vector(0,math.sin(math.radians(angle)),-math.cos(math.radians(angle)))
                     aligned=doc.Baffle.Shape.copy()
@@ -67,6 +68,7 @@ class WoodworkingTests(unittest.TestCase):
             root=Path(tmp);(root/'cad').mkdir()
             p=json.loads((ROOT/'cad/parameters.json').read_text())
             (root/'cad/parameters.json').write_text(json.dumps(p))
+            (root / 'cad/selected-mechanism.json').write_bytes((ROOT / 'cad/selected-mechanism.json').read_bytes())
             with patch.object(build_model,'ROOT',root):doc,p,_=build_model.deliver()
             try:
                 self.assertTrue(hasattr(validate_model,'check_woodworking'))

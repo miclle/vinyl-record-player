@@ -60,7 +60,7 @@
 
 会话中提出的后续建议是左右各预留一个可封堵、可换管接口，用于比较密闭与倒相两种方案；目前只保留建议，尚未确定管径、管长、出口或紧固结构。若后续实施，先检查前格栅后方或侧面出管的空间，每根管只连通所属音腔和箱外，不连通低音腔或电子区，也不套用低音管的尺寸。
 
-实施时需同步 `cad/parameters.json`、`tools/build_model.py`、`tools/validate_model.py` 和回归测试：当前封闭性检查只临时封住三个扬声器开孔及低音倒相口，新增卫星倒相口后须明确其气路、归属、封堵方式和管道排量，再重建两套模型与相关预览。声学取舍仍需样机测量；几何检查不能代替这一步。
+实施时需同步 `cad/parameters.json`、`tools/build_model.py`、`tools/validate_model.py` 和回归测试：当前封闭性检查只临时封住三个扬声器开孔及低音倒相口，新增卫星倒相口后须明确其气路、归属、封堵方式和管道排量，再重建主模型与相关预览。声学取舍仍需样机测量；几何检查不能代替这一步。
 
 已购脚垫按未压缩高度计算，低音离地 19.5 mm，低于此前 20 mm 试验目标；验证报告单列该目标未满足，几何检查不宣称出声空间已足够。
 
@@ -74,4 +74,4 @@
 
 ## 重建入口
 
-修改 `cad/parameters.json` 的 `fullrange`、`woofer`、`acoustic`、`acoustic_divider_x`、`bass_port` 及电子部件参数，按 [README](../README.md#v09-基线重建)先重建并验证基线，再重建机芯核对版。`TweeterLeft` / `TweeterRight` 仅保留为稳定对象 ID，其角色与显示名称已改为全频。更换管长不会自动更新保存的静态实体。
+修改 `cad/parameters.json` 的 `fullrange`、`woofer`、`acoustic`、`acoustic_divider_x`、`bass_port` 及电子部件参数，按 [README](../README.md#整机重建)重建并验证整机。`TweeterLeft` / `TweeterRight` 仅保留为稳定对象 ID，其角色与显示名称已改为全频。更换管长不会自动更新保存的静态实体。

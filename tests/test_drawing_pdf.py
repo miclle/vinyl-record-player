@@ -26,7 +26,7 @@ class PDFProjectionTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             (root / 'cad').mkdir()
-            for name in ['parameters.json', 'lumi-three-driver.FCStd', 'selected-mechanism.json']:
+            for name in ['parameters.json', 'selected-mechanism.json']:
                 shutil.copy2(ROOT / 'cad' / name, root / 'cad' / name)
             path = root / 'cad/selected-mechanism.json'
             cfg = json.loads(path.read_text())
@@ -36,18 +36,20 @@ class PDFProjectionTests(unittest.TestCase):
 from pathlib import Path
 sys.path.insert(0,sys.argv[1])
 import FreeCAD as App
-import mechanism_study as m,drawing_data
-m.ROOT=Path(sys.argv[2])
-doc,cfg,report=m.build_study()
+import build_model as b,drawing_data
+root=Path(sys.argv[2])
+b.ROOT=root
+doc,_,_=b.deliver()
 App.closeDocument(doc.Name)
-doc=App.openDocument(str(m.ROOT/'cad/lumi-selected-mechanism-fit.FCStd'))
+cfg=json.loads((root/'cad/selected-mechanism.json').read_text())
+doc=App.openDocument(str(root/'cad/lumi-selected-mechanism-fit.FCStd'))
 for spring,hour in zip(doc.KitBase.Shape.Solids[1:],cfg['spring_clock_hours']):
     b=spring.optimalBoundingBox(False)
     assert abs(b.Center.x-(cfg['platter_center_x']+100*math.sin(hour*math.pi/6)))<1e-5
     assert abs(b.Center.y-(cfg['platter_center_y']+100*math.cos(hour*math.pi/6)))<1e-5
 App.closeDocument(doc.Name)
-data=drawing_data.collect(m.ROOT)
-(m.ROOT/'data.json').write_text(json.dumps(data))
+data=drawing_data.collect(root)
+(root/'data.json').write_text(json.dumps(data))
 '''
             subprocess.run([str(resources / 'bin/python'), '-c', script,
                             str(ROOT / 'tools'), str(root)],

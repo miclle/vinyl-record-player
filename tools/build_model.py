@@ -24,7 +24,7 @@ SILVER = (0.73, 0.75, 0.77)
 GRAY = (0.23, 0.25, 0.27)
 
 
-def build():
+def build_structure():
     p = json.loads((ROOT / 'cad/parameters.json').read_text())
     if p['driver_count'] != 3 or len(p['fullrange']['center_x']) != 2:
         raise ValueError('This layout requires one woofer and two full-range satellites')
@@ -37,10 +37,13 @@ def build():
     a = math.radians(p['front_angle'])
     inward = V(0, math.sin(a), -math.cos(a))
     front_y = lambda z: 8 + (z - (z0+t)) / math.tan(a)
-    if 'LumiThreeDriver' in App.listDocuments():
-        raise RuntimeError('Close LumiThreeDriver before rebuilding; unsaved edits are protected')
-    doc = App.newDocument('LumiThreeDriver')
-    doc.Label = 'LUMI · SC-2103 整数备料布局 · ' + p['revision']
+    output = ROOT / 'cad/lumi-selected-mechanism-fit.FCStd'
+    for opened in App.listDocuments().values():
+        if (opened.Name == 'LumiAssembly' or
+                (opened.FileName and Path(opened.FileName).resolve() == output.resolve())):
+            raise RuntimeError(f'Save manual edits separately and close {opened.Name} before rebuilding')
+    doc = App.newDocument('LumiAssembly')
+    doc.Label = 'LUMI · 弯臂机芯整机 · 安装待确认'
     groups = {}
     for name, label in [('Cabinet','01 胡桃木外壳'), ('Front','02 倾斜格栅与灯光'),
                         ('Deck','03 浮动唱盘底板'), ('Mechanism','04 唱盘与唱臂包络'),
@@ -48,7 +51,6 @@ def build():
                         ('Cover','07 透明盖与铰链'), ('Feet','08 脚垫')]:
         groups[name] = doc.addObject('App::DocumentObjectGroup', name)
         groups[name].Label = label
-    rows = []
 
     def add(name, label, shape, group, color, basis='估算 / 待选型', material='概念件', transparency=0):
         if shape.isNull() or not shape.isValid() or not shape.Solids:
@@ -64,8 +66,6 @@ def build():
             obj.ViewObject.DisplayMode = 'Flat Lines'
             obj.ViewObject.LineWidth = 1.0
             obj.ViewObject.Transparency = transparency
-        b = shape.optimalBoundingBox(False)
-        rows.append([name,label,group,material,basis,round(b.XLength,3),round(b.YLength,3),round(b.ZLength,3)])
         return obj
 
     def box(name,label,x,y,z,dx,dy,dz,group,color,**kw):
@@ -354,22 +354,63 @@ def build():
     info.addProperty('App::PropertyVector','StylusPoint','Geometry').StylusPoint=stylus
     info.addProperty('App::PropertyVector','CoverHinge','Geometry').CoverHinge=hinge_dimensions(p)['axis']
     doc.recompute()
-    with (ROOT/'cad/parts.csv').open('w',newline='',encoding='utf-8-sig') as f:
-        writer=csv.writer(f,lineterminator='\n');writer.writerow(['ID','零件','分组','材料说明','尺寸依据','包络X_mm','包络Y_mm','包络Z_mm']);writer.writerows(rows)
     return doc,p,groups
 
 
+def build():
+    from mechanism_study import add_study
+    cfg = json.loads((ROOT / 'cad/selected-mechanism.json').read_text())
+    doc,p,groups = build_structure()
+    try:
+        report = add_study(doc,p,cfg)
+        for name in ['SelectedKit', 'Controls', 'FitAnalysis']:
+            groups[name] = doc.getObject(name)
+        return doc,p,groups,report
+    except Exception:
+        App.closeDocument(doc.Name)
+        raise
+
+
 def deliver():
-    doc,p,groups=build()
-    solids=[o for o in doc.Objects if o.TypeId=='Part::Feature' and o.Shape.Solids]
+    from mechanism_study import save_report
+    from assembly_pose import initialize, set_cover_angle
+    doc,p,groups,report=build()
+    initialize(doc)
+    solids=[o for o in doc.Objects if o.TypeId=='Part::Feature' and o.Shape.Solids
+            and not getattr(o,'IsDiagnostic',False) and not getattr(o,'IsReference',False)]
     import Import
-    Import.export(solids,str(ROOT/'cad/lumi-three-driver.step'))
+    step_path=ROOT/'cad/lumi-selected-mechanism-fit.step'
+    Import.export(solids,str(step_path))
+    exported=Part.read(str(step_path))
+    expected=Part.makeCompound([o.Shape for o in solids])
+    report['geometry_checks'].update(
+        all_shapes_valid=all(o.Shape.isValid() for o in solids),
+        step_valid=exported.isValid(),
+        step_solids_match=len(exported.Solids)==len(expected.Solids),
+        step_volume_matches=abs(exported.Volume-expected.Volume)/expected.Volume<1e-7)
     if App.GuiUp:
         import FreeCADGui as Gui
         Gui.activeDocument().activeView().viewAxonometric()
         Gui.activeDocument().activeView().fitAll()
     doc.recompute()
-    doc.saveAs(str(ROOT/'cad/lumi-three-driver.FCStd'))
+    set_cover_angle(doc,p,p['cover_angle_open'])
+    if App.GuiUp:
+        Gui.activeDocument().activeView().fitAll()
+    doc.saveAs(str(ROOT/'cad/lumi-selected-mechanism-fit.FCStd'))
+    # Downstream renderers and callers work in the closed engineering datum.
+    set_cover_angle(doc,p,0)
+    save_report(report,ROOT)
+    with (ROOT/'cad/parts.csv').open('w',newline='',encoding='utf-8-sig') as f:
+        writer=csv.writer(f,lineterminator='\n')
+        writer.writerow(['ID','零件','分组','材料说明','尺寸依据','包络X_mm','包络Y_mm','包络Z_mm'])
+        for obj in solids:
+            b=obj.Shape.optimalBoundingBox(False)
+            group=next(name for name,g in groups.items() if obj in g.Group)
+            writer.writerow([obj.Name,obj.Label,group,getattr(obj,'MaterialNote','机芯概念占位'),
+                             getattr(obj,'DimensionBasis','尺寸待确认'),
+                             round(b.XLength,3),round(b.YLength,3),round(b.ZLength,3)])
+    if not all(report['geometry_checks'].values()):
+        raise RuntimeError('Selected mechanism geometry/export validation failed')
     return doc,p,groups
 
 

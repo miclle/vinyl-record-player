@@ -3,15 +3,16 @@
   "freecad": "1.1.1",
   "checks": {
     "build_parameters_match": true,
+    "mechanism_parameters_match": true,
     "required_model_fields_present": true,
+    "reference_objects_excluded": true,
+    "diagnostic_objects_excluded": true,
     "all_shapes_valid": true,
     "overall_matches_parameters": true,
     "deck_rear_clearance_matches_parameters": true,
     "one_woofer_two_fullrange": true,
     "driver_dimensions_match_parameters": true,
     "driver_geometry_matches_dimensions": true,
-    "pivot_distance": true,
-    "effective_arm_length": true,
     "platter_diameter": true,
     "cover_closed_no_interference": true,
     "cover_sweep_samples_clear": true,
@@ -56,7 +57,7 @@
     "step_bounds": true
   },
   "metrics": {
-    "part_count": 71,
+    "part_count": 65,
     "solid_count": 82,
     "overall_mm": [
       450.0,
@@ -107,11 +108,8 @@
         65.0
       ]
     },
-    "pivot_distance_mm": 199.99999999999997,
-    "effective_length_mm": 217.99999999999994,
-    "stylus_radius_mm": 140.0,
     "cover_closed_intersections_mm3": {},
-    "cover_to_mechanism_min_distance_mm": 11.0,
+    "cover_to_mechanism_min_distance_mm": 5.699999999999989,
     "cover_sweep_collisions": [],
     "internal_collisions": [],
     "installation_reservation_collisions": [],

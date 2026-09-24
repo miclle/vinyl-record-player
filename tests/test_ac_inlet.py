@@ -24,8 +24,9 @@ class ACInletTests(unittest.TestCase):
         (root / 'cad').mkdir()
         self.p = json.loads((ROOT / 'cad/parameters.json').read_text())
         (root / 'cad/parameters.json').write_text(json.dumps(self.p))
+        (root / 'cad/selected-mechanism.json').write_bytes((ROOT / 'cad/selected-mechanism.json').read_bytes())
         with patch.object(build_model, 'ROOT', root):
-            self.doc, _, _ = build_model.build()
+            self.doc, _, _, _ = build_model.build()
         self.addCleanup(App.closeDocument, self.doc.Name)
 
     def test_rear_has_rounded_slot_and_two_through_bolt_holes(self):

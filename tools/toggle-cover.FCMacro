@@ -1,0 +1,33 @@
+# Toggle the active main model between its closed datum and display opening.
+from pathlib import Path
+import json
+import importlib.util
+import sys
+import FreeCAD as App
+import FreeCADGui as Gui
+
+macro_path = Path(__file__).resolve()
+if str(macro_path.parent) not in sys.path:
+    sys.path.insert(0, str(macro_path.parent))
+
+
+def load_local_module(name):
+    path = macro_path.parent / (name + '.py')
+    spec = importlib.util.spec_from_file_location(name, path)
+    module = importlib.util.module_from_spec(spec)
+    exec(compile(path.read_bytes(), str(path), 'exec'), module.__dict__)
+    sys.modules[name] = module
+    return module
+
+
+hinges = load_local_module('hinges')
+assembly_pose = load_local_module('assembly_pose')
+
+doc = App.ActiveDocument
+if doc is None or doc.getObject('AssemblyState') is None:
+    raise RuntimeError('Open the main assembly before toggling its cover')
+p = json.loads(doc.GeometryDatums.BuildParametersJSON)
+assembly_pose.set_cover_angle(doc, p, 0 if float(doc.AssemblyState.CoverAngle) else p['cover_angle_open'])
+Gui.activeDocument().activeView().fitAll()
+Gui.updateGui()
+# Viewing is temporary; do not overwrite the saved main assembly or report hash.

@@ -1,4 +1,4 @@
-"""Candidate curved-arm kit overlay. Preserves the existing assembly unchanged.
+"""Selected curved-arm geometry and diagnostics within the main assembly.
 
 Uses partial measurements and explicitly assumed local envelopes. Reports fit
 conflicts without cutting the cabinet from incomplete bought-in part dimensions.
@@ -6,8 +6,6 @@ conflicts without cutting the cabinet from incomplete bought-in part dimensions.
 import hashlib
 import json
 import math
-import shutil
-import tempfile
 from pathlib import Path
 import FreeCAD as App
 import Part
@@ -75,37 +73,24 @@ def closed_cover_metrics(lid, shapes):
     return overlap, best
 
 
-def build_study():
-    cfg = json.loads((ROOT / 'cad/selected-mechanism.json').read_text())
+def add_study(doc, base_parameters, cfg):
+    """Add the measured mechanism study to the generated main assembly."""
     measurement_datums(cfg, 0)  # Reject inconsistent measurement chains before opening documents.
-    base_path = ROOT / 'cad/lumi-three-driver.FCStd'
-    output_path = ROOT / 'cad/lumi-selected-mechanism-fit.FCStd'
-    # Reopening a saved file changes its document name; also match its real path.
-    for opened in App.listDocuments().values():
-        if (opened.Name == 'LumiMechanismStudy' or
-                (opened.FileName and Path(opened.FileName).resolve() == output_path.resolve())):
-            raise RuntimeError(f'Save manual edits separately and close {opened.Name} before rebuilding')
-    with tempfile.TemporaryDirectory() as tmp:
-        source_path = Path(tmp) / 'MechanismStudySource.FCStd'
-        shutil.copy2(base_path, source_path)
-        source = App.openDocument(str(source_path))
-        try:
-            base_parameters = json.loads(source.getObject('GeometryDatums').BuildParametersJSON)
-            doc = App.newDocument('LumiMechanismStudy')
-            doc.Label = '弯臂机芯装配核对 · 部分实测 v0.4'
-            groups = {}
-            for group_name in ['Cabinet', 'Front', 'Deck', 'Audio', 'Electronics', 'Cover', 'Feet']:
-                group = doc.addObject('App::DocumentObjectGroup', group_name)
-                group.Label = source.getObject(group_name).Label
-                groups[group_name] = group
-                for original in source.getObject(group_name).Group:
-                    group.addObject(doc.copyObject(original, False))
-            controls = doc.addObject('App::DocumentObjectGroup', 'Controls')
-            controls.Label = '原外观旋钮占位（套装控制接口待确认）'
-            for name in ['ControlBase', 'ControlKnob']:
-                controls.addObject(doc.copyObject(source.getObject(name), False))
-        finally:
-            App.closeDocument(source.Name)
+    groups = {name: doc.getObject(name) for name in
+              ['Cabinet', 'Front', 'Deck', 'Audio', 'Electronics', 'Cover', 'Feet']}
+    controls = doc.addObject('App::DocumentObjectGroup', 'Controls')
+    controls.Label = '原外观旋钮占位（套装控制接口待确认）'
+    for name in ['ControlBase', 'ControlKnob']:
+        obj = doc.getObject(name)
+        doc.Mechanism.removeObject(obj)
+        controls.addObject(obj)
+    doc.Mechanism.Label = '历史参考 · 通用机芯（不参与当前装配）'
+    for obj in doc.Mechanism.Group:
+        obj.addProperty('App::PropertyBool', 'IsReference', 'Design').IsReference = True
+        if App.GuiUp:
+            obj.ViewObject.Visibility = False
+    if App.GuiUp:
+        doc.Mechanism.ViewObject.Visibility = False
     kit = doc.addObject('App::DocumentObjectGroup', 'SelectedKit')
     kit.Label = '指定弯臂款 · 部分实测／局部估算'
     analysis = doc.addObject('App::DocumentObjectGroup', 'FitAnalysis')
@@ -244,28 +229,16 @@ def build_study():
         states.append(state)
     study = doc.addObject('App::FeaturePython', 'StudyBasis')
     study.addProperty('App::PropertyString', 'ConfigurationJSON').ConfigurationJSON = json.dumps(cfg, ensure_ascii=False, sort_keys=True)
-    study.addProperty('App::PropertyString', 'BaseSHA256').BaseSHA256 = hashlib.sha256(base_path.read_bytes()).hexdigest()
     study.addProperty('App::PropertyString', 'Status').Status = 'PARTIAL_MEASUREMENTS_PENDING_MOUNTING_REDESIGN'
     doc.recompute()
-    physical = [o for o in doc.Objects if o.TypeId == 'Part::Feature' and not getattr(o, 'IsDiagnostic', False)]
-    import Import
-    step_path = ROOT / 'cad/lumi-selected-mechanism-fit.step'
-    Import.export(physical, str(step_path))
-    doc.saveAs(str(output_path))
-    exported = Part.read(str(step_path))
-    expected = Part.makeCompound([o.Shape for o in physical])
     report = {
         'revision': cfg['revision'], 'selected_option': cfg['selected_option'],
-        'base_sha256': study.BaseSHA256, 'assumptions': cfg,
+        'assumptions': cfg,
         'geometry_checks': {
-            'all_shapes_valid': all(o.Shape.isValid() for o in physical),
             'local_envelope_valid': underbody.isValid(),
-            'step_valid': exported.isValid(),
-            'step_solids_match': len(exported.Solids) == len(expected.Solids),
             **hinge_checks,
             'spring_endpoints_closed_cover_clear': all(s['closed_cover_overlap_mm3'] < 1e-5 for s in states),
             'spring_endpoints_cover_sweep_clear': all(not s['cover_sweep_collisions'] for s in states),
-            'step_volume_matches': abs(exported.Volume - expected.Volume) / expected.Volume < 1e-7,
         },
         'hinges': hinge_metrics,
         'fit': {
@@ -293,13 +266,17 @@ def build_study():
                         '250总长暂作停放纵向外廓；唱臂限位角、有效臂长和播放运动未知',
                         '合页及盖总成对示意机芯做1度开盖抽样；真实机芯和自动回臂运动未验证', 'STEP 仅导出装配示意，包络及红色干涉体保留在 FCStd'],
     }
-    (ROOT / 'cad/mechanism-fit-report.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
-    return doc, cfg, report
+    return report
+
+
+def save_report(report, root=ROOT):
+    report['model_sha256'] = hashlib.sha256((root / 'cad/lumi-selected-mechanism-fit.FCStd').read_bytes()).hexdigest()
+    (root / 'cad/mechanism-fit-report.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
 
 
 def render_study(doc, cfg):
     import FreeCADGui as Gui
-    view = Gui.getDocument(doc.Name).activeView()
+    view = Gui.activeDocument().activeView()
     view.stopAnimating()
     view.setAnimationEnabled(False)
     view.setCameraType('Orthographic')
@@ -356,13 +333,3 @@ def render_study(doc, cfg):
         doc.getObject(name).ViewObject.Visibility = visible
     view.setCameraOrientation(rotation.Q)
     view.fitAll()
-    doc.save()
-
-
-if __name__ == '__main__':
-    doc, cfg, report = build_study()
-    if App.GuiUp:
-        render_study(doc, cfg)
-    print(json.dumps(report, ensure_ascii=False, indent=2))
-    if not all(report['geometry_checks'].values()):
-        raise RuntimeError('Mechanism study geometry/export validation failed')

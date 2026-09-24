@@ -2,7 +2,7 @@
 
 Run assembly-guide.FCMacro in FreeCAD for renders; compose the PDF separately
 with assembly_guide_pdf.py. All exploded placements exist only in a temporary
-document, never in either saved manufacturing/fit-study source.
+document, never in the saved main assembly.
 """
 import hashlib
 import json
@@ -10,6 +10,7 @@ import shutil
 import tempfile
 from pathlib import Path
 
+from assembly_pose import set_cover_angle
 import FreeCAD as App
 import Part
 import drawing_data
@@ -109,7 +110,7 @@ def overview_targets(entries):
 
 def check_coverage(doc, entries):
     physical = {o.Name for o in doc.Objects if o.TypeId == 'Part::Feature'
-                and not getattr(o, 'IsDiagnostic', False)}
+                and not getattr(o, 'IsDiagnostic', False) and not getattr(o, 'IsReference', False)}
     listed = [n for e in entries for n in e['ids']]
     if len(listed) != len(set(listed)) or set(listed) != physical:
         raise ValueError(f'Guide coverage mismatch: missing={physical-set(listed)}, '
@@ -138,9 +139,10 @@ def render(root=ROOT):
         shutil.copy2(source, copy)
         doc = App.openDocument(str(copy))
         try:
+            set_cover_angle(doc,data['parameters'],0)
             manifest['physical_object_count'] = check_coverage(doc, entries)
             physical = [o for o in doc.Objects if o.TypeId == 'Part::Feature'
-                        and not getattr(o, 'IsDiagnostic', False)]
+                        and not getattr(o, 'IsDiagnostic', False) and not getattr(o, 'IsReference', False)]
             originals = {o.Name: o.Placement for o in physical}
             codes = {n: e['code'] for e in entries for n in e['ids']}
             palette = {'W': (0.63, 0.43, 0.26), 'F': (0.62, 0.67, 0.70),

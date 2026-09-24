@@ -1,4 +1,5 @@
 # Run from FreeCAD: Macro > Macros > Execute. The file location determines repo root.
+import json
 import sys
 import importlib.util
 from pathlib import Path
@@ -22,9 +23,18 @@ ac_inlet = load_local_module('ac_inlet')
 feet = load_local_module('feet')
 hinges = load_local_module('hinges')
 fascia = load_local_module('fascia')
+assembly_pose = load_local_module('assembly_pose')
+mechanism_study = load_local_module('mechanism_study')
 build_model = load_local_module('build_model')
 render_views = load_local_module('render_views')
 dimension_sheet = load_local_module('dimension_sheet')
 doc, parameters, groups = build_model.deliver()
 render_views.render(doc, parameters, groups)
 dimension_sheet.create(doc, parameters)
+
+mechanism_study.render_study(doc, json.loads(doc.StudyBasis.ConfigurationJSON))
+assembly_pose.set_cover_angle(doc, parameters, parameters['cover_angle_open'])
+Gui.activeDocument().activeView().fitAll()
+doc.save()
+report = json.loads((macro_path.parent.parent / 'cad/mechanism-fit-report.json').read_text())
+mechanism_study.save_report(report, macro_path.parent.parent)

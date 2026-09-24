@@ -1,7 +1,9 @@
 """Run with FreeCAD's bundled Python and library on PYTHONPATH."""
 import json
 import math
+import tempfile
 from pathlib import Path
+from assembly_pose import set_cover_angle
 import FreeCAD as App
 import Part
 from hinges import check_installation as check_hinges
@@ -13,11 +15,15 @@ ROOT=Path(__file__).resolve().parents[1]
 
 def validate():
     p=json.loads((ROOT/'cad/parameters.json').read_text())
-    doc=App.openDocument(str(ROOT/'cad/lumi-three-driver.FCStd'))
-    try:
-        return _validate_document(doc,p)
-    finally:
-        App.closeDocument(doc.Name)
+    # Read a private copy so validation cannot mutate an open user's document.
+    with tempfile.TemporaryDirectory() as tmp:
+        source=Path(tmp)/'ValidationReadOnly.FCStd'
+        source.write_bytes((ROOT/'cad/lumi-selected-mechanism-fit.FCStd').read_bytes())
+        doc=App.openDocument(str(source))
+        try:
+            return _validate_document(doc,p)
+        finally:
+            App.closeDocument(doc.Name)
 
 
 def _validate_document(doc,p):
@@ -41,6 +47,9 @@ def _validate_document(doc,p):
 
     datum=doc.getObject('GeometryDatums')
     checks['build_parameters_match']=getattr(datum,'BuildParametersJSON','')==json.dumps(p,sort_keys=True,separators=(',',':'),ensure_ascii=False)
+    cfg=json.loads((ROOT/'cad/selected-mechanism.json').read_text())
+    study=doc.getObject('StudyBasis')
+    checks['mechanism_parameters_match']=getattr(study,'ConfigurationJSON','')==json.dumps(cfg,ensure_ascii=False,sort_keys=True)
     result['requested_revision']=p['revision']
     stored_parameters=getattr(datum,'BuildParametersJSON','')
     try:
@@ -49,7 +58,7 @@ def _validate_document(doc,p):
         result['revision']=None
     # Reject old/incomplete model schemas before dereferencing installation properties.
     required={
-        'GeometryDatums': ['BuildParametersJSON','PivotPoint','SpindlePoint','StylusPoint','CoverHinge'],
+        'GeometryDatums': ['BuildParametersJSON','CoverHinge'],
         'PowerTransformer': ['Shape'],
         'Amplifier': ['Shape'],
         'ACInlet': ['Shape','ElectricalReleased','InstallationReleased'],
@@ -72,6 +81,15 @@ def _validate_document(doc,p):
         for prefix in ('HingeBase','HingePin','HingeSpacer','HingeBacking'):
             required[f'{prefix}{i}']=['Shape','InstallationReleased']
     required['DustCover']=['Shape']
+    required['AssemblyState']=['CoverAngle']
+    from hinges import moving_names
+    for name in moving_names():
+        required[name].append('ClosedPlacement')
+    required['StudyBasis']=['ConfigurationJSON','Status']
+    for name in ['SelectedKit','Controls','Mechanism','FitAnalysis']:
+        required[name]=['Group']
+    for name in ['KitBase','KitPlatter','KitMatRings','KitSpindle','KitArmSupport','KitCurvedArm','KitCounterweight','KitHeadshell','KitCartridge','KitArmRest','UnderbodyReservation']:
+        required[name]=['Shape','IsDiagnostic']
     missing=[]
     for name,properties in required.items():
         obj=doc.getObject(name)
@@ -80,14 +98,20 @@ def _validate_document(doc,p):
         else:
             missing.extend(name+'.'+prop for prop in properties if not hasattr(obj,prop))
     checks['required_model_fields_present']=not missing
-    if not checks['build_parameters_match'] or missing:
+    if not checks['build_parameters_match'] or not checks['mechanism_parameters_match'] or missing:
         result['errors']=[]
         if not checks['build_parameters_match']:
             result['errors'].append('模型参数快照缺失、无效或与当前参数不一致，请重新生成模型')
+        if not checks['mechanism_parameters_match']:
+            result['errors'].append('机芯参数快照与当前参数不一致，请重新生成整机')
         if missing:
             result['errors'].append('模型缺少必需对象或属性：'+', '.join(missing))
         return finish()
-    objects=[o for o in doc.Objects if o.TypeId=='Part::Feature' and not o.Shape.isNull()]
+    set_cover_angle(doc,p,0)
+    objects=[o for o in doc.Objects if o.TypeId=='Part::Feature' and not o.Shape.isNull()
+             and not getattr(o,'IsDiagnostic',False) and not getattr(o,'IsReference',False)]
+    checks['reference_objects_excluded']=bool(doc.Mechanism.Group) and all(getattr(o,'IsReference',False) for o in doc.Mechanism.Group)
+    checks['diagnostic_objects_excluded']=bool(doc.FitAnalysis.Group) and all(getattr(o,'IsDiagnostic',False) for o in doc.FitAnalysis.Group)
     checks['all_shapes_valid']=all(o.Shape.isValid() and len(o.Shape.Solids)>0 for o in objects)
     compound=Part.makeCompound([o.Shape for o in objects]);bb=compound.BoundBox
     metrics['part_count']=len(objects);metrics['solid_count']=len(compound.Solids)
@@ -116,13 +140,9 @@ def _validate_document(doc,p):
             [p[o.DriverRole]['flange_diameter']]*2+[p[o.DriverRole]['total_height']]))
         and abs(float(o.ReservedDepth)+float(o.FlangeThickness)-float(o.TotalHeight))<1e-6
         for o in drivers)
-    metrics['pivot_distance_mm']=(datum.PivotPoint-datum.SpindlePoint).Length
-    metrics['effective_length_mm']=(datum.StylusPoint-datum.PivotPoint).Length
-    metrics['stylus_radius_mm']=(datum.StylusPoint-datum.SpindlePoint).Length
-    checks['pivot_distance']=abs(metrics['pivot_distance_mm']-p['pivot_distance'])<1e-6
-    checks['effective_arm_length']=abs(metrics['effective_length_mm']-p['arm_effective_length'])<1e-6
-    checks['platter_diameter']=abs(doc.getObject('Platter').Shape.optimalBoundingBox(False).XLength-p['platter_diameter'])<1e-6
-    stationary=doc.getObject('Cabinet').Group+doc.getObject('Mechanism').Group+doc.getObject('Deck').Group+[doc.Fascia]
+    checks['platter_diameter']=abs(doc.KitPlatter.Shape.optimalBoundingBox(False).XLength-cfg['platter_diameter'])<1e-6
+    mechanisms=doc.SelectedKit.Group+doc.Controls.Group
+    stationary=doc.getObject('Cabinet').Group+mechanisms+doc.getObject('Deck').Group+[doc.Fascia]
     lid=doc.getObject('DustCover').Shape
     def volume(a,b):
         if not a.BoundBox.intersect(b.BoundBox):return 0.0
@@ -130,8 +150,8 @@ def _validate_document(doc,p):
     closed_intersections={o.Name:volume(lid,o.Shape) for o in stationary}
     checks['cover_closed_no_interference']=all(v<1e-5 for v in closed_intersections.values())
     metrics['cover_closed_intersections_mm3']={k:v for k,v in closed_intersections.items() if v>1e-5}
-    mechanisms=Part.makeCompound([o.Shape for o in doc.getObject('Mechanism').Group])
-    metrics['cover_to_mechanism_min_distance_mm']=lid.distToShape(mechanisms)[0]
+    mechanism_shape=Part.makeCompound([o.Shape for o in mechanisms])
+    metrics['cover_to_mechanism_min_distance_mm']=lid.distToShape(mechanism_shape)[0]
     collisions=[]
     for angle in range(0,int(p['cover_angle_open'])+1,5):
         moved=lid.copy();moved.rotate(datum.CoverHinge,App.Vector(1,0,0),-angle)
@@ -140,7 +160,7 @@ def _validate_document(doc,p):
             if v>1e-5:collisions.append({'angle':angle,'part':o.Name,'volume_mm3':v})
     checks['cover_sweep_samples_clear']=not collisions
     metrics['cover_sweep_collisions']=collisions
-    internal_envelopes=drivers+[doc.getObject(n) for n in ['MotorEnvelope','BearingEnvelope','Amplifier','PhonoBoard']]
+    internal_envelopes=drivers+[doc.getObject(n) for n in ['Amplifier','PhonoBoard']]
     boundaries=[doc.getObject(n) for n in ['SideLeft','SideRight','Bottom','Back','AcousticRoof','AcousticRear','AcousticDividerLeft','AcousticDividerRight','Baffle','FloatingDeck','BearingPocket']]
     bad=[]
     for obj in internal_envelopes:
@@ -156,7 +176,7 @@ def _validate_document(doc,p):
         reserved.append((o.Name,full))
     reservation_collisions=[]
     for name,shape in reserved:
-        for boundary in boundaries+[doc.getObject('BassPort')]+doc.getObject('Mechanism').Group+doc.getObject('Electronics').Group:
+        for boundary in boundaries+[doc.getObject('BassPort')]+mechanisms+doc.getObject('Electronics').Group:
             v=volume(shape,boundary.Shape)
             if v>1e-5:reservation_collisions.append({'part':name,'boundary':boundary.Name,'volume_mm3':v})
     for i,(name,shape) in enumerate(reserved):
@@ -223,7 +243,7 @@ def _validate_document(doc,p):
     metrics['woofer_previous_20mm_trial_target_met']=metrics['woofer_floor_clearance_mm']>=20
     checks['woofer_floor_clearance_matches_installation']=(metrics['woofer_floor_clearance_mm']>0 and
         abs(metrics['woofer_floor_clearance_mm']-(p['foot_height']-p['woofer']['flange_thickness']))<1e-5)
-    readback=Part.read(str(ROOT/'cad/lumi-three-driver.step'))
+    readback=Part.read(str(ROOT/'cad/lumi-selected-mechanism-fit.step'))
     checks['step_valid']=readback.isValid()
     checks['step_solid_count']=len(readback.Solids)==len(compound.Solids)
     checks['no_group_duplicates_in_step']=len(readback.Solids)==sum(len(o.Shape.Solids) for o in objects)
@@ -253,7 +273,7 @@ def check_feet(doc,p):
             shape=obj.Shape
             matches &= shape.cut(part[key]).Volume+part[key].cut(shape).Volume<1e-5
             for other in doc.Objects:
-                if other.TypeId!='Part::Feature' or other.Name==name:
+                if other.TypeId!='Part::Feature' or other.Name==name or getattr(other,'IsDiagnostic',False) or getattr(other,'IsReference',False):
                     continue
                 if shape.BoundBox.intersect(other.Shape.BoundBox) and shape.common(other.Shape).Volume>1e-5:
                     hits.append({'part':name,'other':other.Name})
@@ -286,7 +306,7 @@ def check_ac_inlet(doc,p):
     cutouts_match = saved.cut(desired).Volume + desired.cut(saved).Volume < 1e-5
     hits, wire_hits, gaps = [], [], {}
     for obj in doc.Objects:
-        if obj.TypeId != 'Part::Feature' or obj.Name == 'ACInlet':
+        if obj.TypeId != 'Part::Feature' or obj.Name == 'ACInlet' or getattr(obj,'IsDiagnostic',False) or getattr(obj,'IsReference',False):
             continue
         if actual.common(obj.Shape).Volume > 1e-5:
             hits.append(obj.Name)
@@ -372,7 +392,7 @@ def check_acoustics(doc,p,reserved):
              'acoustic_performance_verified':False,'chambers':{},'port_inner_diameter_mm':port['inner_diameter'],
              'port_length_mm':port['length'],'port_trial_lengths_mm':port['trial_lengths']}
     port_outer=Part.makeCylinder(outer_r,port['length'],V(px,D-port['length'],pz),V(0,1,0))
-    objects=[o for o in doc.Objects if o.TypeId=='Part::Feature']
+    objects=[o for o in doc.Objects if o.TypeId=='Part::Feature' and not getattr(o,'IsDiagnostic',False) and not getattr(o,'IsReference',False)]
     replaced_names={name for name,_ in reserved}|{'BassPort'}
     occupants=[o.Shape for o in objects if o.Name not in replaced_names]
     occupants.extend(shape for _,shape in reserved)
@@ -424,7 +444,7 @@ def check_fascia(doc,p):
               actual.cut(expected).Volume<1e-5 and expected.cut(actual).Volume<1e-5)
     hits=[]
     for obj in doc.Objects:
-        if obj.TypeId!='Part::Feature' or obj.Name=='Fascia' or getattr(obj,'IsDiagnostic',False):
+        if obj.TypeId!='Part::Feature' or obj.Name=='Fascia' or getattr(obj,'IsDiagnostic',False) or getattr(obj,'IsReference',False):
             continue
         if actual.BoundBox.intersect(obj.Shape.BoundBox):
             overlap=actual.common(obj.Shape).Volume
