@@ -30,11 +30,11 @@ class ParameterValidationTests(unittest.TestCase):
                 params = json.loads((ROOT / 'cad/parameters.json').read_text())
                 params['deck_rear_clearance'] = clearance
                 (root / 'cad/parameters.json').write_text(json.dumps(params))
-                (root / 'cad/selected-mechanism.json').write_bytes((ROOT / 'cad/selected-mechanism.json').read_bytes())
+                (root / 'cad/mechanism.json').write_bytes((ROOT / 'cad/mechanism.json').read_bytes())
                 with patch.object(build_model, 'ROOT', root):
                     doc, _, _ = build_model.deliver()
                     App.closeDocument(doc.Name)
-                doc = App.openDocument(str(root / 'cad/lumi-selected-mechanism-fit.FCStd'))
+                doc = App.openDocument(str(root / 'cad/record-player.FCStd'))
                 try:
                     deck = doc.FloatingDeck
                     bounds = deck.Shape.optimalBoundingBox(False)
@@ -59,7 +59,7 @@ class ParameterValidationTests(unittest.TestCase):
             (root / 'cad').mkdir()
             (root / 'tools').mkdir()
             shutil.copy2(ROOT / 'cad/parameters.json', root / 'cad/parameters.json')
-            (root / 'cad/selected-mechanism.json').write_bytes((ROOT / 'cad/selected-mechanism.json').read_bytes())
+            (root / 'cad/mechanism.json').write_bytes((ROOT / 'cad/mechanism.json').read_bytes())
             shutil.copy2(ROOT / 'tools/validate_model.py', root / 'tools/validate_model.py')
             shutil.copy2(ROOT / 'tools/ac_inlet.py', root / 'tools/ac_inlet.py')
             shutil.copy2(ROOT / 'tools/feet.py', root / 'tools/feet.py')
@@ -129,7 +129,7 @@ class ParameterValidationTests(unittest.TestCase):
             params = json.loads((ROOT / 'cad/parameters.json').read_text())
             params['power_transformer']['center_x'] = 360.0
             (root / 'cad/parameters.json').write_text(json.dumps(params))
-            (root / 'cad/selected-mechanism.json').write_bytes((ROOT / 'cad/selected-mechanism.json').read_bytes())
+            (root / 'cad/mechanism.json').write_bytes((ROOT / 'cad/mechanism.json').read_bytes())
             with patch.object(build_model, 'ROOT', root):
                 doc, _, _ = build_model.deliver()
                 App.closeDocument(doc.Name)
@@ -145,7 +145,7 @@ class ParameterValidationTests(unittest.TestCase):
             root = Path(tmp)
             (root / 'cad').mkdir()
             shutil.copy2(ROOT / 'cad/parameters.json', root / 'cad/parameters.json')
-            (root / 'cad/selected-mechanism.json').write_bytes((ROOT / 'cad/selected-mechanism.json').read_bytes())
+            (root / 'cad/mechanism.json').write_bytes((ROOT / 'cad/mechanism.json').read_bytes())
             with patch.object(build_model, 'ROOT', root):
                 doc, params, _ = build_model.deliver()
                 woofer = doc.getObject('Woofer')
@@ -168,7 +168,7 @@ class ParameterValidationTests(unittest.TestCase):
             root = Path(tmp)
             (root / 'cad').mkdir()
             shutil.copy2(ROOT / 'cad/parameters.json', root / 'cad/parameters.json')
-            (root / 'cad/selected-mechanism.json').write_bytes((ROOT / 'cad/selected-mechanism.json').read_bytes())
+            (root / 'cad/mechanism.json').write_bytes((ROOT / 'cad/mechanism.json').read_bytes())
             with patch.object(build_model, 'ROOT', root):
                 doc, _, _ = build_model.deliver()
                 App.closeDocument(doc.Name)
@@ -184,7 +184,7 @@ class ParameterValidationTests(unittest.TestCase):
                     else:
                         params['revision'] = 'different-build'
                     (root / 'cad/parameters.json').write_text(json.dumps(params))
-                    (root / 'cad/selected-mechanism.json').write_bytes((ROOT / 'cad/selected-mechanism.json').read_bytes())
+                    (root / 'cad/mechanism.json').write_bytes((ROOT / 'cad/mechanism.json').read_bytes())
                     result = validate_model.validate()
                     with self.subTest(change=change):
                         self.assertFalse(result['passed'])
@@ -196,7 +196,7 @@ class AcousticLayoutTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp); (root/'cad').mkdir()
             shutil.copy2(ROOT/'cad/parameters.json',root/'cad/parameters.json')
-            shutil.copy2(ROOT/'cad/selected-mechanism.json',root/'cad/selected-mechanism.json')
+            shutil.copy2(ROOT/'cad/mechanism.json',root/'cad/mechanism.json')
             with patch.object(build_model,'ROOT',root):
                 doc,p,_=build_model.deliver()
             try:
@@ -226,7 +226,7 @@ class AcousticLayoutTests(unittest.TestCase):
             p=json.loads((ROOT/'cad/parameters.json').read_text())
             p['acoustic']['satellite_rear_y']=100.0
             (root/'cad/parameters.json').write_text(json.dumps(p))
-            (root / 'cad/selected-mechanism.json').write_bytes((ROOT / 'cad/selected-mechanism.json').read_bytes())
+            (root / 'cad/mechanism.json').write_bytes((ROOT / 'cad/mechanism.json').read_bytes())
             with patch.object(build_model,'ROOT',root):
                 doc,_,_=build_model.deliver();App.closeDocument(doc.Name)
             with patch.object(validate_model,'ROOT',root),contextlib.redirect_stdout(io.StringIO()):
@@ -252,7 +252,7 @@ class AcousticLayoutTests(unittest.TestCase):
                 if case=='amplifier':p[case].update(x=180.0,y=55.0)
                 if case=='power_transformer':p[case].update(center_x=224.3,center_y=110.0)
                 (root/'cad/parameters.json').write_text(json.dumps(p))
-                (root / 'cad/selected-mechanism.json').write_bytes((ROOT / 'cad/selected-mechanism.json').read_bytes())
+                (root / 'cad/mechanism.json').write_bytes((ROOT / 'cad/mechanism.json').read_bytes())
                 with patch.object(build_model,'ROOT',root):
                     doc,_,_=build_model.deliver();App.closeDocument(doc.Name)
                 with patch.object(validate_model,'ROOT',root),contextlib.redirect_stdout(io.StringIO()):
@@ -271,7 +271,7 @@ class AcousticLayoutTests(unittest.TestCase):
                 with self.subTest(length=length):
                     p['bass_port']['length']=length
                     (root/'cad/parameters.json').write_text(json.dumps(p))
-                    (root / 'cad/selected-mechanism.json').write_bytes((ROOT / 'cad/selected-mechanism.json').read_bytes())
+                    (root / 'cad/mechanism.json').write_bytes((ROOT / 'cad/mechanism.json').read_bytes())
                     with patch.object(build_model,'ROOT',root):
                         doc,_,_=build_model.deliver();App.closeDocument(doc.Name)
                     with patch.object(validate_model,'ROOT',root),contextlib.redirect_stdout(io.StringIO()):
@@ -398,7 +398,7 @@ class DrawingAnnotationTests(unittest.TestCase):
             params.update(platter_diameter=310, pivot_distance=202, arm_effective_length=220,
                           front_angle=70, wall=14, closed_height=216, revision='v0.3-review')
             group = types.SimpleNamespace(Group=[types.SimpleNamespace(Shape=Part.makeBox(1, 1, 1))])
-            cfg=json.loads((ROOT/'cad/selected-mechanism.json').read_text())
+            cfg=json.loads((ROOT/'cad/mechanism.json').read_text())
             cfg.update(platter_diameter=310,platter_center_x=params['platter_x'],platter_center_y=params['platter_y'])
             doc = types.SimpleNamespace(getObject=lambda name: group, StudyBasis=types.SimpleNamespace(ConfigurationJSON=json.dumps(cfg)))
             svg = module.create(doc, params).read_text()

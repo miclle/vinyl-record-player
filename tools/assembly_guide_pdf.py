@@ -40,7 +40,7 @@ class Guide:
         self.root, self.data = root, data
         pdfmetrics.registerFont(TTFont('GuideCJK', str(font)))
         self.c = canvas.Canvas(str(output), pagesize=(WIDTH*MM, HEIGHT*MM))
-        self.c.setTitle('LUMI / 整机全景与组件导览')
+        self.c.setTitle('黑胶唱片机 / 整机全景与组件导览')
         self.c.setAuthor('vinyl-record-player / FreeCAD')
 
     def text(self, x, y, value, size=10, color=INK):
@@ -68,14 +68,14 @@ class Guide:
         self.text(x-4.8, y+1.1, code, 8.4, '#FFFFFF')
 
     def start(self, page, title, subtitle):
-        self.text(16, 19, 'LUMI', 27)
-        self.text(51, 19, '/  整机结构导览', 17)
+        self.text(16, 19, '黑胶唱片机', 24)
+        self.text(64, 19, '/  整机结构导览', 17)
         self.text(16, 31, title, 14)
         self.text(16, 40, subtitle, 9.5, MUTED)
         self.text(472, 18, f'G-0{page}   /   A2 横向   /   {page:02} — 02', 10, MUTED)
         self.line(16, 45, 578, 45, INK, 0.8)
         self.line(16, 403, 578, 403, INK)
-        self.text(16, 411, f'{self.data["revision"]}  ·  选定弯臂机芯装配  ·  示意视图不按比例量取', 8.5, MUTED)
+        self.text(16, 411, f'{self.data["revision"]}  ·  当前弯臂机芯装配  ·  示意视图不按比例量取', 8.5, MUTED)
         self.text(330, 411, '实体位置与图册关联来自保存 CAD；采购件／接口待确认，非制造或接线放行图。', 8.5, MUTED)
 
     def image(self, key, rect):

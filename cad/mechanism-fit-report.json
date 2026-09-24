@@ -6,8 +6,8 @@
     "selected_option": "28高端弯臂机芯全套餐装好直接用 自动回臂",
     "product_url": "https://item.taobao.com/item.htm?id=712086565319&skuId=5162746531784",
     "dimension_status": "user_measured_partial_with_approximate_supports",
-    "dimension_reference": "references/selected-mechanism/straight-arm-dimensions.png",
-    "appearance_reference": "references/selected-mechanism/selected-curved-arm-kit.png",
+    "dimension_reference": "references/mechanism/straight-arm-dimensions.png",
+    "appearance_reference": "references/mechanism/curved-arm-kit.png",
     "nominal_width": 355.0,
     "nominal_depth": 280.0,
     "platter_diameter": 280.0,
@@ -15,7 +15,7 @@
     "platter_center_x": 188.0,
     "platter_center_y": 172.0,
     "mounting_holes_confirmed": false,
-    "assumption_note": "2026-09-24 用户确认除弯臂外与直臂图一致，且唱头指托不超过机芯基座右侧；355 平面总宽按图，唱盘 Ø280×11、总高85、平台128×108×5、上下40及弹簧数据来自用户。250为唱臂总长，暂作含配重/唱头的纵向外廓，不作为有效臂长。机芯整体右移12 mm以在浮动甲板上近似居中；弯管、连接套、开槽唱头壳与指托按 selected-curved-arm-kit.png 近似。平台与弹簧座共面、唱盘高度、马达位置/直径、传动及回臂外形、弹簧直径和唱臂局部外形均为估算；底部覆盖不完整，不可据此开孔。",
+    "assumption_note": "2026-09-24 用户确认除弯臂外与直臂图一致，且唱头指托不超过机芯基座右侧；355 平面总宽按图，唱盘 Ø280×11、总高85、平台128×108×5、上下40及弹簧数据来自用户。250为唱臂总长，暂作含配重/唱头的纵向外廓，不作为有效臂长。机芯整体右移12 mm以在浮动甲板上近似居中；弯管、连接套、开槽唱头壳与指托按 curved-arm-kit.png 近似。平台与弹簧座共面、唱盘高度、马达位置/直径、传动及回臂外形、弹簧直径和唱臂局部外形均为估算；底部覆盖不完整，不可据此开孔。",
     "total_height": 85.0,
     "platform_thickness": 5.0,
     "platform_length": 128.0,
@@ -273,5 +273,5 @@
     "合页及盖总成对示意机芯做1度开盖抽样；真实机芯和自动回臂运动未验证",
     "STEP 仅导出装配示意，包络及红色干涉体保留在 FCStd"
   ],
-  "model_sha256": "0de707397130c7fc81b28f8307b55acd5c2828d3fba713c695fb1b0e54c9d0a1"
+  "model_sha256": "2ca67e8976c790586655b0f4f3ffc34d8e9aa1243316768e49d60e2d5c4aa443"
 }

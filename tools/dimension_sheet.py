@@ -29,7 +29,7 @@ def create(doc,p):
 <defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto-start-reverse"><path d="M0,1 L7,4 L0,7" fill="none" stroke="#8a5137"/></marker></defs>
 <rect width="1400" height="1030" fill="white"/>
 <style>text{font-family:'PingFang SC','Noto Sans CJK SC',sans-serif;fill:#252a2d}.title{font-size:27px;font-weight:600}.label{font-size:18px;font-weight:600}.note{font-size:16px}.dim{stroke:#8a5137;stroke-width:1;fill:none}.ext{stroke:#aba49e;stroke-width:0.8}.value{font-size:16px;fill:#8a5137}</style>
-<text x="60" y="49" class="title">LUMI 参考外形 · 一低音两全频概念 CAD</text>
+<text x="60" y="49" class="title">黑胶唱片机 · 一低音两全频概念 CAD</text>
 <line x1="60" y1="68" x2="1340" y2="68" stroke="#d8d3cc"/>
 <text x="80" y="99" class="label">俯视 · 移除防尘盖</text>
 <text x="80" y="595" class="label">正视 · 闭盖</text>

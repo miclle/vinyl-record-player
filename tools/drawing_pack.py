@@ -52,7 +52,7 @@ class Book:
         self.data=data
         self.font=font
         self.c=canvas.Canvas(str(path),pagesize=(PAGE_W*MM,PAGE_H*MM),pageCompression=1)
-        self.c.setTitle('LUMI / '+title)
+        self.c.setTitle('黑胶唱片机 / '+title)
         self.c.setAuthor('vinyl-record-player / CAD drawing export')
         self.page=0
         self.index=[]
@@ -90,7 +90,7 @@ class Book:
         self.index.append((self.page,title,code))
         self.c.bookmarkPage(code)
         self.c.addOutlineEntry(f'{code}  {title}',code,level=0)
-        self.text(12,14,'LUMI  /  '+self.title,16)
+        self.text(12,14,'黑胶唱片机  /  '+self.title,16)
         self.text(408,14,f'{code}  |  A3 横向  |  单位 mm',9,MUTED,'right')
         self.text(12,23,title,11)
         if subtitle:self.text(408,23,subtitle,8,MUTED,'right')
@@ -205,7 +205,7 @@ def intro(book,data):
     book.text(18,70,'图册 02  音腔与内部结构',17)
     book.text(18,79,'内部布置、斜障板与音腔结构；障板、音腔顶板和浮动底板开孔定位图。',10)
     book.text(18,97,'图册 03  机芯与电子部件',17)
-    book.text(18,106,'扬声器、功放、变压器、电子预留、选定弯臂机芯；附基线通用机芯对照。',10)
+    book.text(18,106,'扬声器、功放、变压器、电子预留、当前弯臂机芯；附基线通用机芯对照。',10)
     book.line(18,116,402,116)
     paragraphs=[
         '方向与尺寸：X 为左右方向，Y 为前后方向，Z 为高度；原点是机体左前方桌面基准。尺寸表中的长、宽、高均为装配姿态下的 XYZ 外包络，不自动按最大边排序。',
@@ -213,7 +213,7 @@ def intro(book,data):
         '备料与厚度：木板另列整数矩形备料 L × W × T；斜板需按成形轮廓修切。板厚按法向计，空心罩标壁厚；未知厚度明确注明。名义板厚须实测，锯缝、贴皮和装配余量另核。',
         '投影约定：这是独立命名的正投影视图集，布局不采用统一第一角或第三角排列；各视图比例单独注明。小件可放大，薄件侧视尺寸文字记录真实厚度。打印采用 A3、100% 实际大小。',
         '同形件：侧板、格栅、隔板、脚垫等用代表件图形加数量，安装位置见附表。左右后板及承托梁按独立实体分别出图，避免把跨空区包络当成单块尺寸。',
-        '当前配置：整机六面图与全部零件取自同一主 CAD；历史机芯仅作隐藏参考。选定机芯采用部分实测尺寸；局部下探轮廓仍为估算，安装未放行。',
+        '当前配置：整机六面图与全部零件取自同一主 CAD；历史机芯仅作隐藏参考。当前机芯采用部分实测尺寸；局部下探轮廓仍为估算，安装未放行。',
     ]
     y=127
     for paragraph in paragraphs:
@@ -311,7 +311,7 @@ def make_books(data,out,font):
             compress_min, compress_max = cfg['spring_compression_range']
             depth_min = cfg['seat_to_motor_bottom'] - cfg['spring_free_height'] + compress_min
             depth_max = cfg['seat_to_motor_bottom'] - cfg['spring_free_height'] + compress_max
-            assembly_page(book,assemblies['selected-kit'],['top','front','right'],'选定弯臂机芯 / 停放姿态','C-00',[
+            assembly_page(book,assemblies['selected-kit'],['top','front','right'],'当前弯臂机芯 / 停放姿态','C-00',[
                 f'图示宽 {num(cfg["nominal_width"])}；实测唱盘 Ø{num(cfg["platter_diameter"])} × {num(cfg["platter_thickness"])}，总高 {num(cfg["total_height"])}；平台 {num(cfg["platform_width"])} × {num(cfg["platform_length"])} × {num(cfg["platform_thickness"])}。',
                 f'弹簧自由高 {num(cfg["spring_free_height"])}，估计压缩{num(compress_min)}–{num(compress_max)}；本图显示压缩 {num(cfg["display_spring_compression"])}。支点{spring_positions_note(cfg)}，不能据此钻孔。',
                 f'承托面 Z={num(H)}；电机下探约{num(depth_min)}–{num(depth_max)}；现有顶板净深 {num(H-roof_top)}。图示仅含上部及弹簧，局部底部估算体另见核对模型。'])
@@ -334,7 +334,7 @@ def make_books(data,out,font):
         if volume==3:
             generic=[c for c in data['cards'] if c['volume']==4]
             assembly_page(book,assemblies['generic'],['top','front','right'],'附录 / 基线通用机芯正投影','C-G01',[
-                '此页为原三单元基线的通用机芯占位。当前选定弯臂装配已替换这些机芯部件，两组不是同时安装。',
+                '此页为原三单元基线的通用机芯占位。当前弯臂装配已替换这些机芯部件，两组不是同时安装。',
                 '基线唱盘 Ø300，唱臂轴距 200，有效臂长 218；不用于约束候选弯臂机芯。',
                 '下页按对象列出全部基线机芯 XYZ 包络；这些外观占位未定义真实壁厚和制造接口。'])
             book.start('附录 / 基线通用机芯尺寸记录','C-G02','装配姿态包络 / 厚度未知或实心占位')

@@ -26,9 +26,9 @@ class PDFProjectionTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             (root / 'cad').mkdir()
-            for name in ['parameters.json', 'selected-mechanism.json']:
+            for name in ['parameters.json', 'mechanism.json']:
                 shutil.copy2(ROOT / 'cad' / name, root / 'cad' / name)
-            path = root / 'cad/selected-mechanism.json'
+            path = root / 'cad/mechanism.json'
             cfg = json.loads(path.read_text())
             cfg.update(spring_clock_hours=[2.5, 5, 9], spring_radius=100)
             path.write_text(json.dumps(cfg))
@@ -41,8 +41,8 @@ root=Path(sys.argv[2])
 b.ROOT=root
 doc,_,_=b.deliver()
 App.closeDocument(doc.Name)
-cfg=json.loads((root/'cad/selected-mechanism.json').read_text())
-doc=App.openDocument(str(root/'cad/lumi-selected-mechanism-fit.FCStd'))
+cfg=json.loads((root/'cad/mechanism.json').read_text())
+doc=App.openDocument(str(root/'cad/record-player.FCStd'))
 for spring,hour in zip(doc.KitBase.Shape.Solids[1:],cfg['spring_clock_hours']):
     b=spring.optimalBoundingBox(False)
     assert abs(b.Center.x-(cfg['platter_center_x']+100*math.sin(hour*math.pi/6)))<1e-5

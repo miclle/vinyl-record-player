@@ -17,7 +17,7 @@ import drawing_data
 
 class AssemblyPoseTests(unittest.TestCase):
     def test_saved_open_cover_round_trips_and_drawings_use_closed_datum(self):
-        source=ROOT/'cad/lumi-selected-mechanism-fit.FCStd'
+        source=ROOT/'cad/record-player.FCStd'
         digest=hashlib.sha256(source.read_bytes()).hexdigest()
         with tempfile.TemporaryDirectory() as tmp:
             path=Path(tmp)/'PoseTest.FCStd'

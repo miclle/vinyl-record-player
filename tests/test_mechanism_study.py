@@ -21,7 +21,7 @@ import mechanism_study
 class MechanismStudyTests(unittest.TestCase):
     def copy_inputs(self, root):
         (root / 'cad').mkdir()
-        for name in ['parameters.json', 'selected-mechanism.json']:
+        for name in ['parameters.json', 'mechanism.json']:
             shutil.copy2(ROOT / 'cad' / name, root / 'cad' / name)
 
     def test_reopened_output_blocks_rebuild_without_changing_files_or_edits(self):
@@ -31,13 +31,13 @@ class MechanismStudyTests(unittest.TestCase):
             with patch.object(build_model, 'ROOT', root):
                 doc, _, _ = build_model.deliver()
                 App.closeDocument(doc.Name)
-                output = root / 'cad/lumi-selected-mechanism-fit.FCStd'
+                output = root / 'cad/record-player.FCStd'
                 alias = root / 'reopened-study.FCStd'
                 alias.symlink_to(output)
                 for opened_path in [output, alias]:
                     with self.subTest(opened_path=opened_path.name):
                         reopened = App.openDocument(str(opened_path))
-                        self.assertNotEqual(reopened.Name, 'LumiAssembly')
+                        self.assertNotEqual(reopened.Name, 'RecordPlayerAssembly')
                         reopened.KitPlatter.Label = 'unsaved user edit'
                         documents_before = set(App.listDocuments())
                         files_before = {p.name: p.read_bytes() for p in (root / 'cad').iterdir()}
@@ -61,9 +61,9 @@ class MechanismStudyTests(unittest.TestCase):
                 doc, _, _ = build_model.deliver()
             report = json.loads((root / 'cad/mechanism-fit-report.json').read_text())
             App.closeDocument(doc.Name)
-            saved = App.openDocument(str(root / 'cad/lumi-selected-mechanism-fit.FCStd'))
+            saved = App.openDocument(str(root / 'cad/record-player.FCStd'))
             try:
-                cfg = json.loads((root / 'cad/selected-mechanism.json').read_text())
+                cfg = json.loads((root / 'cad/mechanism.json').read_text())
                 self.assertTrue(all(report['geometry_checks'].values()))
                 self.assertEqual(json.loads(saved.StudyBasis.ConfigurationJSON), cfg)
                 b = saved.KitPlatter.Shape.optimalBoundingBox(False)
@@ -117,16 +117,16 @@ class MechanismStudyTests(unittest.TestCase):
                 self.assertAlmostEqual(fit['illustrative_cover_clearance_mm'], 0.7)
                 self.assertTrue(all(o.IsReference for o in saved.Mechanism.Group))
                 self.assertEqual(list((root / 'cad').glob('*.FCStd')),
-                                 [root / 'cad/lumi-selected-mechanism-fit.FCStd'])
+                                 [root / 'cad/record-player.FCStd'])
                 self.assertEqual(report['model_sha256'], hashlib.sha256(
-                    (root / 'cad/lumi-selected-mechanism-fit.FCStd').read_bytes()).hexdigest())
+                    (root / 'cad/record-player.FCStd').read_bytes()).hexdigest())
                 with (root / 'cad/parts.csv').open(encoding='utf-8-sig') as f:
                     ids = {row['ID'] for row in csv.DictReader(f)}
                 physical = [o for o in saved.Objects if o.TypeId == 'Part::Feature'
                             and not getattr(o, 'IsReference', False)
                             and not getattr(o, 'IsDiagnostic', False)]
                 self.assertEqual(ids, {o.Name for o in physical})
-                exported = Part.read(str(root / 'cad/lumi-selected-mechanism-fit.step'))
+                exported = Part.read(str(root / 'cad/record-player.step'))
                 self.assertEqual(len(exported.Solids), sum(len(o.Shape.Solids) for o in physical))
                 self.assertLess(abs(exported.Volume-sum(o.Shape.Volume for o in physical))/exported.Volume,
                                 1e-7)
@@ -137,7 +137,7 @@ class MechanismStudyTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             self.copy_inputs(root)
-            path = root / 'cad/selected-mechanism.json'
+            path = root / 'cad/mechanism.json'
             cfg = json.loads(path.read_text())
             cfg['spring_free_height'] = 16.5
             path.write_text(json.dumps(cfg))
@@ -146,7 +146,7 @@ class MechanismStudyTests(unittest.TestCase):
                     with self.assertRaisesRegex(RuntimeError, 'geometry/export validation failed'):
                         build_model.deliver()
             finally:
-                failed = App.getDocument('LumiAssembly')
+                failed = App.getDocument('RecordPlayerAssembly')
                 if failed is not None:
                     App.closeDocument(failed.Name)
             report = json.loads((root / 'cad/mechanism-fit-report.json').read_text())
@@ -161,7 +161,7 @@ class MechanismStudyTests(unittest.TestCase):
             self.assertTrue(report['geometry_checks']['hinge_cover_assembly_sweep_clear'])
 
     def test_datum_change_and_invalid_height_chain(self):
-        cfg = json.loads((ROOT / 'cad/selected-mechanism.json').read_text())
+        cfg = json.loads((ROOT / 'cad/mechanism.json').read_text())
         cfg['spring_radius'] = 100
         d = mechanism_study.measurement_datums(cfg, 150, 2)
         self.assertAlmostEqual(d['spring_centers_xy_mm'][0][0], cfg['platter_center_x'] + 50)
@@ -174,7 +174,7 @@ class MechanismStudyTests(unittest.TestCase):
             mechanism_study.measurement_datums(cfg, 150, 16)
 
     def test_headshell_details_follow_nondefault_length_and_width(self):
-        cfg = json.loads((ROOT / 'cad/selected-mechanism.json').read_text())
+        cfg = json.loads((ROOT / 'cad/mechanism.json').read_text())
         appearance = cfg['appearance_assumptions']
         for length, width in [(27, 22), (52, 14)]:
             with self.subTest(length=length, width=width):

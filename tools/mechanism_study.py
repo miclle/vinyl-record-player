@@ -1,4 +1,4 @@
-"""Selected curved-arm geometry and diagnostics within the main assembly.
+"""Curved-arm geometry and diagnostics within the main assembly.
 
 Uses partial measurements and explicitly assumed local envelopes. Reports fit
 conflicts without cutting the cabinet from incomplete bought-in part dimensions.
@@ -151,7 +151,7 @@ def add_study(doc, base_parameters, cfg):
     if App.GuiUp:
         doc.Mechanism.ViewObject.Visibility = False
     kit = doc.addObject('App::DocumentObjectGroup', 'SelectedKit')
-    kit.Label = '指定弯臂款 · 部分实测／局部估算'
+    kit.Label = '当前弯臂机芯 · 部分实测／局部估算'
     analysis = doc.addObject('App::DocumentObjectGroup', 'FitAnalysis')
     analysis.Label = '安装包络与干涉 · 非实物零件'
     # Preserve inherited electronic spaces without claiming the kit needs a preamp.
@@ -210,7 +210,7 @@ def add_study(doc, base_parameters, cfg):
     # as the parked assembly's longitudinal span, including weight and head.
     arm_front = pivot.y + 33 - cfg['arm_total_length']
     # Two tangent circular bends keep this unmeasured outline analytic. Their
-    # larger, forward position follows the selected-kit photograph; an
+    # larger, forward position follows the curved-arm reference photograph; an
     # interpolated spline pipe produced unstable STEP volumes and slow booleans.
     bend = a['arm_bend_radius']
     y0 = cy + a['arm_bend_start_y_offset']
@@ -353,7 +353,7 @@ def add_study(doc, base_parameters, cfg):
 
 
 def save_report(report, root=ROOT):
-    report['model_sha256'] = hashlib.sha256((root / 'cad/lumi-selected-mechanism-fit.FCStd').read_bytes()).hexdigest()
+    report['model_sha256'] = hashlib.sha256((root / 'cad/record-player.FCStd').read_bytes()).hexdigest()
     (root / 'cad/mechanism-fit-report.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
 
 
@@ -374,7 +374,7 @@ def render_study(doc, cfg):
     for name,original in originals.items():
         doc.getObject(name).Placement=hinge_rotation(p,p['cover_angle_open']).multiply(original)
     doc.recompute()
-    save('selected-mechanism-open.png')
+    save('mechanism-open.png')
     for name,original in originals.items():doc.getObject(name).Placement=original
     for name in ['Cover', 'SelectedKit', 'Controls', 'Front', 'Deck']:
         for obj in doc.getObject(name).Group:
@@ -385,7 +385,7 @@ def render_study(doc, cfg):
     doc.getObject('BearingPocket').ViewObject.Visibility = False
     for obj in doc.getObject('FitAnalysis').Group:
         obj.ViewObject.Visibility = obj.Name in ['UnderbodyReservation', 'InterferenceAcousticRoof']
-    save('selected-mechanism-clearance.png')
+    save('mechanism-clearance.png')
     doc.getObject('AcousticRoof').ViewObject.Visibility = True
     doc.getObject('BearingPocket').ViewObject.Visibility = True
     for obj in doc.getObject('FitAnalysis').Group:
@@ -409,7 +409,7 @@ def render_study(doc, cfg):
     scene.aspectRatio.setValue(1.6)
     scene.viewportMapping.setValue(coin.SoCamera.LEAVE_ALONE)
     Gui.updateGui()
-    view.saveImage(str(ROOT / 'previews/selected-mechanism-side.png'), 1600, 1000, 'White')
+    view.saveImage(str(ROOT / 'previews/mechanism-side.png'), 1600, 1000, 'White')
     scene.viewportMapping.setValue(mapping)
     scene.aspectRatio.setValue(aspect)
     for name, visible in visibility.items():

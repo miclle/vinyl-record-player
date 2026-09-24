@@ -23,11 +23,11 @@ class FasciaTests(unittest.TestCase):
         self.root=Path(tmp.name)
         (self.root/'cad').mkdir()
         (self.root/'cad/parameters.json').write_bytes((ROOT/'cad/parameters.json').read_bytes())
-        (self.root / 'cad/selected-mechanism.json').write_bytes((ROOT / 'cad/selected-mechanism.json').read_bytes())
+        (self.root / 'cad/mechanism.json').write_bytes((ROOT / 'cad/mechanism.json').read_bytes())
         with patch.object(build_model,'ROOT',self.root):
             doc,self.p,_=build_model.deliver()
         App.closeDocument(doc.Name)
-        self.doc=App.openDocument(str(self.root/'cad/lumi-selected-mechanism-fit.FCStd'))
+        self.doc=App.openDocument(str(self.root/'cad/record-player.FCStd'))
         from assembly_pose import set_cover_angle
         set_cover_angle(self.doc,self.p,0)
         self.addCleanup(App.closeDocument,self.doc.Name)

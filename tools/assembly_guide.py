@@ -129,11 +129,11 @@ def render(root=ROOT):
     entries = catalog_from_drawings(data)
     manifest = {'revision': data['revision'], 'sources': data['sources'],
                 'entries': entries, 'views': {}, 'units': 'mm',
-                'configuration': 'selected-curved-arm',
+                'configuration': 'curved-arm',
                 'unmodeled': ['电源线与外接插头', '内部线束、端子护套', 'LED 灯带本体',
                               '紧固件、胶粘剂、密封件、吸音材料'],
                 'nominal_cabinet_mm': [data['parameters'][k] for k in ('width', 'depth', 'closed_height')]}
-    source = root / 'cad/lumi-selected-mechanism-fit.FCStd'
+    source = root / 'cad/record-player.FCStd'
     with tempfile.TemporaryDirectory() as tmp:
         copy = Path(tmp) / 'GuideReadOnly.FCStd'
         shutil.copy2(source, copy)

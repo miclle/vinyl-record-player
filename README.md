@@ -1,6 +1,6 @@
-# 黑胶唱片机 · LUMI 参考外形
+# 黑胶唱片机概念 CAD
 
-基于 [HYM LUMI Walnut 官方资料](https://www.hym-originals-en.com/products/lumi-turntable-walnut)制作的一低音两全频的一体式唱片机概念 CAD。外形与扬声器布局为 **v0.9 可调定位合页布局**；选定弯臂机芯与结构统一保存在一个主 CAD 文件中，机芯采用 **v0.6 部分实测居中参数**。扬声器、变压器和功放板已采用用户提供的外廓尺寸；机芯安装接口仍待确认。
+一低音两全频的一体式黑胶唱片机概念 CAD，外形参考 [HYM LUMI Walnut 官方资料](https://www.hym-originals-en.com/products/lumi-turntable-walnut)。外形与扬声器布局为 **v0.9 可调定位合页布局**；当前弯臂机芯与结构统一保存在一个主 CAD 文件中，机芯采用 **v0.6 部分实测居中参数**。扬声器、变压器和功放板已采用用户提供的外廓尺寸；机芯安装接口仍待确认。
 
 ![开盖 CAD 预览](previews/open.png)
 
@@ -8,9 +8,9 @@
 
 | 文件 | 用途 |
 |---|---|
-| [整机主模型](cad/lumi-selected-mechanism-fit.FCStd) | 唯一 CAD 入口，默认开盖 70°；包含结构、所选机芯与隐藏的诊断分组 |
+| [整机主模型](cad/record-player.FCStd) | 唯一 CAD 入口，默认开盖 70°；包含结构、当前机芯与隐藏的诊断分组 |
 
-主模型直接由两份参数 JSON 一次生成，不再依赖另一个 FCStd。原 `lumi-three-driver.FCStd` / `.step` 已移除，可从 Git 历史找回。原通用机芯的 16 个对象保留为默认隐藏的 `Mechanism` 历史参考组，仅供图册附录使用，不进入当前装配、STEP 或零件清单。`FitAnalysis` 诊断组也默认隐藏。
+主模型直接由两份参数 JSON 一次生成，不再依赖另一个 FCStd。旧基线 CAD／STEP 已移除，可从 Git 历史找回。原通用机芯的 16 个对象保留为默认隐藏的 `Mechanism` 历史参考组，仅供图册附录使用，不进入当前装配、STEP 或零件清单。`FitAnalysis` 诊断组也默认隐藏。
 
 日常查看无需重建：
 
@@ -24,34 +24,34 @@
 
 ## 分组平面图纸
 
-先看[整机结构导览（两页 A2 PDF）](output/pdf/00-assembly-guide.pdf)：[开盖全景](previews/assembly-guide-1.png)和[内部展开](previews/assembly-guide-2.png)用编号标出部件、材料状态、数量及对应详图号，覆盖当前选定装配的全部 65 个物理对象。详见[导览说明](docs/assembly-guide.md)。
+先看[整机结构导览（两页 A2 PDF）](output/pdf/00-assembly-guide.pdf)：[开盖全景](previews/assembly-guide-1.png)和[内部展开](previews/assembly-guide-2.png)用编号标出部件、材料状态、数量及对应详图号，覆盖当前装配的全部 65 个物理对象。详见[导览说明](docs/assembly-guide.md)。
 
 当前模型已整理为 **3 份 A3 矢量 PDF，共 42 页**：
 
 - [整机与外壳（17 页）](output/pdf/01-assembly-and-enclosure.pdf)：木板整数备料汇总、闭盖六面图、障板局部剖视、外壳零件、合页与安装板，以及底板／后板／防尘盖后壁开孔定位。
 - [音腔与内部结构（11 页）](output/pdf/02-acoustic-and-structure.pdf)：隔板、音腔顶板、倒相管、浮动台面与支承，附障板／顶板／浮动底板开孔定位。
-- [机芯与电子部件（14 页）](output/pdf/03-mechanism-and-electronics.pdf)：扬声器、电源、功放、选定弯臂机芯及通用机芯对照。
+- [机芯与电子部件（14 页）](output/pdf/03-mechanism-and-electronics.pdf)：扬声器、电源、功放、当前弯臂机芯及通用机芯对照。
 
 图纸标明长 X、宽 Y、高 Z、厚度或厚度状态，并补充已有开孔、定位和同形件数量。六种板件的 33 个孔及后板沉台已分别标注孔径、局部孔位、必要的深度和加工面；障板孔位使用沿前表面量取的 S 尺寸。未确认的尺寸明确标为假设或待定；当前仍是概念与空间核对图。详见[读图说明与重新生成方法](docs/drawing-pack.md)。
 
-## 指定机芯装配核对
+## 机芯装配核对
 
-已按“28高端弯臂机芯全套餐装好直接用 自动回臂”建立 [FreeCAD](cad/lumi-selected-mechanism-fit.FCStd) / [STEP](cad/lumi-selected-mechanism-fit.step) 示意装配，见 [选型说明与重建方法](docs/selected-mechanism.md)。用户已确认到货款除弯臂外与原图一致，并确认唱头指托不会越过机芯基座右侧。采用 Ø280×11 唱盘、85 mm 总高及 R110、约1／4／8点的三个弹簧支点；整套机芯右移 12 mm 至唱盘中心 X=188 mm，355 mm 基座在浮动台面上的左右余量约为 32／31 mm。指托暂按 16 mm 外观长度建模并保持在基座范围内。弹簧自由高15.5、估计压缩0–5 mm，对应电机下探24.5–29.5 mm。底部局部轮廓仍为估算，与现有结构有重叠，安装未放行。
+已按“28高端弯臂机芯全套餐装好直接用 自动回臂”建立 [FreeCAD](cad/record-player.FCStd) / [STEP](cad/record-player.step) 示意装配，见 [选型说明与重建方法](docs/mechanism.md)。用户已确认到货款除弯臂外与原图一致，并确认唱头指托不会越过机芯基座右侧。采用 Ø280×11 唱盘、85 mm 总高及 R110、约1／4／8点的三个弹簧支点；整套机芯右移 12 mm 至唱盘中心 X=188 mm，355 mm 基座在浮动台面上的左右余量约为 32／31 mm。指托暂按 16 mm 外观长度建模并保持在基座范围内。弹簧自由高15.5、估计压缩0–5 mm，对应电机下探24.5–29.5 mm。底部局部轮廓仍为估算，与现有结构有重叠，安装未放行。
 
-[弯臂预览](previews/selected-mechanism-open.png) · [空间核对图](previews/selected-mechanism-clearance.png) · [核对报告](cad/mechanism-fit-report.json)
+[弯臂预览](previews/mechanism-open.png) · [空间核对图](previews/mechanism-clearance.png) · [核对报告](cad/mechanism-fit-report.json)
 
 ## 整机交付内容
 
 | 文件 | 用途 |
 |---|---|
-| [FreeCAD 装配](cad/lumi-selected-mechanism-fit.FCStd) | 65 个当前装配对象，另含隐藏历史参考和诊断对象，按结构分组，可隐藏、移动和进一步建模 |
-| [STEP 装配](cad/lumi-selected-mechanism-fit.step) | 闭盖姿态，82 个实体；排除历史参考与诊断体 |
+| [FreeCAD 装配](cad/record-player.FCStd) | 65 个当前装配对象，另含隐藏历史参考和诊断对象，按结构分组，可隐藏、移动和进一步建模 |
+| [STEP 装配](cad/record-player.step) | 闭盖姿态，82 个实体；排除历史参考与诊断体 |
 | [三视尺寸图 SVG](previews/dimensions.svg) / [PNG](previews/dimensions.png) | CAD 实体投影，含外廓和唱盘尺寸；不是加工图 |
 | [闭盖](previews/closed.png) / [开盖](previews/open.png) / [内部布局](previews/internal.png) | 实际 FreeCAD 视口渲染 |
 | [底部低音安装](previews/bottom.png) | 低音朝下，底板预留圆孔 |
 | [俯视](previews/top.png) / [正视](previews/front.png) / [右视](previews/right.png) | 外形与布局核对 |
 | [主要参数](cad/parameters.json) | 修改后通过脚本重建 |
-| [机芯参数](cad/selected-mechanism.json) | 当前弯臂机芯占位、唱盘尺寸和下探假设，与结构参数一起重建 |
+| [机芯参数](cad/mechanism.json) | 当前弯臂机芯占位、唱盘尺寸和下探假设，与结构参数一起重建 |
 | [零件清单](cad/parts.csv) | 材料说明、包络尺寸和估算标记 |
 | [木板备料清单](cad/wood-cut-list.csv) | 21 块 / 条板件，整数矩形备料长宽、名义板厚、数量及后续修切说明 |
 | [设计依据](docs/design-basis.md) | 官方资料、估算边界与后续选型要求 |
@@ -107,9 +107,9 @@
 
 ## v0.9 结构参数与精度
 
-闭盖机壳外廓为 **450 × 350 × 210.7 mm**，含后凸合页总深 **363.2 mm**（不含未建模紧固件、外接插头和线缆）。当前所选机芯的唱盘占位为 **Ø280 mm**，由 `cad/selected-mechanism.json` 控制；弯臂轴距、有效臂长和循迹参数尚未确认。
+闭盖机壳外廓为 **450 × 350 × 210.7 mm**，含后凸合页总深 **363.2 mm**（不含未建模紧固件、外接插头和线缆）。当前机芯的唱盘占位为 **Ø280 mm**，由 `cad/mechanism.json` 控制；弯臂轴距、有效臂长和循迹参数尚未确认。
 
-`cad/parameters.json` 中保留的 Ø300 mm 唱盘、200 mm 轴距与 218 mm 有效臂长属于隐藏的历史通用机芯，仅用于图册附录，不能作为当前弯臂的安装尺寸。两类尺寸来源见[设计依据](docs/design-basis.md#公开参数)和[机芯尺寸依据](docs/selected-mechanism.md#尺寸依据)。
+`cad/parameters.json` 中保留的 Ø300 mm 唱盘、200 mm 轴距与 218 mm 有效臂长属于隐藏的历史通用机芯，仅用于图册附录，不能作为当前弯臂的安装尺寸。两类尺寸来源见[设计依据](docs/design-basis.md#公开参数)和[机芯尺寸依据](docs/mechanism.md#尺寸依据)。
 
 原始 **214.2 mm** 曾暂解释为闭盖总高，官网图示未明确测量基准；v0.7 因已购脚垫名义离地高度降低 3.5 mm，当前总高为 **210.7 mm**。木壳高度分配、板厚、格栅间距、防尘盖与内部件尺寸均为估算；扬声器口端外径与总高采用用户于 2026-09-21 提供的尺寸，见下表；开孔和 3 mm 边沿厚度仍为估算。口端外径暂对应模型法兰外径，不代表振膜直径或名义英寸规格。
 
@@ -130,8 +130,8 @@ FCStd 保留独立的 `Part::Feature` 实体；主参数由 JSON 驱动脚本重
 
 使用 FreeCAD **1.1.1**。以下终端命令从仓库根目录执行；整机生成输出写回 `cad/` 和 `previews/`，PDF 另行生成到 `output/pdf/`。
 
-1. 按需修改结构参数 `cad/parameters.json` 或机芯参数 `cad/selected-mechanism.json`。脚垫高度须满足 `foot_height = feet.rubber_height + feet.flange_thickness`；改变离地高度时还需同步关联的绝对 Z 参数，见[脚垫参数与重建](references/feet/README.md#参数与重建)。
-2. 将手动改动另存后，关闭主模型。生成器同时检查 `LumiAssembly` 文档名与解析符号链接后的输出路径，阻止覆盖已打开的目标。
+1. 按需修改结构参数 `cad/parameters.json` 或机芯参数 `cad/mechanism.json`。脚垫高度须满足 `foot_height = feet.rubber_height + feet.flange_thickness`；改变离地高度时还需同步关联的绝对 Z 参数，见[脚垫参数与重建](references/feet/README.md#参数与重建)。
+2. 将手动改动另存后，关闭主模型。生成器同时检查 `RecordPlayerAssembly` 文档名与解析符号链接后的输出路径，阻止覆盖已打开的目标。
 3. 执行 `tools/build.FCMacro`，一次生成整机 FCStd、闭盖 STEP、清单、机芯核对报告、预览和尺寸图；最后以开盖 70° 保存主模型。脚座及合页局部视图只裁切临时文档。
 4. 执行下方验证命令。验证读取临时副本并恢复闭盖基准，不改变已打开的用户文档或源文件。
 5. 交付图纸时，按[图册说明](docs/drawing-pack.md#重新生成)提取主 CAD 的最新数据并排版三份 A3 PDF，再按[导览说明](docs/assembly-guide.md#重新生成)生成两页 A2 PDF。整机宏不会自动更新这些 PDF。
@@ -187,4 +187,4 @@ PYTHONPATH="${FREECAD_RESOURCES:?请先设置 FreeCAD 运行环境}/lib" \
 
 盖壳每 5°、盖壳与活动安装件总成每 1° 检查至 70°，均为离散抽样，不是连续运动或实物悬停验证。模型合并和开盖展示没有解决机芯实际轮廓、孔位与运动范围未知的问题；声学、电气、隔振和安装仍未放行。
 
-具体未完成安装工作见[后续适配](docs/selected-mechanism.md#后续适配与重建)，加工前资料清单见[设计依据](docs/design-basis.md#进入加工前必须补齐)。SC-2103 具体版本、原功放分频和单元参数仍需核实。现有图纸已标出暂定声孔，进入加工前仍需实测确认声孔直径，补齐扬声器固定螺孔、扬声器与已选弯臂机芯的真实安装图，并确定材料、连接方式和公差。**本版不能直接作为原厂精确复刻或生产加工图。**
+具体未完成安装工作见[后续适配](docs/mechanism.md#后续适配与重建)，加工前资料清单见[设计依据](docs/design-basis.md#进入加工前必须补齐)。SC-2103 具体版本、原功放分频和单元参数仍需核实。现有图纸已标出暂定声孔，进入加工前仍需实测确认声孔直径，补齐扬声器固定螺孔、扬声器与当前弯臂机芯的真实安装图，并确定材料、连接方式和公差。**本版不能直接作为原厂精确复刻或生产加工图。**

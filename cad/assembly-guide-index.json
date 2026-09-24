@@ -1,7 +1,7 @@
 {
   "revision": "v0.9-torque-hinges",
   "sources": {
-    "lumi-selected-mechanism-fit.FCStd": "0de707397130c7fc81b28f8307b55acd5c2828d3fba713c695fb1b0e54c9d0a1"
+    "record-player.FCStd": "2ca67e8976c790586655b0f4f3ffc34d8e9aa1243316768e49d60e2d5c4aa443"
   },
   "entries": [
     {
@@ -719,7 +719,7 @@
     }
   ],
   "units": "mm",
-  "configuration": "selected-curved-arm",
+  "configuration": "curved-arm",
   "unmodeled": [
     "电源线与外接插头",
     "内部线束、端子护套",

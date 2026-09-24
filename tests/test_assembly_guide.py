@@ -1,4 +1,4 @@
-"""The guide must map the selected assembly, not the historical mechanism."""
+"""The guide must map the current assembly, not the historical mechanism."""
 import copy
 import hashlib
 import shutil
@@ -41,7 +41,7 @@ class AssemblyGuideTests(unittest.TestCase):
         entries = assembly_guide.catalog_from_drawings(data)
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp)/'GuideTest.FCStd'
-            shutil.copy2(ROOT/'cad/lumi-selected-mechanism-fit.FCStd', path)
+            shutil.copy2(ROOT/'cad/record-player.FCStd', path)
             doc = App.openDocument(str(path))
             try:
                 self.assertEqual(assembly_guide.check_coverage(doc, entries), 65)

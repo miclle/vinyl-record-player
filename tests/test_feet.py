@@ -22,11 +22,11 @@ class FeetTests(unittest.TestCase):
         root = Path(self.tmp.name)
         (root / 'cad').mkdir()
         (root / 'cad/parameters.json').write_bytes((ROOT / 'cad/parameters.json').read_bytes())
-        (root / 'cad/selected-mechanism.json').write_bytes((ROOT / 'cad/selected-mechanism.json').read_bytes())
+        (root / 'cad/mechanism.json').write_bytes((ROOT / 'cad/mechanism.json').read_bytes())
         with patch.object(build_model, 'ROOT', root):
             doc, self.p, _ = build_model.deliver()
         App.closeDocument(doc.Name)
-        self.doc = App.openDocument(str(root / 'cad/lumi-selected-mechanism-fit.FCStd'))
+        self.doc = App.openDocument(str(root / 'cad/record-player.FCStd'))
         self.addCleanup(App.closeDocument, self.doc.Name)
 
     def test_saved_bought_parts_and_bottom_holes_fit(self):

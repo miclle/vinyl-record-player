@@ -18,7 +18,7 @@ def validate():
     # Read a private copy so validation cannot mutate an open user's document.
     with tempfile.TemporaryDirectory() as tmp:
         source=Path(tmp)/'ValidationReadOnly.FCStd'
-        source.write_bytes((ROOT/'cad/lumi-selected-mechanism-fit.FCStd').read_bytes())
+        source.write_bytes((ROOT/'cad/record-player.FCStd').read_bytes())
         doc=App.openDocument(str(source))
         try:
             return _validate_document(doc,p)
@@ -47,7 +47,7 @@ def _validate_document(doc,p):
 
     datum=doc.getObject('GeometryDatums')
     checks['build_parameters_match']=getattr(datum,'BuildParametersJSON','')==json.dumps(p,sort_keys=True,separators=(',',':'),ensure_ascii=False)
-    cfg=json.loads((ROOT/'cad/selected-mechanism.json').read_text())
+    cfg=json.loads((ROOT/'cad/mechanism.json').read_text())
     study=doc.getObject('StudyBasis')
     checks['mechanism_parameters_match']=getattr(study,'ConfigurationJSON','')==json.dumps(cfg,ensure_ascii=False,sort_keys=True)
     result['requested_revision']=p['revision']
@@ -243,7 +243,7 @@ def _validate_document(doc,p):
     metrics['woofer_previous_20mm_trial_target_met']=metrics['woofer_floor_clearance_mm']>=20
     checks['woofer_floor_clearance_matches_installation']=(metrics['woofer_floor_clearance_mm']>0 and
         abs(metrics['woofer_floor_clearance_mm']-(p['foot_height']-p['woofer']['flange_thickness']))<1e-5)
-    readback=Part.read(str(ROOT/'cad/lumi-selected-mechanism-fit.step'))
+    readback=Part.read(str(ROOT/'cad/record-player.step'))
     checks['step_valid']=readback.isValid()
     checks['step_solid_count']=len(readback.Solids)==len(compound.Solids)
     checks['no_group_duplicates_in_step']=len(readback.Solids)==sum(len(o.Shape.Solids) for o in objects)

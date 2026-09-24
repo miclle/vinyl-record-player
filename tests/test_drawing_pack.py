@@ -29,12 +29,12 @@ class DrawingPackTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp); (root/'cad').mkdir()
             (root/'cad/parameters.json').write_text(json.dumps(p))
-            (root / 'cad/selected-mechanism.json').write_bytes((ROOT / 'cad/selected-mechanism.json').read_bytes())
-            shutil.copy2(ROOT/'cad/selected-mechanism.json',root/'cad/selected-mechanism.json')
+            (root / 'cad/mechanism.json').write_bytes((ROOT / 'cad/mechanism.json').read_bytes())
+            shutil.copy2(ROOT/'cad/mechanism.json',root/'cad/mechanism.json')
             with patch.object(build_model,'ROOT',root):
                 doc,_,_=build_model.deliver()
             App.closeDocument(doc.Name)
-            saved=App.openDocument(str(root/'cad/lumi-selected-mechanism-fit.FCStd'))
+            saved=App.openDocument(str(root/'cad/record-player.FCStd'))
             try:
                 from assembly_pose import set_cover_angle
                 set_cover_angle(saved,p,0)
@@ -74,7 +74,7 @@ class DrawingPackTests(unittest.TestCase):
         self.assertEqual(data['coverage']['missing'], [])
         self.assertEqual(data['coverage']['physical_count'], 65)
         self.assertEqual(data['coverage']['reference_count'], 16)
-        self.assertEqual(set(data['sources']), {'lumi-selected-mechanism-fit.FCStd'})
+        self.assertEqual(set(data['sources']), {'record-player.FCStd'})
         self.assertNotIn('LowerRail', cards)
         self.assertEqual(cards['GrilleCloth']['drawing_code'], 'A-P03')
         self.assertEqual(cards['GrilleCloth']['drawing_column'], 1)
@@ -154,7 +154,7 @@ class DrawingPackTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp);(root/'cad').mkdir()
             (root/'cad/parameters.json').write_text(json.dumps(p))
-            (root / 'cad/selected-mechanism.json').write_bytes((ROOT / 'cad/selected-mechanism.json').read_bytes())
+            (root / 'cad/mechanism.json').write_bytes((ROOT / 'cad/mechanism.json').read_bytes())
             with patch.object(build_model,'ROOT',root):
                 doc,_,_,_=build_model.build()
             try:
@@ -201,11 +201,11 @@ class DrawingPackTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp)
             (root/'cad').mkdir()
-            for name in ('parameters.json','selected-mechanism.json',
-                         'lumi-selected-mechanism-fit.FCStd'):
+            for name in ('parameters.json','mechanism.json',
+                         'record-player.FCStd'):
                 shutil.copy2(ROOT/'cad'/name,root/'cad'/name)
             before=set(App.listDocuments())
-            for name,key in [('parameters.json','wall'),('selected-mechanism.json','nominal_width')]:
+            for name,key in [('parameters.json','wall'),('mechanism.json','nominal_width')]:
                 path=root/'cad'/name
                 original=path.read_text()
                 params=json.loads(original)

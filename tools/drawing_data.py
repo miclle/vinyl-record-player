@@ -56,8 +56,8 @@ def project_shape(shape, view):
 def collect(root=ROOT, project=True):
     root = Path(root)
     p = json.loads((root / 'cad/parameters.json').read_text())
-    cfg = json.loads((root / 'cad/selected-mechanism.json').read_text())
-    source_paths = [root / 'cad/lumi-selected-mechanism-fit.FCStd']
+    cfg = json.loads((root / 'cad/mechanism.json').read_text())
+    source_paths = [root / 'cad/record-player.FCStd']
     hashes = {path.name: hashlib.sha256(path.read_bytes()).hexdigest() for path in source_paths}
     docs = []
     try:
@@ -94,7 +94,7 @@ def collect(root=ROOT, project=True):
                             'source': source, 'size_mm': dims, 'origin_mm': pos,
                             'quantity': len(names), 'positions_mm': positions,
                             'thickness_mm': thickness, 'notes': list(notes),
-                            'basis': getattr(obj, 'DimensionBasis', '选定弯臂机芯外观假设，尺寸待实测'),
+                            'basis': getattr(obj, 'DimensionBasis', '当前弯臂机芯外观假设，尺寸待实测'),
                             'primary': primary, 'views': {}}
                     if project:
                         card['views'] = {v: project_shape(shape, v) for v in ('top', 'front', 'right')}
@@ -189,7 +189,7 @@ def collect(root=ROOT, project=True):
             add('AcousticRear',2,ac['partition_thickness'],['此对象包含左右两块独立后板，分别绘制。','两块均由原实体直接读取，不以跨空区总包络下料。'],split=True)
             front_bottom=16+ac['baffle_thickness']/sin
             add('AcousticDividerLeft',2,ac['partition_thickness'],[f'前缘倾斜 {f(90-p["front_angle"])}°；后缘 Y={f(D-t)}。',f'下前角 Y={f(front_bottom)}；上前角 Y={f(front_bottom+(ac["roof_bottom_z"]-zlo)/math.tan(math.radians(p["front_angle"])))}。','两块同形；板厚方向 X。整数备料后按斜前缘精确修切。'],['AcousticDividerRight'])
-            add('BearingPocket',2,2,['外径 Ø28；内径 Ø24；底厚 2；杯顶开口。','仅适配基线通用轴承；选定机芯安装时须重新核对。'])
+            add('BearingPocket',2,2,['外径 Ø28；内径 Ø24；底厚 2；杯顶开口。','仅适配基线通用轴承；当前机芯安装时须重新核对。'])
             add('BassPort',2,p['bass_port']['wall_thickness'],[f"通径 Ø{f(p['bass_port']['inner_diameter'])}；管壁 {f(p['bass_port']['wall_thickness'])}；总长 {f(p['bass_port']['length'])}（含法兰）。",f"法兰 Ø{f(p['bass_port']['flange_diameter'])} × {f(p['bass_port']['flange_thickness'])}；主体长 {f(p['bass_port']['length']-p['bass_port']['flange_thickness'])}。",'长度是当前试验初值，非已验证声学调谐。'])
             add('FloatingDeck',2,p['deck_thickness'],['主轴通孔 Ø20.4（暂定）；机芯固定孔与外轮廓开口未设计。',hole(p['platter_x']-t-4,p['platter_y']-8)])
             add('RearSupport',2,8,['对象由左右两块承托梁组成，逐块标注。'],split=True)
@@ -232,9 +232,9 @@ def collect(root=ROOT, project=True):
                 raise ValueError(f'Undrawn objects: {coverage["missing"]}')
             assemblies=[]
             specs=[
-                ('selected-closed','选定弯臂机芯版 / 闭盖六面图',study,['Cabinet','Front','Deck','SelectedKit','Controls','Cover','Feet'],('top','front','right','bottom','rear','left')),
+                ('selected-closed','当前弯臂机芯版 / 闭盖六面图',study,['Cabinet','Front','Deck','SelectedKit','Controls','Cover','Feet'],('top','front','right','bottom','rear','left')),
                 ('internal','内部布置 / 移除盖与台面',base,['Cabinet','Audio','Electronics'],('top','front','right')),
-                ('selected-kit','选定弯臂机芯 / 外观与安装包络',study,['SelectedKit'],('top','front','right')),
+                ('selected-kit','当前弯臂机芯 / 外观与安装包络',study,['SelectedKit'],('top','front','right')),
                 ('generic','基线通用机芯 / 历史对照',base,['Mechanism'],('top','front','right')),
             ]
             for key,title,doc,groups,views in specs:

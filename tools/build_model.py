@@ -1,4 +1,4 @@
-"""LUMI reference reconstruction. Run build.FCMacro in FreeCAD to rebuild.
+"""Record player assembly reconstruction. Run build.FCMacro in FreeCAD to rebuild.
 
 All distances are millimetres. JSON drives regeneration; native Part features
 remain independent, editable solids, not a fully constrained manufacturing tree.
@@ -37,13 +37,13 @@ def build_structure():
     a = math.radians(p['front_angle'])
     inward = V(0, math.sin(a), -math.cos(a))
     front_y = lambda z: 8 + (z - (z0+t)) / math.tan(a)
-    output = ROOT / 'cad/lumi-selected-mechanism-fit.FCStd'
+    output = ROOT / 'cad/record-player.FCStd'
     for opened in App.listDocuments().values():
-        if (opened.Name == 'LumiAssembly' or
+        if (opened.Name == 'RecordPlayerAssembly' or
                 (opened.FileName and Path(opened.FileName).resolve() == output.resolve())):
             raise RuntimeError(f'Save manual edits separately and close {opened.Name} before rebuilding')
-    doc = App.newDocument('LumiAssembly')
-    doc.Label = 'LUMI · 弯臂机芯整机 · 安装待确认'
+    doc = App.newDocument('RecordPlayerAssembly')
+    doc.Label = '黑胶唱片机整机 · 安装待确认'
     groups = {}
     for name, label in [('Cabinet','01 胡桃木外壳'), ('Front','02 倾斜格栅与灯光'),
                         ('Deck','03 浮动唱盘底板'), ('Mechanism','04 唱盘与唱臂包络'),
@@ -161,7 +161,7 @@ def build_structure():
     pocket_bottom=H-40
     pocket=Part.makeCylinder(14,zhi+ac['roof_thickness']-pocket_bottom,V(bx,by,pocket_bottom)).cut(
         Part.makeCylinder(12,zhi+ac['roof_thickness']-pocket_bottom-1,V(bx,by,pocket_bottom+2)))
-    add('BearingPocket','通用轴承密封避让杯（选定机芯待重做）',pocket,'Audio',GRAY)
+    add('BearingPocket','通用轴承密封避让杯（当前机芯待重做）',pocket,'Audio',GRAY)
     rear_panels=Part.makeCompound([
         Part.makeBox(left-t,pt,zhi-zlo,V(t,rear,zlo)),
         Part.makeBox(W-t-right-pt,pt,zhi-zlo,V(right+pt,rear,zlo))])
@@ -359,7 +359,7 @@ def build_structure():
 
 def build():
     from mechanism_study import add_study
-    cfg = json.loads((ROOT / 'cad/selected-mechanism.json').read_text())
+    cfg = json.loads((ROOT / 'cad/mechanism.json').read_text())
     doc,p,groups = build_structure()
     try:
         report = add_study(doc,p,cfg)
@@ -379,7 +379,7 @@ def deliver():
     solids=[o for o in doc.Objects if o.TypeId=='Part::Feature' and o.Shape.Solids
             and not getattr(o,'IsDiagnostic',False) and not getattr(o,'IsReference',False)]
     import Import
-    step_path=ROOT/'cad/lumi-selected-mechanism-fit.step'
+    step_path=ROOT/'cad/record-player.step'
     Import.export(solids,str(step_path))
     exported=Part.read(str(step_path))
     expected=Part.makeCompound([o.Shape for o in solids])
@@ -396,7 +396,7 @@ def deliver():
     set_cover_angle(doc,p,p['cover_angle_open'])
     if App.GuiUp:
         Gui.activeDocument().activeView().fitAll()
-    doc.saveAs(str(ROOT/'cad/lumi-selected-mechanism-fit.FCStd'))
+    doc.saveAs(str(ROOT/'cad/record-player.FCStd'))
     # Downstream renderers and callers work in the closed engineering datum.
     set_cover_angle(doc,p,0)
     save_report(report,ROOT)
@@ -410,7 +410,7 @@ def deliver():
                              getattr(obj,'DimensionBasis','尺寸待确认'),
                              round(b.XLength,3),round(b.YLength,3),round(b.ZLength,3)])
     if not all(report['geometry_checks'].values()):
-        raise RuntimeError('Selected mechanism geometry/export validation failed')
+        raise RuntimeError('Mechanism geometry/export validation failed')
     return doc,p,groups
 
 

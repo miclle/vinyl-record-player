@@ -19,7 +19,7 @@ class HingeTests(unittest.TestCase):
         tmp=tempfile.TemporaryDirectory()
         self.addCleanup(tmp.cleanup)
         path=Path(tmp.name)/'HingeReadback.FCStd'
-        shutil.copy2(ROOT/'cad/lumi-selected-mechanism-fit.FCStd',path)
+        shutil.copy2(ROOT/'cad/record-player.FCStd',path)
         self.doc=App.openDocument(str(path))
         from assembly_pose import set_cover_angle
         set_cover_angle(self.doc,json.loads((ROOT/'cad/parameters.json').read_text()),0)
