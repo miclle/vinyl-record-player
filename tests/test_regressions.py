@@ -407,7 +407,12 @@ class DrawingAnnotationTests(unittest.TestCase):
                     self.assertIn(expected, svg)
             line = re.search(r'd="M([\d.]+),([\d.]+) H([\d.]+)"/><text[^>]*>Ø310', svg)
             self.assertIsNotNone(line)
-            for actual, expected in zip(line.groups(), [104.15, 312.2, 460.65]):
+            scale = 1.15
+            start = 80 + (cfg['platter_center_x'] - cfg['platter_diameter'] / 2) * scale
+            expected_values = [start,
+                               510 - cfg['platter_center_y'] * scale,
+                               start + cfg['platter_diameter'] * scale]
+            for actual, expected in zip(line.groups(), expected_values):
                 self.assertAlmostEqual(float(actual), expected)
 
 

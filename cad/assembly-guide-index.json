@@ -1,7 +1,7 @@
 {
   "revision": "v0.9-torque-hinges",
   "sources": {
-    "lumi-selected-mechanism-fit.FCStd": "63b75c7bc56b62f3b82d872682cd1e25b488c13d8d2ceaa01fe2153e7dc1368a"
+    "lumi-selected-mechanism-fit.FCStd": "0de707397130c7fc81b28f8307b55acd5c2828d3fba713c695fb1b0e54c9d0a1"
   },
   "entries": [
     {
@@ -268,7 +268,7 @@
         "C-P09"
       ],
       "size_mm": [
-        58.279888,
+        39.844269,
         67.31514,
         13.0
       ]

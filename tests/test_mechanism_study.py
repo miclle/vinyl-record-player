@@ -73,9 +73,14 @@ class MechanismStudyTests(unittest.TestCase):
                 arm = saved.KitCurvedArm.Shape.optimalBoundingBox(False)
                 headshell = saved.KitHeadshell.Shape
                 head_bounds = headshell.optimalBoundingBox(False)
+                base_bounds = saved.KitBase.Shape.optimalBoundingBox(False)
+                deck_bounds = saved.FloatingDeck.Shape.optimalBoundingBox(False)
                 self.assertGreater(arm.XLength, 2 * cfg['appearance_assumptions']['arm_bend_radius'])
-                self.assertGreater(head_bounds.XLength, 50)  # Includes the side finger lift.
+                self.assertGreater(head_bounds.XLength, cfg['appearance_assumptions']['headshell_width'])
                 self.assertGreater(head_bounds.YLength, cfg['appearance_assumptions']['headshell_length'])
+                self.assertLessEqual(head_bounds.XMax, base_bounds.XMax)
+                self.assertAlmostEqual(base_bounds.XMin-deck_bounds.XMin,
+                                       deck_bounds.XMax-base_bounds.XMax, delta=1)
                 self.assertEqual(len(headshell.Solids), 1)
                 self.assertGreaterEqual(len(headshell.Faces), 20)  # Connector, two slots and top pads.
                 arm_parts = [saved.getObject(name).Shape.optimalBoundingBox(False) for name in
@@ -84,7 +89,7 @@ class MechanismStudyTests(unittest.TestCase):
                                        cfg['arm_total_length'], places=5)
                 springs = saved.KitBase.Shape.Solids[1:]
                 self.assertEqual(len(springs), 3)
-                expected = [(231, 267.262794), (271.262794, 117), (80.737206, 117)]
+                expected = mechanism_study.measurement_datums(cfg, 150)['spring_centers_xy_mm']
                 for spring, (x, y) in zip(springs, expected):
                     bounds = spring.optimalBoundingBox(False)
                     self.assertAlmostEqual(bounds.Center.x, x, places=5)
@@ -159,7 +164,7 @@ class MechanismStudyTests(unittest.TestCase):
         cfg = json.loads((ROOT / 'cad/selected-mechanism.json').read_text())
         cfg['spring_radius'] = 100
         d = mechanism_study.measurement_datums(cfg, 150, 2)
-        self.assertAlmostEqual(d['spring_centers_xy_mm'][0][0], 226)
+        self.assertAlmostEqual(d['spring_centers_xy_mm'][0][0], cfg['platter_center_x'] + 50)
         self.assertAlmostEqual(d['lowest_z_mm'], 123.5)
         cfg['total_height'] += 1
         with self.assertRaisesRegex(ValueError, 'height chain'):

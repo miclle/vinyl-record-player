@@ -103,6 +103,7 @@ class DrawingPackTests(unittest.TestCase):
 
     def test_hole_sheets_match_saved_panel_geometry_and_keep_sources_unchanged(self):
         import drawing_data
+        params = json.loads((ROOT / 'cad/parameters.json').read_text())
         paths = list((ROOT / 'cad').glob('*.FCStd'))
         before = {p: hashlib.sha256(p.read_bytes()).hexdigest() for p in paths}
         data = drawing_data.collect(ROOT, project=False)
@@ -126,10 +127,12 @@ class DrawingPackTests(unittest.TestCase):
         self.assertEqual((port['u_mm'], port['v_mm']), (276, 68))
         self.assertEqual(port['recess'], {'diameter_mm': 48, 'depth_mm': 3, 'face': '后侧'})
         self.assertEqual([(h['u_mm'], h['v_mm']) for h in back[2:4]], [(58, 34), (58, 74)])
-        self.assertEqual(sheets['AcousticRoof']['holes'][0]['u_mm'], 164)
+        self.assertEqual(sheets['AcousticRoof']['holes'][0]['u_mm'],
+                         params['platter_x'] - params['wall'])
         self.assertAlmostEqual(sheets['AcousticRoof']['holes'][0]['v_mm'], 166.8)
         self.assertIn('余厚 4.3',' '.join(sheets['AcousticRoof']['notes']))
-        self.assertEqual(sheets['FloatingDeck']['holes'][0]['u_mm'], 160)
+        self.assertEqual(sheets['FloatingDeck']['holes'][0]['u_mm'],
+                         params['platter_x'] - params['wall'] - 4)
         self.assertIn('baffle_section', data)
         self.assertEqual(data['baffle_section']['x_mm'], 225)
         self.assertIn('Baffle', [part['key'] for part in data['baffle_section']['parts']])

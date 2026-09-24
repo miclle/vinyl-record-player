@@ -1,8 +1,8 @@
 {
-  "revision": "v0.5-curved-arm-appearance",
+  "revision": "v0.6-centered-mechanism",
   "selected_option": "28高端弯臂机芯全套餐装好直接用 自动回臂",
   "assumptions": {
-    "revision": "v0.5-curved-arm-appearance",
+    "revision": "v0.6-centered-mechanism",
     "selected_option": "28高端弯臂机芯全套餐装好直接用 自动回臂",
     "product_url": "https://item.taobao.com/item.htm?id=712086565319&skuId=5162746531784",
     "dimension_status": "user_measured_partial_with_approximate_supports",
@@ -12,10 +12,10 @@
     "nominal_depth": 280.0,
     "platter_diameter": 280.0,
     "platter_thickness": 11.0,
-    "platter_center_x": 176.0,
+    "platter_center_x": 188.0,
     "platter_center_y": 172.0,
     "mounting_holes_confirmed": false,
-    "assumption_note": "2026-09-24 用户确认除弯臂外与直臂图一致；355 平面总宽按图，唱盘 Ø280×11、总高85、平台128×108×5、上下40及弹簧数据来自用户。250为唱臂总长，暂作含配重/唱头的纵向外廓，不作为有效臂长。弯管、连接套、开槽唱头壳与指托按 selected-curved-arm-kit.png 近似。平台与弹簧座共面、唱盘高度、马达位置/直径、传动及回臂外形、弹簧直径和唱臂局部外形均为估算；底部覆盖不完整，不可据此开孔。",
+    "assumption_note": "2026-09-24 用户确认除弯臂外与直臂图一致，且唱头指托不超过机芯基座右侧；355 平面总宽按图，唱盘 Ø280×11、总高85、平台128×108×5、上下40及弹簧数据来自用户。250为唱臂总长，暂作含配重/唱头的纵向外廓，不作为有效臂长。机芯整体右移12 mm以在浮动甲板上近似居中；弯管、连接套、开槽唱头壳与指托按 selected-curved-arm-kit.png 近似。平台与弹簧座共面、唱盘高度、马达位置/直径、传动及回臂外形、弹簧直径和唱臂局部外形均为估算；底部覆盖不完整，不可据此开孔。",
     "total_height": 85.0,
     "platform_thickness": 5.0,
     "platform_length": 128.0,
@@ -72,7 +72,7 @@
       "headshell_length": 52.0,
       "headshell_width": 22.0,
       "headshell_thickness": 6.0,
-      "finger_lift_length": 35.0
+      "finger_lift_length": 16.0
     }
   },
   "geometry_checks": {
@@ -126,15 +126,15 @@
       "motor_depth_below_support_mm": 29.5,
       "spring_centers_xy_mm": [
         [
-          231.0,
+          243.0,
           267.2627944162883
         ],
         [
-          271.2627944162883,
+          283.2627944162883,
           117.00000000000003
         ],
         [
-          80.73720558371178,
+          92.73720558371178,
           116.99999999999994
         ]
       ]
@@ -151,15 +151,15 @@
         "motor_depth_below_support_mm": 24.5,
         "spring_centers_xy_mm": [
           [
-            231.0,
+            243.0,
             267.2627944162883
           ],
           [
-            271.2627944162883,
+            283.2627944162883,
             117.00000000000003
           ],
           [
-            80.73720558371178,
+            92.73720558371178,
             116.99999999999994
           ]
         ],
@@ -170,7 +170,11 @@
           },
           {
             "part": "AcousticRoof",
-            "overlap_mm3": 15033.486
+            "overlap_mm3": 14493.486
+          },
+          {
+            "part": "AcousticDividerRight",
+            "overlap_mm3": 86.9
           }
         ],
         "closed_cover_clearance_mm": 0.6999999999999886,
@@ -191,15 +195,15 @@
         "motor_depth_below_support_mm": 29.5,
         "spring_centers_xy_mm": [
           [
-            231.0,
+            243.0,
             267.2627944162883
           ],
           [
-            271.2627944162883,
+            283.2627944162883,
             117.00000000000003
           ],
           [
-            80.73720558371178,
+            92.73720558371178,
             116.99999999999994
           ]
         ],
@@ -210,11 +214,15 @@
           },
           {
             "part": "BassPort",
-            "overlap_mm3": 1026.127
+            "overlap_mm3": 1049.176
           },
           {
             "part": "AcousticRoof",
-            "overlap_mm3": 38133.849
+            "overlap_mm3": 32193.849
+          },
+          {
+            "part": "AcousticDividerRight",
+            "overlap_mm3": 260.701
           }
         ],
         "closed_cover_clearance_mm": 5.699999999999989,
@@ -239,12 +247,17 @@
       {
         "part": "BassPort",
         "label": "后置倒相管 · Ø32 × 160 可换试验件",
-        "overlap_mm3": 1026.127
+        "overlap_mm3": 1049.176
       },
       {
         "part": "AcousticRoof",
         "label": "三音腔共用顶板 · 中部延伸至后板",
-        "overlap_mm3": 38133.849
+        "overlap_mm3": 32193.849
+      },
+      {
+        "part": "AcousticDividerRight",
+        "label": "低音腔右全深隔板",
+        "overlap_mm3": 260.701
       }
     ],
     "display_closed_cover_clear": true,
@@ -260,5 +273,5 @@
     "合页及盖总成对示意机芯做1度开盖抽样；真实机芯和自动回臂运动未验证",
     "STEP 仅导出装配示意，包络及红色干涉体保留在 FCStd"
   ],
-  "model_sha256": "63b75c7bc56b62f3b82d872682cd1e25b488c13d8d2ceaa01fe2153e7dc1368a"
+  "model_sha256": "0de707397130c7fc81b28f8307b55acd5c2828d3fba713c695fb1b0e54c9d0a1"
 }
