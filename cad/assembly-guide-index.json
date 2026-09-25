@@ -1,7 +1,7 @@
 {
-  "revision": "v0.10-10mm-structural-panels",
+  "revision": "v0.11-10x6-grille-slats",
   "sources": {
-    "record-player.FCStd": "210db6e7fb55f5c35d262613c64c5953e686781afbd83a4ef8f8f0bca0a0efda"
+    "record-player.FCStd": "0babcb831caca3fa34089d4067b9ffa54a0f77b043d93c50d023c4b8668d66e5"
   },
   "entries": [
     {
@@ -41,16 +41,15 @@
         "Slat04",
         "Slat05",
         "Slat06",
-        "Slat07",
-        "Slat08"
+        "Slat07"
       ],
-      "quantity": "8 条",
+      "quantity": "7 条",
       "material": "木饰条；木种待定",
-      "stock_count": 8,
+      "stock_count": 7,
       "stock_mm": [
         426.0,
-        7.0,
-        3.0
+        10.0,
+        6.0
       ],
       "stock_note": "矩形截面成品条；整体倾斜安装，无需把截面切成斜四边形",
       "drawings": [
@@ -58,8 +57,8 @@
       ],
       "size_mm": [
         426.0,
-        5.016289,
-        7.584447
+        8.796509,
+        11.364667
       ]
     },
     {
@@ -751,7 +750,7 @@
     350.0,
     210.7
   ],
-  "physical_object_count": 65,
+  "physical_object_count": 64,
   "embedded_in": {
     "file": "01-assembly-and-enclosure.pdf",
     "after": "A-STOCK",

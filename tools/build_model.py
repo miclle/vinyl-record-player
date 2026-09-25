@@ -146,8 +146,10 @@ def build_structure():
                basis='用户选定 30×30×5 商家图；按总外廓、等厚居中 T 截面解释，圆角及公差待实测',
                material=f"铝合金 T 型材 {fs['face_height']:g}×{fs['overall_depth']:g}×{fs['thickness']:g}；安装长 {fd['length']:g} mm")
     fascia.addProperty('App::PropertyBool','InstallationReleased','Installation').InstallationReleased=False
-    # Thin cloth proxy; actual cloth is acoustically open, unlike this visual solid.
-    cloth = add('GrilleCloth','透声布外观占位（非实心材料）',slope(z0+t,H-22,4,0.5),'Front',BLACK,material='透声织物（薄实体仅用于显示）')
+    # Seat the thin visual cloth proxy against the baffle front so the deeper
+    # grille slats retain a real gap. The cloth is acoustically open in reality.
+    cloth = add('GrilleCloth','透声布外观占位（非实心材料）',slope(z0+t,H-22,7.5,0.5),'Front',BLACK,
+                material='透声织物（薄实体贴障板前表面显示；张紧与固定待确认）')
     n=p['slat_count']
     for i in range(n):
         z=z0+t+2+i*p['slat_pitch']

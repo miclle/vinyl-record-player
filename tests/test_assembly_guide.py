@@ -17,9 +17,9 @@ from wood_stock import RETIRED_WOOD_CODES, stock_rows
 
 
 class AssemblyGuideTests(unittest.TestCase):
-    def test_overview_targets_exist_with_one_three_or_eight_slats(self):
+    def test_overview_targets_exist_with_one_three_seven_or_eight_slats(self):
         data = drawing_data.collect(ROOT, project=False)
-        for count in (1, 3, 8):
+        for count in (1, 3, 7, 8):
             with self.subTest(slat_count=count):
                 changed = copy.deepcopy(data)
                 for card in changed['cards']:
@@ -33,7 +33,7 @@ class AssemblyGuideTests(unittest.TestCase):
                 self.assertEqual(set(targets), {e['code'] for e in entries if e['page'] == 1})
                 for code, (name, fraction) in targets.items():
                     self.assertIn(name, catalog[code]['ids'])
-                if count == 8:
+                if count in (7, 8):
                     self.assertEqual(targets['W02'][0], 'Slat04')
 
     def test_selected_objects_have_unique_codes_and_current_drawing_references(self):
@@ -46,7 +46,7 @@ class AssemblyGuideTests(unittest.TestCase):
             shutil.copy2(ROOT/'cad/record-player.FCStd', path)
             doc = App.openDocument(str(path))
             try:
-                self.assertEqual(assembly_guide.check_coverage(doc, entries), 65)
+                self.assertEqual(assembly_guide.check_coverage(doc, entries), 64)
                 with self.assertRaisesRegex(ValueError, 'coverage mismatch'):
                     assembly_guide.check_coverage(doc, entries[:-1])
                 with self.assertRaisesRegex(ValueError, 'duplicate=True'):
@@ -55,7 +55,7 @@ class AssemblyGuideTests(unittest.TestCase):
                 App.closeDocument(doc.Name)
         catalog = {e['code']: e for e in entries}
         self.assertEqual(len(catalog), 35)
-        self.assertEqual(catalog['W02']['quantity'], '8 条')
+        self.assertEqual(catalog['W02']['quantity'], '7 条')
         self.assertEqual(catalog['W08']['quantity'], '2 块')
         params = data['parameters']
         self.assertEqual(catalog['W06']['stock_mm'],
@@ -73,7 +73,7 @@ class AssemblyGuideTests(unittest.TestCase):
                    if entry['code'].startswith('W')]
         self.assertEqual([entry['code'] for entry in entries],
                          [row['code'] for row in expected])
-        self.assertEqual(sum(entry['stock_count'] for entry in entries), 21)
+        self.assertEqual(sum(entry['stock_count'] for entry in entries), 20)
         self.assertEqual(RETIRED_WOOD_CODES, {
             'W05': '原独立下横梁与底板完全重叠，已取消；编号保留不重排。',
         })

@@ -72,7 +72,7 @@ class DrawingPackTests(unittest.TestCase):
         data = drawing_data.collect(ROOT, project=False)
         cards = {c['key']: c for c in data['cards']}
         self.assertEqual(data['coverage']['missing'], [])
-        self.assertEqual(data['coverage']['physical_count'], 65)
+        self.assertEqual(data['coverage']['physical_count'], 64)
         self.assertEqual(data['coverage']['reference_count'], 16)
         self.assertEqual(set(data['sources']), {'record-player.FCStd'})
         self.assertNotIn('LowerRail', cards)
@@ -96,7 +96,7 @@ class DrawingPackTests(unittest.TestCase):
         self.assertEqual(cards['RearSupport:1']['size_mm'], [109.0, 30.0, 10.0])
         self.assertEqual(cards['Baffle']['thickness_mm'], 10.0)
         self.assertEqual(cards['Baffle']['stock_mm'], [426.0, 98.0, 10.0])
-        self.assertEqual(cards['Slat01']['stock_mm'], [426.0, 7.0, 3.0])
+        self.assertEqual(cards['Slat01']['stock_mm'], [426.0, 10.0, 6.0])
         self.assertEqual(cards['DustCover']['thickness_mm'], 3.0)
         self.assertIsNone(cards['KitCurvedArm']['thickness_mm'])
         self.assertEqual(before, {p: hashlib.sha256(p.read_bytes()).hexdigest() for p in paths})

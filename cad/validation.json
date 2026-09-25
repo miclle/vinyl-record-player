@@ -1,5 +1,5 @@
 {
-  "revision": "v0.10-10mm-structural-panels",
+  "revision": "v0.11-10x6-grille-slats",
   "freecad": "1.1.1",
   "checks": {
     "build_parameters_match": true,
@@ -60,8 +60,8 @@
     "step_bounds": true
   },
   "metrics": {
-    "part_count": 65,
-    "solid_count": 82,
+    "part_count": 64,
+    "solid_count": 81,
     "overall_mm": [
       450.0,
       363.2,
@@ -531,14 +531,14 @@
         "finished_local_bounds_mm": [
           [
             426.0,
-            7.0,
-            3.000000000000002
+            10.0,
+            6.000000000000002
           ]
         ],
         "rectangular_stock_mm": [
           426.0,
-          7.0,
-          3.0
+          10.0,
+          6.0
         ],
         "quantity": 1
       },
@@ -546,14 +546,14 @@
         "finished_local_bounds_mm": [
           [
             426.0,
-            7.000000000000007,
-            3.0000000000000018
+            10.000000000000007,
+            6.000000000000003
           ]
         ],
         "rectangular_stock_mm": [
           426.0,
-          7.0,
-          3.0
+          10.0,
+          6.0
         ],
         "quantity": 1
       },
@@ -561,14 +561,14 @@
         "finished_local_bounds_mm": [
           [
             426.0,
-            7.000000000000007,
-            3.000000000000002
+            10.0,
+            6.000000000000003
           ]
         ],
         "rectangular_stock_mm": [
           426.0,
-          7.0,
-          3.0
+          10.0,
+          6.0
         ],
         "quantity": 1
       },
@@ -576,14 +576,14 @@
         "finished_local_bounds_mm": [
           [
             426.0,
-            7.0,
-            3.000000000000003
+            10.0,
+            6.000000000000005
           ]
         ],
         "rectangular_stock_mm": [
           426.0,
-          7.0,
-          3.0
+          10.0,
+          6.0
         ],
         "quantity": 1
       },
@@ -591,14 +591,14 @@
         "finished_local_bounds_mm": [
           [
             426.0,
-            7.0,
-            3.000000000000002
+            10.0,
+            6.000000000000004
           ]
         ],
         "rectangular_stock_mm": [
           426.0,
-          7.0,
-          3.0
+          10.0,
+          6.0
         ],
         "quantity": 1
       },
@@ -606,14 +606,14 @@
         "finished_local_bounds_mm": [
           [
             426.0,
-            7.000000000000014,
-            3.000000000000002
+            10.000000000000014,
+            6.000000000000004
           ]
         ],
         "rectangular_stock_mm": [
           426.0,
-          7.0,
-          3.0
+          10.0,
+          6.0
         ],
         "quantity": 1
       },
@@ -621,29 +621,14 @@
         "finished_local_bounds_mm": [
           [
             426.0,
-            7.0,
-            3.0000000000000036
+            10.0,
+            6.000000000000004
           ]
         ],
         "rectangular_stock_mm": [
           426.0,
-          7.0,
-          3.0
-        ],
-        "quantity": 1
-      },
-      "Slat08": {
-        "finished_local_bounds_mm": [
-          [
-            426.0,
-            7.0,
-            3.0000000000000044
-          ]
-        ],
-        "rectangular_stock_mm": [
-          426.0,
-          7.0,
-          3.0
+          10.0,
+          6.0
         ],
         "quantity": 1
       }
@@ -689,6 +674,6 @@
     "未对所有零件做全局干涉放行；这里只检查列出的关键部件与外壳",
     "变压器固定耳宽厚为保守占位，孔距未知；未验证散热、磁场、电气或走线"
   ],
-  "requested_revision": "v0.10-10mm-structural-panels",
+  "requested_revision": "v0.11-10x6-grille-slats",
   "passed": true
 }

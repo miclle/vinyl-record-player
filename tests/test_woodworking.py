@@ -20,12 +20,12 @@ import validate_model
 
 class WoodworkingTests(unittest.TestCase):
     def test_integer_stock_and_real_slope_thickness_keep_chambers_closed(self):
-        for angle,baffle_thickness,slat_thickness in [(72,8,3),(70,10,4)]:
+        for angle,baffle_thickness,slat_thickness in [(72,10,6),(70,8,4)]:
             with self.subTest(angle=angle), tempfile.TemporaryDirectory() as tmp:
                 root=Path(tmp);(root/'cad').mkdir()
                 p=json.loads((ROOT/'cad/parameters.json').read_text())
                 p.update(width=450,depth=350,front_angle=angle,slat_thickness=slat_thickness,
-                         slat_face_width=7,slat_pitch=11)
+                         slat_face_width=10,slat_pitch=13,slat_count=7)
                 p['acoustic']['baffle_thickness']=baffle_thickness
                 p['woofer']['center_x']=225
                 p['fullrange']['center_x']=[80,370]
@@ -43,15 +43,15 @@ class WoodworkingTests(unittest.TestCase):
                     slat=doc.Slat01.Shape.copy()
                     slat.Placement=App.Placement(App.Vector(),App.Rotation(normal,App.Vector(0,0,1))).multiply(slat.Placement)
                     bb=slat.optimalBoundingBox(False)
-                    for actual,want in zip([bb.XLength,bb.YLength,bb.ZLength],[426,7,slat_thickness]):
+                    for actual,want in zip([bb.XLength,bb.YLength,bb.ZLength],[426,10,slat_thickness]):
                         self.assertAlmostEqual(actual,want,places=6)
-                    self.assertAlmostEqual(doc.Slat08.Shape.CenterOfMass.z-doc.Slat01.Shape.CenterOfMass.z,77,places=6)
+                    self.assertAlmostEqual(doc.Slat07.Shape.CenterOfMass.z-doc.Slat01.Shape.CenterOfMass.z,78,places=6)
                     self.assertIsNone(doc.getObject('LowerRail'))
                     front_edge=Part.makeBox(426,8,p['wall'],App.Vector(p['wall'],0,p['foot_height']))
                     self.assertLess(front_edge.cut(doc.Bottom.Shape).Volume,1e-6)
                     self.assertLess(doc.Baffle.Shape.distToShape(doc.Bottom.Shape)[0],1e-6)
                     self.assertEqual([doc.Bottom.StockLength.Value,doc.Bottom.StockWidth.Value,doc.Bottom.StockThickness.Value],[426,350,12])
-                    self.assertEqual([doc.Slat01.StockLength.Value,doc.Slat01.StockWidth.Value,doc.Slat01.StockThickness.Value],[426,7,slat_thickness])
+                    self.assertEqual([doc.Slat01.StockLength.Value,doc.Slat01.StockWidth.Value,doc.Slat01.StockThickness.Value],[426,10,slat_thickness])
                     for name in ['AcousticRoof','AcousticRear','AcousticDividerLeft',
                                  'AcousticDividerRight','RearSupport','FloatingDeck']:
                         self.assertEqual(doc.getObject(name).StockThickness.Value,10,name)

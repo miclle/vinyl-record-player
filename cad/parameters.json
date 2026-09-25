@@ -1,6 +1,6 @@
 {
   "units": "mm",
-  "revision": "v0.10-10mm-structural-panels",
+  "revision": "v0.11-10x6-grille-slats",
   "width": 450.0,
   "depth": 350.0,
   "closed_height": 210.7,
@@ -24,7 +24,7 @@
   "cover_bottom": 147.5,
   "cover_angle_open": 70.0,
   "front_angle": 72.0,
-  "slat_count": 8,
+  "slat_count": 7,
   "platter_diameter": 300.0,
   "platter_x": 188.0,
   "platter_y": 172.0,
@@ -106,9 +106,9 @@
     "width": 52.0,
     "height": 17.0
   },
-  "slat_face_width": 7.0,
-  "slat_thickness": 3.0,
-  "slat_pitch": 11.0,
+  "slat_face_width": 10.0,
+  "slat_thickness": 6.0,
+  "slat_pitch": 13.0,
   "ac_inlet": {
     "model": "8-F5 C8 inlet + switch + fuse holder",
     "orientation": "horizontal; vendor front drawing rotated 90 degrees",
