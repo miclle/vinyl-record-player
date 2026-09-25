@@ -90,12 +90,12 @@ class DrawingPackTests(unittest.TestCase):
         self.assertEqual(cards['Fascia']['size_mm'], [425.0, 30.0, 30.0])
         self.assertEqual(cards['Fascia']['thickness_mm'], 5.0)
         self.assertEqual(cards['AcousticRoof']['origin_mm'][1], 5.2)
-        self.assertIn('深 3.7', ' '.join(cards['AcousticRoof']['notes']))
-        self.assertEqual(cards['AcousticRear:1']['size_mm'], [117.0, 8.0, 90.0])
-        self.assertEqual(cards['AcousticRear:2']['size_mm'], [117.0, 8.0, 90.0])
-        self.assertEqual(cards['RearSupport:1']['size_mm'], [109.0, 30.0, 8.0])
-        self.assertEqual(cards['Baffle']['thickness_mm'], 8.0)
-        self.assertEqual(cards['Baffle']['stock_mm'], [426.0, 98.0, 8.0])
+        self.assertIn('深 5.7', ' '.join(cards['AcousticRoof']['notes']))
+        self.assertEqual(cards['AcousticRear:1']['size_mm'], [117.0, 10.0, 90.0])
+        self.assertEqual(cards['AcousticRear:2']['size_mm'], [117.0, 10.0, 90.0])
+        self.assertEqual(cards['RearSupport:1']['size_mm'], [109.0, 30.0, 10.0])
+        self.assertEqual(cards['Baffle']['thickness_mm'], 10.0)
+        self.assertEqual(cards['Baffle']['stock_mm'], [426.0, 98.0, 10.0])
         self.assertEqual(cards['Slat01']['stock_mm'], [426.0, 7.0, 3.0])
         self.assertEqual(cards['DustCover']['thickness_mm'], 3.0)
         self.assertIsNone(cards['KitCurvedArm']['thickness_mm'])
@@ -110,6 +110,11 @@ class DrawingPackTests(unittest.TestCase):
         self.assertIn('hole_sheets', data)
         sheets = {s['key']: s for s in data['hole_sheets']}
         self.assertEqual(set(sheets), {'Bottom', 'Back', 'Baffle', 'AcousticRoof', 'FloatingDeck', 'DustCover'})
+        for key, face in [('AcousticRoof', '顶面'), ('FloatingDeck', '底面')]:
+            support_recesses = [h for h in sheets[key]['holes'] if h['id'].startswith('S')]
+            self.assertEqual(len(support_recesses), 3)
+            self.assertTrue(all(h['diameter_mm'] == 16 and h['depth_mm'] == 3
+                                and h['face'] == face for h in support_recesses))
         bottom = sheets['Bottom']
         self.assertEqual(len(bottom['holes']), 17)
         pilots = [h for h in bottom['holes'] if h['kind'] == 'blind']
@@ -136,6 +141,9 @@ class DrawingPackTests(unittest.TestCase):
         self.assertEqual(sheets['FloatingDeck']['holes'][0]['v_mm'],
                          params['platter_y'] - params['fascia']['thickness']
                          - params['deck_front_fascia_clearance'])
+        deck_notes=' '.join(sheets['FloatingDeck']['notes'])
+        self.assertIn('H1 沿 Z 贯通；S1-S3 为非贯通沉台',deck_notes)
+        self.assertNotIn('圆孔沿 Z 贯通',deck_notes)
         self.assertIn('baffle_section', data)
         self.assertEqual(data['baffle_section']['x_mm'], 225)
         self.assertIn('Baffle', [part['key'] for part in data['baffle_section']['parts']])

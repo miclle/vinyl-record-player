@@ -267,6 +267,8 @@ def _validate_document(doc,p):
     checks.update(hinge_checks);metrics['hinges']=hinge_metrics
     fascia_checks,fascia_metrics=check_fascia(doc,p)
     checks.update(fascia_checks);metrics['fascia']=fascia_metrics
+    support_checks,support_metrics=check_deck_supports(doc,p)
+    checks.update(support_checks);metrics['deck_supports']=support_metrics
     wood_checks,wood_metrics=check_woodworking(doc,p)
     checks.update(wood_checks);metrics['woodworking']=wood_metrics
     acoustic_checks,acoustic_metrics=check_acoustics(doc,p,reserved+[(transformer.Name,envelope)])
@@ -497,6 +499,64 @@ def check_fascia(doc,p):
         'rebate_to_baffle_seal_mm':d['seal_margin'],'closed_cover_gap_mm':lid_gap,
         'deck_gap_mm':actual.distToShape(doc.FloatingDeck.Shape)[0],
         'collisions':hits,'installation_released':False}
+
+
+def check_deck_supports(doc,p):
+    """Verify the support solids and their matching shallow panel recesses."""
+    s=p['deck_support'];radius=s['diameter']/2
+    centers=[(44,100),(p['width']-44,100),(p['width']/2,295)]
+    roof_top=p['acoustic']['roof_bottom_z']+p['acoustic']['roof_thickness']
+    roof_bottom=p['acoustic']['roof_bottom_z']
+    deck_bottom=p['cabinet_top']-p['deck_thickness']
+    bottom=roof_top-s['roof_recess_depth']
+    roof=doc.AcousticRoof.Shape;deck=doc.FloatingDeck.Shape
+    matches=True;recesses_match=True;seated=True;rows=[]
+    for i,(x,y) in enumerate(centers):
+        obj=doc.getObject(f'Isolator{i}')
+        expected=Part.makeCylinder(radius,s['height'],App.Vector(x,y,bottom))
+        if obj is None:
+            matches=seated=False
+            rows.append({'index':i,'error':'missing isolator'})
+            continue
+        matches &= (obj.Shape.cut(expected).Volume+expected.cut(obj.Shape).Volume<1e-5 and
+                    hasattr(obj,'InstallationReleased') and not obj.InstallationReleased)
+        roof_overlap=obj.Shape.common(roof).Volume
+        deck_overlap=obj.Shape.common(deck).Volume
+        roof_gap=obj.Shape.distToShape(roof)[0]
+        deck_gap=obj.Shape.distToShape(deck)[0]
+        # Compare the saved panel material around each pocket, not only the
+        # support contact: an oversized recess can still have zero gap at its floor.
+        inspection_radius=radius+1
+        roof_region=Part.makeCylinder(
+            inspection_radius,p['acoustic']['roof_thickness'],App.Vector(x,y,roof_bottom))
+        roof_cutter=Part.makeCylinder(
+            radius,s['roof_recess_depth']+1,
+            App.Vector(x,y,roof_top-s['roof_recess_depth']))
+        expected_roof=roof_region.cut(roof_cutter)
+        actual_roof=roof.common(roof_region)
+        roof_delta=(actual_roof.cut(expected_roof).Volume+
+                    expected_roof.cut(actual_roof).Volume)
+        deck_region=Part.makeCylinder(
+            inspection_radius,p['deck_thickness'],App.Vector(x,y,deck_bottom))
+        deck_cutter=Part.makeCylinder(
+            radius,s['deck_recess_depth']+1,App.Vector(x,y,deck_bottom-1))
+        expected_deck=deck_region.cut(deck_cutter)
+        actual_deck=deck.common(deck_region)
+        deck_delta=(actual_deck.cut(expected_deck).Volume+
+                    expected_deck.cut(actual_deck).Volume)
+        recesses_match &= roof_delta<1e-5 and deck_delta<1e-5
+        seated &= (roof_overlap<1e-5 and deck_overlap<1e-5 and
+                   roof_gap<1e-6 and deck_gap<1e-6)
+        rows.append({'index':i,'center_xy_mm':[x,y],
+                     'roof_overlap_mm3':roof_overlap,'deck_overlap_mm3':deck_overlap,
+                     'roof_gap_mm':roof_gap,'deck_gap_mm':deck_gap,
+                     'roof_recess_delta_mm3':roof_delta,
+                     'deck_recess_delta_mm3':deck_delta})
+    return {'deck_supports_match_parameters':bool(matches),
+            'deck_support_recesses_clear_and_seated':bool(recesses_match and seated)}, {
+        'diameter_height_mm':[s['diameter'],s['height']],
+        'roof_deck_recess_depth_mm':[s['roof_recess_depth'],s['deck_recess_depth']],
+        'supports':rows,'installation_released':False}
 
 
 def check_woodworking(doc,p):

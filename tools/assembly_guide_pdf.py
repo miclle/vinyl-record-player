@@ -18,6 +18,11 @@ from wood_stock import RETIRED_WOOD_CODES
 ROOT = Path(__file__).resolve().parents[1]
 MM = 72/25.4
 WIDTH, HEIGHT = 594, 420
+CONTENT_LEFT, CONTENT_RIGHT = 16, 578
+VISUAL_RIGHT = 376
+MAIN_VIEW_X, MAIN_VIEW_WIDTH = 46, 285
+CALLOUT_LEFT_X, CALLOUT_RIGHT_X = 25, 363
+LEGEND_X, LEGEND_WIDTH = 391, 185
 COLORS = {'W': '#956233', 'F': '#596C79', 'C': '#557787',
           'K': '#355E79', 'S': '#89659C', 'A': '#277C98', 'E': '#288068'}
 INK, MUTED = '#20313B', '#62747E'
@@ -144,6 +149,7 @@ def embed_guide_in_book(guide_path, book_path, output_path=None,
 class Guide:
     def __init__(self, root, data, output, font):
         self.root, self.data = root, data
+        self.entries_by_code = {entry['code']: entry for entry in data['entries']}
         pdfmetrics.registerFont(TTFont('GuideCJK', str(font)))
         self.c = canvas.Canvas(str(output), pagesize=(WIDTH*MM, HEIGHT*MM))
         self.c.setTitle('黑胶唱片机 / 整机全景与组件导览')
@@ -173,15 +179,25 @@ class Guide:
         self.c.roundRect((x-6.3)*MM, (HEIGHT-y-3.2)*MM, 12.6*MM, 6.4*MM, 1.7*MM, stroke=0, fill=1)
         self.text(x-4.8, y+1.1, code, 8.4, '#FFFFFF')
 
+    def callout_name(self, code, x, y, width=28):
+        title = self.entries_by_code[code]['title']
+        size = 7.8
+        lines = self.wrap(title, width, size)
+        if len(lines) > 2:
+            raise ValueError('Callout name overflow: '+code)
+        for i, line in enumerate(lines):
+            line_width = pdfmetrics.stringWidth(line, 'GuideCJK', size)/MM
+            self.text(x-line_width/2, y+6.3+i*3.2, line, size, INK)
+
     def start(self, page, title, subtitle):
-        self.text(16, 19, '黑胶唱片机', 24)
+        self.text(CONTENT_LEFT, 19, '黑胶唱片机', 24)
         self.text(64, 19, '/  整机结构导览', 17)
-        self.text(16, 31, title, 14)
-        self.text(16, 40, subtitle, 9.5, MUTED)
+        self.text(CONTENT_LEFT, 31, title, 14)
+        self.text(CONTENT_LEFT, 40, subtitle, 9.5, MUTED)
         self.text(472, 18, f'G-0{page}   /   A2 横向   /   {page:02} — 02', 10, MUTED)
-        self.line(16, 45, 578, 45, INK, 0.8)
-        self.line(16, 403, 578, 403, INK)
-        self.text(16, 411, f'{self.data["revision"]}  ·  当前弯臂机芯装配  ·  示意视图不按比例量取', 8.5, MUTED)
+        self.line(CONTENT_LEFT, 45, CONTENT_RIGHT, 45, INK, 0.8)
+        self.line(CONTENT_LEFT, 403, CONTENT_RIGHT, 403, INK)
+        self.text(CONTENT_LEFT, 411, f'{self.data["revision"]}  ·  当前弯臂机芯装配  ·  示意视图不按比例量取', 8.5, MUTED)
         self.text(330, 411, '实体位置与图册关联来自保存 CAD；采购件／接口待确认，非制造或接线放行图。', 8.5, MUTED)
 
     def image(self, key, rect):
@@ -200,7 +216,8 @@ class Guide:
         self.c.restoreState()
         return {code: (ox+u*scale, oy+v*scale) for code, (u, v) in view['anchors'].items()}
 
-    def balloons(self, anchors, left_codes, right_codes, left_x, right_x, y0, step):
+    def balloons(self, anchors, left_codes, right_codes, left_x, right_x, y0, step,
+                 show_names=False, name_width=28):
         # Each side is sorted vertically by its real projected anchor. This
         # keeps the fan-out deterministic and avoids crossing parallel leaders.
         for codes, x in [(left_codes, left_x), (right_codes, right_x)]:
@@ -214,6 +231,8 @@ class Guide:
                 self.c.setFillColor(HexColor(COLORS[code[0]]))
                 self.c.circle(ax*MM, (HEIGHT-ay)*MM, 0.8*MM, fill=1, stroke=0)
                 self.badge(code, x, by)
+                if show_names:
+                    self.callout_name(code, x, by, name_width)
 
     def legend(self, page, x, y, width, step):
         self.text(x, y, '编号 / 部件与材料', 12)
@@ -239,12 +258,12 @@ class Guide:
 
     def make(self):
         self.start(1, '01  从整机外观认识部件',
-                   '开盖三维全景  /  同色编号对应右侧目录  /  内部结构见第 2 页')
-        anchors = self.image('overview', (46, 66, 285, 289))
+                   '开盖三维全景  /  编号下方直读名称  /  完整材料与详图见右侧目录')
+        anchors = self.image('overview', (MAIN_VIEW_X, 66, MAIN_VIEW_WIDTH, 289))
         self.balloons(anchors, ['C01', 'W02', 'F01', 'K02', 'K03', 'E01', 'C03'],
                       ['C02', 'W01', 'K01', 'K04', 'K05', 'K06', 'K07', 'K08'],
-                      25, 363, 82, 35)
-        self.legend(1, 391, 58, 185, 21)
+                      CALLOUT_LEFT_X, CALLOUT_RIGHT_X, 82, 35, show_names=True)
+        self.legend(1, LEGEND_X, 58, LEGEND_WIDTH, 21)
         dims = ' × '.join(number(n) for n in self.data['nominal_cabinet_mm'])
         self.text(47, 372, '木箱与闭盖名义外廓  '+dims+' mm', 11)
         self.text(47, 380, '合页与 AC 插座法兰超出后板；含合页外廓见 A-01。机芯安装尺寸仍待确认。', 9, MUTED)
@@ -254,17 +273,19 @@ class Guide:
         self.c.showPage()
 
         self.start(2, '02  分层展开，认识内部结构',
-                   '板件仅为展示而移开，零件尺寸未缩放  /  图中层间距离不是安装间隙或拆装顺序')
-        anchors = self.image('exploded', (53, 62, 273, 261))
+                   '分层仅为展示  /  编号下方直读名称  /  层间距离不是安装间隙或拆装顺序')
+        anchors = self.image('exploded', (MAIN_VIEW_X, 62, MAIN_VIEW_WIDTH, 261))
         left = ['W03', 'W06', 'W10', 'F02', 'F03', 'S01', 'E03', 'E04', 'S02']
         right = [e['code'] for e in self.data['entries'] if e['page'] == 2
                  and e['code'] not in left+['W04', 'E05', 'E06']]
-        self.balloons(anchors, left, right, 25, 363, 62, 24)
-        self.legend(2, 391, 55, 185, 16)
-        self.line(16, 329, 376, 329)
+        self.balloons(anchors, left, right, CALLOUT_LEFT_X, CALLOUT_RIGHT_X, 62, 24,
+                      show_names=True)
+        self.legend(2, LEGEND_X, 55, LEGEND_WIDTH, 16)
+        self.line(CONTENT_LEFT, 329, VISUAL_RIGHT, 329)
         self.text(20, 337, '后部接口定位（后板半透明）', 10)
         rear = self.image('rear', (36, 347, 149, 39))
-        self.balloons(rear, ['E05', 'A03'], ['W04', 'E06'], 24, 198, 353, 26)
+        self.balloons(rear, ['E05', 'A03'], ['W04', 'E06'], 24, 198, 353, 26,
+                      show_names=True)
         self.text(219, 345, '材料与范围说明', 10)
         notes = ['木色：木板／饰面；蓝色：音响与机芯；绿色：电子模块。',
                  '颜色用于识别类别，不代表最终材质或采购状态。',

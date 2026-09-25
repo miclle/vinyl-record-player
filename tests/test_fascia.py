@@ -43,7 +43,7 @@ class FasciaTests(unittest.TestCase):
         self.assertTrue(all(checks.values()),(checks,m))
         self.assertAlmostEqual(m['closed_cover_gap_mm'],1)
         self.assertAlmostEqual(m['remaining_roof_mm'],4.3)
-        self.assertAlmostEqual(m['rebate_depth_mm'],3.7)
+        self.assertAlmostEqual(m['rebate_depth_mm'],5.7)
         # Coordinates independent of the geometry helper verify actual shelf and slot.
         roof=self.doc.AcousticRoof.Shape
         self.assertTrue(roof.isInside(App.Vector(225,20,128),1e-6,False))
@@ -59,11 +59,12 @@ class FasciaTests(unittest.TestCase):
 
     def test_filled_rebate_and_removed_shelf_are_detected(self):
         roof=self.doc.AcousticRoof; original=roof.Shape.copy()
-        roof.Shape=original.fuse(Part.makeBox(426,25,3.7,App.Vector(12,5.2,128.8)))
+        d=fascia.dimensions(self.p)
+        roof.Shape=original.fuse(Part.makeBox(426,25,d['rebate_depth'],App.Vector(12,5.2,d['rebate_floor'])))
         checks,_=validate_model.check_fascia(self.doc,self.p)
         self.assertFalse(checks['fascia_roof_rebate_and_shelf_match'])
         self.assertFalse(checks['fascia_neighbors_clear'])
-        roof.Shape=original.cut(Part.makeBox(426,25,8,App.Vector(12,5.2,124.5)))
+        roof.Shape=original.cut(Part.makeBox(426,25,self.p['acoustic']['roof_thickness'],App.Vector(12,5.2,self.p['acoustic']['roof_bottom_z'])))
         checks,_=validate_model.check_fascia(self.doc,self.p)
         self.assertFalse(checks['fascia_roof_rebate_and_shelf_match'])
 

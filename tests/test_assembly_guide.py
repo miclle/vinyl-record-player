@@ -57,7 +57,9 @@ class AssemblyGuideTests(unittest.TestCase):
         self.assertEqual(len(catalog), 35)
         self.assertEqual(catalog['W02']['quantity'], '8 条')
         self.assertEqual(catalog['W08']['quantity'], '2 块')
-        self.assertEqual(catalog['W06']['stock_mm'], [426, 98, 8])
+        params = data['parameters']
+        self.assertEqual(catalog['W06']['stock_mm'],
+                         [426, 98, params['acoustic']['baffle_thickness']])
         self.assertEqual(catalog['E06']['drawings'], ['C-P01'])
         self.assertEqual(catalog['K07']['drawings'], ['C-P09'])
         self.assertEqual(catalog['E01']['drawings'], ['C-P04', 'C-P05'])

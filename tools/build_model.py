@@ -43,13 +43,16 @@ def build_structure():
     deck_width = deck_right - deck_left
     deck_depth = deck_rear - deck_front
     isolator_centers = [(44,100), (W-44,100), (W/2,295)]
+    support = p['deck_support']
+    support_radius = support['diameter'] / 2
+    rear_support_thickness = p['rear_support_thickness']
     if min(deck_side, p['deck_front_fascia_clearance'], p['deck_rear_clearance']) <= 0:
         raise ValueError('Floating deck clearances must be positive')
     if deck_width <= 0 or deck_depth <= 0:
         raise ValueError('Floating deck clearances leave no usable panel')
     required_footprints = [('spindle hole', p['platter_x'], p['platter_y'], 10.2)]
     required_footprints.extend(
-        (f'elastic support {i+1}', x, y, 8)
+        (f'elastic support {i+1}', x, y, support_radius)
         for i,(x,y) in enumerate(isolator_centers))
     for name,x,y,radius in required_footprints:
         if not (deck_left <= x-radius and x+radius <= deck_right
@@ -176,6 +179,22 @@ def build_structure():
     # A sealed local recess clears the generic bearing without opening the low chamber.
     bx,by=p['platter_x'],p['platter_y']
     roof=roof.cut(Part.makeCylinder(14,ac['roof_thickness']+2,V(bx,by,zhi-1)))
+    roof_top = zhi + ac['roof_thickness']
+    deck_bottom = H - p['deck_thickness']
+    exposed_support_height = (support['height'] - support['roof_recess_depth']
+                              - support['deck_recess_depth'])
+    if min(support_radius, support['height']) <= 0 or min(
+            support['roof_recess_depth'], support['deck_recess_depth']) < 0:
+        raise ValueError('Deck support dimensions and recess depths must be non-negative')
+    if (support['roof_recess_depth'] >= ac['roof_thickness'] or
+            support['deck_recess_depth'] >= p['deck_thickness']):
+        raise ValueError('Deck support recesses must retain panel material')
+    if abs((deck_bottom - roof_top) - exposed_support_height) > 1e-6:
+        raise ValueError('Deck support stack must meet the roof and floating deck')
+    for x,y in isolator_centers:
+        roof = roof.cut(Part.makeCylinder(
+            support_radius, support['roof_recess_depth'] + 1,
+            V(x, y, roof_top - support['roof_recess_depth'])))
     for cutter in fascia_cuts:
         roof=roof.cut(cutter)
     add('AcousticRoof','三音腔共用顶板 · 中部延伸至后板',roof,'Audio',GRAY)
@@ -215,16 +234,29 @@ def build_structure():
         driver('Tweeter'+side,('左' if side=='Left' else '右')+'全频 · SC-2103 安装占位',c,inward,tweeter,'fullrange')
     driver('Woofer','后排低音 · SC-2103 朝下安装占位',V(woofer['center_x'],woofer['center_y'],z0),V(0,0,1),woofer,'woofer')
 
-    support=Part.makeCompound([Part.makeBox(left-t-8,30,8,V(t+8,280,H-22)),
-                               Part.makeBox(W-t-8-right-pt,30,8,V(right+pt,280,H-22))])
-    add('RearSupport','后部两侧隔振承托梁',support,'Deck',GRAY)
+    rear_support=Part.makeCompound([
+        Part.makeBox(left-t-8,30,rear_support_thickness,V(t+8,280,zhi)),
+        Part.makeBox(W-t-8-right-pt,30,rear_support_thickness,V(right+pt,280,zhi))])
+    add('RearSupport','后部两侧隔振承托梁',rear_support,'Deck',GRAY,
+        material=f'{rear_support_thickness:g} mm 木质承托梁；固定方式待定')
+    isolator_bottom = roof_top - support['roof_recess_depth']
     for i,(x,y) in enumerate(isolator_centers):
-        cyl('Isolator%d'%i,'弹性支承 %d（刚度待定）'%(i+1),8,8,V(x,y,H-14),'Deck',(0.12,0.15,0.16))
+        isolator = cyl('Isolator%d'%i,'弹性支承 %d（刚度待定）'%(i+1),
+                       support_radius,support['height'],V(x,y,isolator_bottom),
+                       'Deck',(0.12,0.15,0.16),
+                       material='弹性支承与双面浅沉台均为安装假设')
+        isolator.addProperty('App::PropertyBool','InstallationReleased','Installation').InstallationReleased=False
     # Clearances are installation assumptions, not verified suspension travel.
     deck_shape=Part.makeBox(deck_width,deck_depth,p['deck_thickness'],
                             V(deck_left,deck_front,H-p['deck_thickness']))
     deck_shape=deck_shape.cut(Part.makeCylinder(10.2,p['deck_thickness']+2,V(p['platter_x'],p['platter_y'],H-p['deck_thickness']-1)))
-    deck=add('FloatingDeck','唱盘与唱臂共用浮动底板',deck_shape,'Deck',BLACK,material='结构底板 / 6 mm 占位；主轴孔 Ø20.4 待选型')
+    for x,y in isolator_centers:
+        deck_shape = deck_shape.cut(Part.makeCylinder(
+            support_radius, support['deck_recess_depth'] + 1,
+            V(x, y, deck_bottom - 1)))
+    deck=add('FloatingDeck','唱盘与唱臂共用浮动底板',deck_shape,'Deck',BLACK,
+             material=(f"{p['deck_thickness']:g} mm 结构底板；3×Ø{support['diameter']:g} "
+                       f"底面沉台深 {support['deck_recess_depth']:g} mm；主轴孔 Ø20.4 待选型"))
     amplifier=p['amplifier']
     if amplifier['rotation_degrees'] not in (0,90):
         raise ValueError('Amplifier rotation must be 0 or 90 degrees')
@@ -333,13 +365,13 @@ def build_structure():
         'Bottom':(V(0,0,1),t,f"矩形板；低音通孔；4×Ø{p['feet']['panel_hole_diameter_assumption']:g} 脚座通孔、12×Ø{p['feet']['pilot_diameter_assumption']:g} 深{p['feet']['pilot_depth_assumption']:g} 底面盲预孔（安装假设）"),
         'Back':(V(0,1,0),t,f"矩形板；倒相孔及沉台；AC 横孔 {p['ac_inlet']['cutout_width']:g}×{p['ac_inlet']['cutout_height']:g} R{p['ac_inlet']['cutout_radius']:g}、上下 2×Ø{p['ac_inlet']['mount_hole_diameter']:g} 孔距 {p['ac_inlet']['mount_hole_pitch']:g}；4×Ø{p['hinges']['wood_pilot_diameter_assumption']:g} 深{p['hinges']['wood_pilot_depth_assumption']:g} 后侧铰链盲预孔（假设）"),
         'Baffle':(inward,ac['baffle_thickness'],f'整数矩形备料；上下两边修 {90-p["front_angle"]:g}° 斜口至安装竖高 {zhi-zlo:g}；另开法向孔'),
-        'AcousticRoof':(V(0,0,1),ac['roof_thickness'],f"T 形板；成形前缘 Y={fd['roof_front']:g}；顶面前缘台阶宽 {fd['rebate_rear']-fd['roof_front']:g}、深 {fd['rebate_depth']:g}、余厚 {fd['remaining_roof']:g}；Ø28 轴承孔"),
+        'AcousticRoof':(V(0,0,1),ac['roof_thickness'],f"T 形板；成形前缘 Y={fd['roof_front']:g}；顶面前缘台阶宽 {fd['rebate_rear']-fd['roof_front']:g}、深 {fd['rebate_depth']:g}、余厚 {fd['remaining_roof']:g}；Ø28 轴承孔；3×Ø{support['diameter']:g} 顶面沉台深 {support['roof_recess_depth']:g}（安装假设）"),
         'AcousticRear':(V(0,1,0),pt,'两块独立矩形板'),
         'AcousticDividerLeft':(V(1,0,0),pt,'整数矩形备料；前缘按精确斜线修切'),
         'AcousticDividerRight':(V(1,0,0),pt,'整数矩形备料；前缘按精确斜线修切'),
-        'RearSupport':(V(0,0,1),8,'两块独立矩形梁'),
+        'RearSupport':(V(0,0,1),rear_support_thickness,'两块独立矩形梁'),
         'FloatingDeck':(V(0,0,1),p['deck_thickness'],
-                        f"矩形板；饰条后 {p['deck_front_fascia_clearance']:g}、左右各 {deck_side:g}、后板前 {p['deck_rear_clearance']:g} mm 名义间隙；另开主轴孔，机芯安装接口待定"),
+                        f"矩形板；饰条后 {p['deck_front_fascia_clearance']:g}、左右各 {deck_side:g}、后板前 {p['deck_rear_clearance']:g} mm 名义间隙；3×Ø{support['diameter']:g} 底面沉台深 {support['deck_recess_depth']:g}（安装假设）；另开主轴孔，机芯安装接口待定"),
     }
     for i in range(n):
         stock_specs[f'Slat{i+1:02}']=(inward,p['slat_thickness'],'矩形截面成品条；整体倾斜安装，无需把截面切成斜四边形')

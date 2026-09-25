@@ -186,7 +186,8 @@ def collect(root=ROOT, project=True):
             add('AcousticRoof',2,ac['roof_thickness'],[f'前横板进深 {f(ac["satellite_rear_y"]+ac["partition_thickness"])}；中央后伸部宽 {f(p["acoustic_divider_x"][1]+ac["partition_thickness"]-p["acoustic_divider_x"][0])}。',f'后伸部左缘 X={f(p["acoustic_divider_x"][0])}；后缘 Y={f(D-t)}。',f'轴承孔 Ø28；中心 X={f(p["platter_x"])}, Y={f(p["platter_y"])}（整机坐标）。'])
             cards[-1]['notes'][0]=f"成形前缘 Y={f(fd['roof_front'])}；前横板至 Y={f(ac['satellite_rear_y']+ac['partition_thickness'])}；中央后伸宽 {f(p['acoustic_divider_x'][1]+ac['partition_thickness']-p['acoustic_divider_x'][0])}。"
             cards[-1]['notes'] += [f"顶面前缘台阶：宽 {f(fd['rebate_rear']-fd['roof_front'])}、深 {f(fd['rebate_depth'])}；余厚 {f(fd['remaining_roof'])}。",
-                                  f"轴承孔局部 Y={f(p['platter_y']-fd['roof_front'])}，从新成形前缘量取；见 B-H02 / A-03。"]
+                                  f"轴承孔局部 Y={f(p['platter_y']-fd['roof_front'])}，从新成形前缘量取；见 B-H02 / A-03。",
+                                  f"3×Ø{f(p['deck_support']['diameter'])} 顶面沉台深 {f(p['deck_support']['roof_recess_depth'])}（安装假设）。"]
             add('AcousticRear',2,ac['partition_thickness'],['此对象包含左右两块独立后板，分别绘制。','两块均由原实体直接读取，不以跨空区总包络下料。'],split=True)
             front_bottom=16+ac['baffle_thickness']/sin
             add('AcousticDividerLeft',2,ac['partition_thickness'],[f'前缘倾斜 {f(90-p["front_angle"])}°；后缘 Y={f(D-t)}。',f'下前角 Y={f(front_bottom)}；上前角 Y={f(front_bottom+(ac["roof_bottom_z"]-zlo)/math.tan(math.radians(p["front_angle"])))}。','两块同形；板厚方向 X。整数备料后按斜前缘精确修切。'],['AcousticDividerRight'])
@@ -197,9 +198,10 @@ def collect(root=ROOT, project=True):
             add('FloatingDeck',2,p['deck_thickness'],[
                 '主轴通孔 Ø20.4（暂定）；机芯固定孔与外轮廓开口未设计。',
                 f"饰条后 {f(p['deck_front_fascia_clearance'])}、左右各 {f(p['deck_side_clearance'])}、后板前 {f(p['deck_rear_clearance'])} 名义间隙；浮动行程待验证。",
+                f"3×Ø{f(p['deck_support']['diameter'])} 底面沉台深 {f(p['deck_support']['deck_recess_depth'])}，与顶板沉台共同定位弹性支承（安装假设）。",
                 hole(p['platter_x']-deck_x,p['platter_y']-deck_y)])
-            add('RearSupport',2,8,['对象由左右两块承托梁组成，逐块标注。'],split=True)
-            add('Isolator0',2,None,['实心弹性支承 Ø16 × 8；刚度未定，壁厚不适用。'],['Isolator1','Isolator2'])
+            add('RearSupport',2,p['rear_support_thickness'],['对象由左右两块承托梁组成，逐块标注。'],split=True)
+            add('Isolator0',2,None,[f"实心弹性支承 Ø{f(p['deck_support']['diameter'])} × {f(p['deck_support']['height'])}；上下分别嵌入顶板／台面 {f(p['deck_support']['roof_recess_depth'])}/{f(p['deck_support']['deck_recess_depth'])}；刚度未定，壁厚不适用。"],['Isolator1','Isolator2'])
             for name,role,aliases in [('Woofer','woofer',[]),('TweeterLeft','fullrange',['TweeterRight'])]:
                 q=p[role]
                 add(name,3,None,[f"单元本体：口端 Ø{f(q['flange_diameter'])}；轴向总高 {f(q['total_height'])}（用户提供）。",f"法兰厚 {f(q['flange_thickness'])}；孔径 Ø{f(q['cutout_diameter'])}；入腔深 {f(q['total_height']-q['flange_thickness'])}（假设）。",'下表为装配姿态 XYZ 包络；盆架壁厚等内部结构未经确认。'],aliases)

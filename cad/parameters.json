@@ -1,13 +1,22 @@
 {
   "units": "mm",
-  "revision": "v0.9-torque-hinges",
+  "revision": "v0.10-10mm-structural-panels",
   "width": 450.0,
   "depth": 350.0,
   "closed_height": 210.7,
   "foot_height": 22.5,
   "cabinet_top": 146.5,
   "wall": 12.0,
-  "deck_thickness": 6.0,
+  "deck_thickness": 10.0,
+  "rear_support_thickness": 10.0,
+  "deck_support": {
+    "diameter": 16.0,
+    "height": 8.0,
+    "roof_recess_depth": 3.0,
+    "deck_recess_depth": 3.0,
+    "installation_released": false,
+    "note": "Three ideal cylindrical elastic supports. Matching shallow recesses in the acoustic roof and floating deck retain the existing deck elevation after both panels change to 10 mm stock. Diameter, stiffness, compression, retention and recess clearances require physical confirmation."
+  },
   "deck_front_fascia_clearance": 1.0,
   "deck_side_clearance": 2.0,
   "deck_rear_clearance": 2.0,
@@ -34,7 +43,7 @@
   },
   "acoustic_divider_x": [
     129.0,
-    313.0
+    311.0
   ],
   "power_transformer": {
     "body_length": 60.0,
@@ -66,13 +75,13 @@
     "flange_thickness": 3.0
   },
   "acoustic": {
-    "partition_thickness": 8.0,
+    "partition_thickness": 10.0,
     "satellite_rear_y": 150.0,
     "roof_bottom_z": 124.5,
-    "roof_thickness": 8.0,
+    "roof_thickness": 10.0,
     "source": "Shockwave SC-2103 salvaged drivers; original cabinets and ports unavailable; exact variant unconfirmed",
     "satellite_alignment": "sealed trial; response unverified",
-    "baffle_thickness": 8.0
+    "baffle_thickness": 10.0
   },
   "bass_port": {
     "inner_diameter": 32.0,

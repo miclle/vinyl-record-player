@@ -103,11 +103,15 @@ class MechanismStudyTests(unittest.TestCase):
                 self.assertAlmostEqual(high-low, 85)
                 self.assertLess(saved.UnderbodyReservation.Shape.Volume, 355*280*29.5)
                 fit = report['fit']
+                p = json.loads((root / 'cad/parameters.json').read_text())
                 self.assertFalse(fit['installation_released'])
                 self.assertFalse(fit['underbody_coverage_complete'])
                 states = fit['spring_states']
                 self.assertEqual([s['motor_depth_below_support_mm'] for s in states], [24.5, 29.5])
-                self.assertEqual([s['roof_depth_deficit_mm'] for s in states], [10.5, 15.5])
+                roof_depth = (p['cabinet_top'] - p['acoustic']['roof_bottom_z']
+                              - p['acoustic']['roof_thickness'])
+                self.assertEqual([s['roof_depth_deficit_mm'] for s in states],
+                                 [24.5-roof_depth, 29.5-roof_depth])
                 self.assertAlmostEqual(states[0]['upper_vertical_lid_gap_mm'], 0.7)
                 self.assertAlmostEqual(states[1]['upper_vertical_lid_gap_mm'], 5.7)
                 for state in states:

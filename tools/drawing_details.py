@@ -113,10 +113,18 @@ def panel_details(doc, p, project_shape, project=True):
         else:
             diameter = 28 if key == 'AcousticRoof' else 20.4
             round_hole('H1', p['platter_x']-b.XMin, p['platter_y']-b.YMin, diameter)
+            support = p['deck_support']
+            support_centers = [(44,100), (p['width']-44,100), (p['width']/2,295)]
+            recess_depth = (support['roof_recess_depth'] if key == 'AcousticRoof'
+                            else support['deck_recess_depth'])
+            for i, (x, y) in enumerate(support_centers, 1):
+                h = round_hole(f'S{i}', x-b.XMin, y-b.YMin,
+                               support['diameter'], 'blind', recess_depth)
+                h['face'] = '顶面' if key == 'AcousticRoof' else '底面'
             size = [b.XLength, b.YLength]
             notes = [
                 '俯视；O 为板件左前角，+X 向右，+Y 向后（图上方）；所有孔位均相对该板成形边。',
-                '圆孔沿 Z 贯通，孔表坐标以孔轴心为准。',
+                'H1 沿 Z 贯通；S1-S3 为非贯通沉台；孔表坐标均以孔轴心为准。',
                 ('此孔与通用轴承密封避让杯配合，保留在当前模型中；当前弯臂机芯安装时须重新核对。'
                  if key == 'AcousticRoof' else '主轴孔为通用机芯暂定值；当前机芯固定孔、轮廓开口及弹性支承固定方式尚未设计。'),
                 '板件连接螺孔未定义；未标孔位不得按示意位置直接开孔。',
@@ -125,6 +133,11 @@ def panel_details(doc, p, project_shape, project=True):
                 fd=fascia_dimensions(p)
                 notes[0]=f"俯视；O 为新成形左前角（整机 Y={fd['roof_front']:g}），+Y 向后；轴承孔局部 Y={holes[0]['v_mm']:g}。"
                 notes[1]=f"顶面前缘通长台阶：从 O 向后宽 {fd['rebate_rear']-fd['roof_front']:g}、深 {fd['rebate_depth']:g}、余厚 {fd['remaining_roof']:g}；截面见 A-03。"
+                notes[2] += (f" S1-S3 为顶面 Ø{support['diameter']:g}、深 {recess_depth:g} mm "
+                             '弹性支承沉台，均为安装假设。')
+            else:
+                notes[2] += (f" S1-S3 为底面 Ø{support['diameter']:g}、深 {recess_depth:g} mm "
+                             '弹性支承沉台，均为安装假设。')
         projection = project_shape(shape, 'front' if view == 'baffle_face' else view) if project else {}
         sheets.append(dict(key=key, code=code, title=title, volume=volume, view=view, axes=axes,
                            size_mm=size, projection=projection, holes=holes, notes=notes,

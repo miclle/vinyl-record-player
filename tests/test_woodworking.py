@@ -52,6 +52,11 @@ class WoodworkingTests(unittest.TestCase):
                     self.assertLess(doc.Baffle.Shape.distToShape(doc.Bottom.Shape)[0],1e-6)
                     self.assertEqual([doc.Bottom.StockLength.Value,doc.Bottom.StockWidth.Value,doc.Bottom.StockThickness.Value],[426,350,12])
                     self.assertEqual([doc.Slat01.StockLength.Value,doc.Slat01.StockWidth.Value,doc.Slat01.StockThickness.Value],[426,7,slat_thickness])
+                    for name in ['AcousticRoof','AcousticRear','AcousticDividerLeft',
+                                 'AcousticDividerRight','RearSupport','FloatingDeck']:
+                        self.assertEqual(doc.getObject(name).StockThickness.Value,10,name)
+                    support_checks,support_metrics=validate_model.check_deck_supports(doc,p)
+                    self.assertTrue(all(support_checks.values()),(support_checks,support_metrics))
                     for obj in doc.Objects:
                         if hasattr(obj,'StockLength'):
                             self.assertEqual(obj.StockLength.Value,round(obj.StockLength.Value))
@@ -79,6 +84,35 @@ class WoodworkingTests(unittest.TestCase):
                 doc.Baffle.Shape=doc.Baffle.Shape.fuse(extra)
                 bad,_=validate_model.check_woodworking(doc,p)
                 self.assertFalse(bad['wood_panel_normal_thickness_matches'])
+            finally:App.closeDocument(doc.Name)
+
+    def test_validator_detects_oversized_support_recesses(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);(root/'cad').mkdir()
+            p=json.loads((ROOT/'cad/parameters.json').read_text())
+            (root/'cad/parameters.json').write_text(json.dumps(p))
+            (root/'cad/mechanism.json').write_bytes((ROOT/'cad/mechanism.json').read_bytes())
+            with patch.object(build_model,'ROOT',root):doc,p,_,_=build_model.build()
+            try:
+                support=p['deck_support'];radius=support['diameter']/2+2
+                centers=[(44,100),(p['width']-44,100),(p['width']/2,295)]
+                roof_top=p['acoustic']['roof_bottom_z']+p['acoustic']['roof_thickness']
+                original=doc.AcousticRoof.Shape.copy()
+                for x,y in centers:
+                    doc.AcousticRoof.Shape=doc.AcousticRoof.Shape.cut(Part.makeCylinder(
+                        radius,support['roof_recess_depth']+1,
+                        App.Vector(x,y,roof_top-support['roof_recess_depth'])))
+                checks,_=validate_model.check_deck_supports(doc,p)
+                self.assertFalse(checks['deck_support_recesses_clear_and_seated'])
+                doc.AcousticRoof.Shape=original
+
+                deck_bottom=p['cabinet_top']-p['deck_thickness']
+                for x,y in centers:
+                    doc.FloatingDeck.Shape=doc.FloatingDeck.Shape.cut(Part.makeCylinder(
+                        radius,support['deck_recess_depth']+1,
+                        App.Vector(x,y,deck_bottom-1)))
+                checks,_=validate_model.check_deck_supports(doc,p)
+                self.assertFalse(checks['deck_support_recesses_clear_and_seated'])
             finally:App.closeDocument(doc.Name)
 
 

@@ -44,9 +44,20 @@ class GuideAnnotationTests(unittest.TestCase):
 
     def test_guide_is_inserted_after_stock_page_without_duplication(self):
         from pypdf import PdfReader
+        import reportlab
+        from reportlab.pdfbase import pdfmetrics
+        from reportlab.pdfbase.ttfonts import TTFont
         from reportlab.pdfgen import canvas
-        from assembly_guide_pdf import (BOOK_01_BASE_CODES, EMBEDDED_GUIDE_MARKER,
-                                        embed_guide_in_book)
+        from assembly_guide_pdf import (BOOK_01_BASE_CODES, CALLOUT_LEFT_X,
+                                        CALLOUT_RIGHT_X, CONTENT_LEFT, CONTENT_RIGHT,
+                                        EMBEDDED_GUIDE_MARKER, Guide, LEGEND_WIDTH,
+                                        LEGEND_X, MAIN_VIEW_WIDTH, MAIN_VIEW_X,
+                                        VISUAL_RIGHT, embed_guide_in_book)
+
+        self.assertEqual((CONTENT_LEFT, CONTENT_RIGHT), (16, 578))
+        self.assertEqual((MAIN_VIEW_X, MAIN_VIEW_WIDTH), (46, 285))
+        self.assertEqual((CALLOUT_LEFT_X, CALLOUT_RIGHT_X), (25, 363))
+        self.assertEqual((VISUAL_RIGHT, LEGEND_X, LEGEND_WIDTH), (376, 391, 185))
 
         def write_pdf(path, pagesize, labels, source_sha256=None):
             pdf = canvas.Canvas(str(path), pagesize=pagesize)
@@ -95,6 +106,17 @@ class GuideAnnotationTests(unittest.TestCase):
                       BOOK_01_BASE_CODES[:-1], source_sha256)
             with self.assertRaisesRegex(ValueError, '16 base pages'):
                 embed_guide_in_book(guide, incomplete, **options)
+
+            label_pdf = root/'callout-label.pdf'
+            font = Path(reportlab.__file__).parent/'fonts/Vera.ttf'
+            pdfmetrics.registerFont(TTFont('GuideCJK', str(font)))
+            sample = Guide.__new__(Guide)
+            sample.entries_by_code = {'W03': {'title': 'Bottom panel'}}
+            sample.c = canvas.Canvas(str(label_pdf), pagesize=(200, 100))
+            sample.callout_name('W03', 25, 20)
+            sample.c.showPage()
+            sample.c.save()
+            self.assertIn('Bottom panel', PdfReader(label_pdf).pages[0].extract_text())
 
     def test_failed_preview_render_does_not_publish_partial_outputs(self):
         import assembly_guide_pdf

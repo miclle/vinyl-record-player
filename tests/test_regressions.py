@@ -59,7 +59,7 @@ class ParameterValidationTests(unittest.TestCase):
                     self.assertAlmostEqual(bounds.YMin, y_min)
                     self.assertAlmostEqual(bounds.YLength, depth)
                     self.assertAlmostEqual(bounds.XLength, width)
-                    self.assertAlmostEqual(bounds.ZLength, 6.0)
+                    self.assertAlmostEqual(bounds.ZLength, params['deck_thickness'])
                     self.assertAlmostEqual(float(deck.StockLength), width)
                     self.assertAlmostEqual(float(deck.StockWidth), depth)
                     for name in ['SideLeft', 'SideRight', 'Back', 'AcousticRoof',
@@ -281,13 +281,23 @@ class AcousticLayoutTests(unittest.TestCase):
                 result=validate_model.validate()
             self.assertTrue(result['passed'],result)
             chambers=result['metrics']['acoustics']['chambers']
-            # The unchanged 117 x 90 mm chamber gains the 0.2 mm radial
-            # panel clearance but loses the barrel/stud protruding above its floor.
+            # Integrate the sloping inner baffle face, then account for the
+            # foot-panel clearance and the barrel/stud occupying the chamber.
             import math
             foot_delta = math.pi*((6.2**2-6**2)*12-6**2*2.5-4**2*6)/1e6
-            for side in ('left','right'):
+            height = p['acoustic']['roof_bottom_z']-p['foot_height']-p['wall']
+            angle = math.radians(p['front_angle'])
+            baffle_y = p['acoustic']['baffle_thickness']/math.sin(angle)
+            widths = {
+                'left': p['acoustic_divider_x'][0]-p['wall'],
+                'right': p['width']-p['wall']-p['acoustic_divider_x'][1]
+                         -p['acoustic']['partition_thickness'],
+            }
+            for side,width in widths.items():
+                gross = width*(height*(p['acoustic']['satellite_rear_y']-16-baffle_y)
+                               -height**2/(2*math.tan(angle)))/1e6
                 self.assertAlmostEqual(chambers[side]['gross_after_recess_l'],
-                                       0.64198162417+foot_delta,places=8)
+                                       gross+foot_delta,places=8)
 
     def test_electronics_in_chamber_reduce_net_volume(self):
         with tempfile.TemporaryDirectory() as tmp:
