@@ -751,5 +751,10 @@
     350.0,
     210.7
   ],
-  "physical_object_count": 65
+  "physical_object_count": 65,
+  "embedded_in": {
+    "file": "01-assembly-and-enclosure.pdf",
+    "after": "A-STOCK",
+    "pages": 19
+  }
 }

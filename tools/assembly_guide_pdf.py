@@ -4,8 +4,11 @@ import hashlib
 import json
 import shutil
 import subprocess
+import tempfile
 from pathlib import Path
 
+from pypdf import PdfReader, PdfWriter
+from pypdf.generic import BooleanObject, NameObject
 from reportlab.pdfgen import canvas
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
@@ -18,6 +21,12 @@ WIDTH, HEIGHT = 594, 420
 COLORS = {'W': '#956233', 'F': '#596C79', 'C': '#557787',
           'K': '#355E79', 'S': '#89659C', 'A': '#277C98', 'E': '#288068'}
 INK, MUTED = '#20313B', '#62747E'
+EMBEDDED_GUIDE_MARKER = NameObject('/VinylAssemblyGuidePage')
+BOOK_01_BASE_CODES = (
+    'A-00', 'A-STOCK', 'A-01', 'A-02', 'A-03',
+    'A-P01', 'A-P02', 'A-P03', 'A-P04', 'A-P05', 'A-P06', 'A-P07', 'A-P08',
+    'A-H01', 'A-H02', 'A-H03', 'A-POS',
+)
 
 
 def number(value):
@@ -37,6 +46,99 @@ def validate_annotations(data):
         occluded = codes & set(view['occluded_by'])
         if missing or occluded:
             raise ValueError(f'Unusable annotations in {key}: missing={missing}, occluded={occluded}')
+
+
+def embed_guide_in_book(guide_path, book_path, output_path=None,
+                        expected_source_sha256=None, expected_base_codes=None):
+    """Insert the two original-size guide pages after A-STOCK, idempotently."""
+    guide_path, book_path = Path(guide_path), Path(book_path)
+    output_path = Path(output_path) if output_path else book_path
+    if not book_path.exists():
+        raise FileNotFoundError(
+            f'Missing {book_path.name}; generate the drawing pack before the assembly guide'
+        )
+    guide = PdfReader(guide_path)
+    if len(guide.pages) != 2:
+        raise ValueError(f'Expected two assembly-guide pages, found {len(guide.pages)}')
+    for page, code in zip(guide.pages, ('G-01', 'G-02')):
+        if code not in (page.extract_text() or ''):
+            raise ValueError(f'Assembly-guide page is missing {code}')
+
+    book = PdfReader(book_path)
+    clean_pages = [i for i, page in enumerate(book.pages)
+                   if not bool(page.get(EMBEDDED_GUIDE_MARKER, False))]
+    if expected_base_codes:
+        if len(clean_pages) != len(expected_base_codes):
+            raise ValueError(
+                f'Book 01 has {len(clean_pages)} base pages, expected '
+                f'{len(expected_base_codes)}; regenerate the drawing pack'
+            )
+        for source_index, code in zip(clean_pages, expected_base_codes):
+            if code not in (book.pages[source_index].extract_text() or ''):
+                raise ValueError(
+                    f'Book 01 base page sequence is stale at {code}; '
+                    'regenerate the drawing pack'
+                )
+    if expected_source_sha256:
+        first_page_text = book.pages[clean_pages[0]].extract_text() or ''
+        if expected_source_sha256 not in first_page_text:
+            raise ValueError(
+                'Book 01 source CAD hash differs from the assembly guide; '
+                'regenerate the drawing pack'
+            )
+    stock_pages = [position for position, source_index in enumerate(clean_pages)
+                   if 'A-STOCK' in (book.pages[source_index].extract_text() or '')]
+    if len(stock_pages) != 1:
+        raise ValueError(f'Expected one A-STOCK page, found {len(stock_pages)}')
+    insert_at = stock_pages[0] + 1
+
+    outlines_by_page = {}
+    def collect_outlines(items):
+        for item in items:
+            if isinstance(item, list):
+                collect_outlines(item)
+                continue
+            page_number = book.get_destination_page_number(item)
+            if page_number in clean_pages:
+                outlines_by_page.setdefault(page_number, []).append(item.title)
+    collect_outlines(book.outline)
+
+    writer = PdfWriter()
+    writer.append(book, pages=clean_pages, import_outline=False)
+    writer.merge(insert_at, guide, import_outline=False)
+    for page in writer.pages[insert_at:insert_at + len(guide.pages)]:
+        page[EMBEDDED_GUIDE_MARKER] = BooleanObject(True)
+    output_index = 0
+    for source_index in clean_pages:
+        if output_index == insert_at:
+            writer.add_outline_item('G-01  整机外观导览', output_index)
+            writer.add_outline_item('G-02  内部结构导览', output_index + 1)
+            output_index += len(guide.pages)
+        for title in outlines_by_page.get(source_index, []):
+            writer.add_outline_item(title, output_index)
+        output_index += 1
+    if book.metadata:
+        writer.add_metadata({key: str(value) for key, value in book.metadata.items()
+                             if value is not None})
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = output_path.with_name('.' + output_path.name + '.tmp')
+    try:
+        with temporary.open('wb') as stream:
+            writer.write(stream)
+        combined = PdfReader(temporary)
+        expected_pages = len(clean_pages) + len(guide.pages)
+        if len(combined.pages) != expected_pages:
+            raise ValueError(
+                f'Combined drawing book has {len(combined.pages)} pages, expected {expected_pages}'
+            )
+        embedded = combined.pages[insert_at:insert_at + len(guide.pages)]
+        if not all(bool(page.get(EMBEDDED_GUIDE_MARKER, False)) for page in embedded):
+            raise ValueError('Combined drawing book lost its embedded-guide markers')
+        temporary.replace(output_path)
+    finally:
+        temporary.unlink(missing_ok=True)
+    return expected_pages
 
 
 class Guide:
@@ -184,18 +286,55 @@ def make(root=ROOT, font=Path('/Users/miclle/Library/Fonts/AlibabaPuHuiTi-2-55-R
     for name, digest in data['sources'].items():
         if hashlib.sha256((root/'cad'/name).read_bytes()).hexdigest() != digest:
             raise ValueError('Guide views are stale; rerun assembly-guide.FCMacro')
-    out = root/'output/pdf/00-assembly-guide.pdf'
-    out.parent.mkdir(parents=True, exist_ok=True)
-    Guide(root, data, out, font).make()
-    index = {k: v for k, v in data.items() if k != 'views'}
-    (root/'cad/assembly-guide-index.json').write_text(json.dumps(index, ensure_ascii=False, indent=2)+'\n')
+    source_sha256 = data['sources'].get('record-player.FCStd')
+    if not source_sha256:
+        raise ValueError('Guide manifest is missing the record-player.FCStd source hash')
     renderer = shutil.which('pdftoppm')
     if not renderer:
         raise RuntimeError('Install Poppler (pdftoppm) to export the two guide PNGs')
-    (root/'previews').mkdir(parents=True, exist_ok=True)
-    subprocess.run([renderer, '-r', '180', '-png', str(out),
-                    str(root/'previews/assembly-guide')], check=True)
-    return out
+    guide_pdf = root/'tmp/assembly-guide/guide-pages.pdf'
+    guide_pdf.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        Guide(root, data, guide_pdf, font).make()
+        combined_book = root/'output/pdf/01-assembly-and-enclosure.pdf'
+        with tempfile.TemporaryDirectory(prefix='assembly-guide-publish-',
+                                         dir=root/'tmp') as stage_name:
+            stage = Path(stage_name)
+            staged_book = stage/combined_book.name
+            combined_pages = embed_guide_in_book(
+                guide_pdf, combined_book, output_path=staged_book,
+                expected_source_sha256=source_sha256,
+                expected_base_codes=BOOK_01_BASE_CODES,
+            )
+            if combined_pages != 19:
+                raise ValueError(
+                    f'Combined drawing book has {combined_pages} pages, expected 19'
+                )
+            index = {k: v for k, v in data.items() if k != 'views'}
+            index['embedded_in'] = {'file': combined_book.name, 'after': 'A-STOCK',
+                                    'pages': combined_pages}
+            staged_index = stage/'assembly-guide-index.json'
+            staged_index.write_text(json.dumps(index, ensure_ascii=False, indent=2)+'\n')
+            preview_prefix = stage/'assembly-guide'
+            subprocess.run([renderer, '-r', '180', '-png', str(guide_pdf),
+                            str(preview_prefix)], check=True)
+            staged_previews = [stage/f'assembly-guide-{page}.png' for page in (1, 2)]
+            if not all(path.is_file() and path.stat().st_size for path in staged_previews):
+                raise ValueError('Poppler did not produce both assembly-guide preview PNGs')
+
+            final_index = root/'cad/assembly-guide-index.json'
+            final_previews = [root/f'previews/assembly-guide-{page}.png'
+                              for page in (1, 2)]
+            final_index.parent.mkdir(parents=True, exist_ok=True)
+            final_previews[0].parent.mkdir(parents=True, exist_ok=True)
+            staged_book.replace(combined_book)
+            staged_index.replace(final_index)
+            for staged, final in zip(staged_previews, final_previews):
+                staged.replace(final)
+        (root/'output/pdf/00-assembly-guide.pdf').unlink(missing_ok=True)
+        return combined_book
+    finally:
+        guide_pdf.unlink(missing_ok=True)
 
 
 if __name__ == '__main__':

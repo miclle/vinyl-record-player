@@ -1,6 +1,6 @@
 # 整机全景与组件导览
 
-[两页 A2 导览 PDF](../output/pdf/00-assembly-guide.pdf) 是三份尺寸图册的阅读入口，基于单一主 CAD 中的 `v0.9-torque-hinges` 结构和 `v0.6-centered-mechanism` 机芯制作。
+[图册 01 中的两页 A2 导览](../output/pdf/01-assembly-and-enclosure.pdf)是三份尺寸图册的阅读入口，基于单一主 CAD 中的 `v0.9-torque-hinges` 结构和 `v0.6-centered-mechanism` 机芯制作。两页原尺寸 A2 导览插在 A-STOCK 木板清单之后；不再另行交付内容重复的 00 PDF。
 
 - **第 1 页：整机全景。** 开盖三维视图标出外壳、格栅、透明盖、铰链、脚垫、机芯和旋钮。
 - **第 2 页：内部展开。** 移开台面、音腔顶板、障板等结构，显示扬声器、隔板、支承与电子模块；后部小图用半透明后板显示 AC 插座和接口板预留。
@@ -35,9 +35,9 @@ K01 现包含机芯基座及三个弹簧外廓套筒（1 座 + 3 弹簧），不
 
 ## 重新生成
 
-先确保保存的主 CAD、两份 JSON 参数及原尺寸图册同步，随后在 FreeCAD 1.1.1 的宏对话框执行 `tools/assembly-guide.FCMacro`。宏读取临时副本，校验两份参数快照，恢复闭盖基准后，将三张原始视图与标注投影写入忽略的 `tmp/assembly-guide/`，不保存修改后的模型。
+先确保保存的主 CAD、两份 JSON 参数及 17／11／14 页基础图册同步，随后在 FreeCAD 1.1.1 的宏对话框执行 `tools/assembly-guide.FCMacro`。宏读取临时副本，校验两份参数快照，恢复闭盖基准后，将三张原始视图与标注投影写入忽略的 `tmp/assembly-guide/`，不保存修改后的模型。
 
-在仓库根目录使用含 ReportLab 和 Poppler 的普通 Python 排版，默认输出一份两页 PDF、两张 180 dpi PNG 和编号索引。字体示例 `tmp/fonts/chinese-font.ttf` 是项目相对路径占位，需自行准备字体或替换为已有字体的相对路径：
+在仓库根目录使用含 ReportLab、pypdf 和 Poppler 的普通 Python 排版。脚本在 `tmp/assembly-guide/` 生成临时两页 PDF，核对图册 01 的 CAD 哈希与 17 页基础图号序列，再把两页导览插入 A-STOCK 后。合并 PDF、两张 180 dpi PNG 和编号索引全部在临时目录生成成功后才替换正式文件，随后删除临时 PDF 及旧的正式 00 文件；预览生成失败不会发布部分产物。重复运行会先移除上次嵌入的导览页再重新插入，不会累积重复页面；若图册 01 不存在或与当前 CAD 不一致则明确停止。字体示例 `tmp/fonts/chinese-font.ttf` 是项目相对路径占位，需自行准备字体或替换为已有字体的相对路径：
 
 ```sh
 python3 tools/assembly_guide_pdf.py --font tmp/fonts/chinese-font.ttf
@@ -45,7 +45,7 @@ python3 tools/assembly_guide_pdf.py --font tmp/fonts/chinese-font.ttf
 
 请显式传入存在且可嵌入的中文字体。脚本保留的旧默认字体路径不保证可用，也不会自动搜索替代字体。当前 v0.9 交付使用 STHeiti Light；TrueType 集合 `.ttc` 需确认默认子字体可由 ReportLab 读取并覆盖所需字符。PDF 中嵌入字体，阅读者无需安装；A2 原幅为 594 × 420 mm，PNG 约 4210 × 2977 像素。
 
-几何参数改变后须先重建 CAD，再重跑导览宏；若 CAD 在渲染后发生变化，排版脚本会拒绝使用过期视图。目录、图号映射或渲染脚本改变后也应重跑宏，即使 CAD 未变：索引只记录主 CAD 的 SHA-256，不校验脚本和 PDF 的版本。
+几何参数改变后须先重建 CAD，依次重建三册图纸、重跑导览宏并执行导览排版；导览排版以刚生成的 17 页第一册为底稿，输出最终 19 页第一册。若 CAD 在渲染后发生变化，排版脚本会拒绝使用过期视图。目录、图号映射或渲染脚本改变后也应重跑宏，即使 CAD 未变：索引只记录主 CAD 的 SHA-256，不校验脚本和 PDF 的版本。
 
 验证包括对象覆盖、重复映射拒绝、当前图号关联、1／3／8 根格栅的标注目标有效性、复合板件数量及源 CAD 未改写的回归用例。渲染时沿相机方向检查引出线端点是否被其他不透明零件挡住；排版拒绝缺失或被遮挡的实际使用标注。生成后还需目视检查两页的引出线、可见部件与文字排版。终端执行前按 [README](../README.md#整机重建) 设置 `FREECAD_RESOURCES`。
 
