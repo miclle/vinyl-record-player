@@ -13,6 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT/'tools'))
 import assembly_guide
 import drawing_data
+from wood_stock import RETIRED_WOOD_CODES, stock_rows
 
 
 class AssemblyGuideTests(unittest.TestCase):
@@ -24,6 +25,7 @@ class AssemblyGuideTests(unittest.TestCase):
                 for card in changed['cards']:
                     if 'Slat01' in card['ids']:
                         card['ids'] = card['ids'][:count]
+                        card['quantity'] = count
                 entries = assembly_guide.catalog_from_drawings(changed)
                 targets = assembly_guide.overview_targets(entries)
                 catalog = {e['code']: e for e in entries}
@@ -61,6 +63,24 @@ class AssemblyGuideTests(unittest.TestCase):
         self.assertEqual(catalog['E01']['drawings'], ['C-P04', 'C-P05'])
         self.assertNotIn('Platter', {n for e in entries for n in e['ids']})
         self.assertEqual(before, {p: hashlib.sha256(p.read_bytes()).hexdigest() for p in paths})
+
+    def test_wood_stock_catalog_matches_guide_exactly(self):
+        data = drawing_data.collect(ROOT, project=False)
+        expected = stock_rows(data['cards'])
+        entries = [entry for entry in assembly_guide.catalog_from_drawings(data)
+                   if entry['code'].startswith('W')]
+        self.assertEqual([entry['code'] for entry in entries],
+                         [row['code'] for row in expected])
+        self.assertEqual(sum(entry['stock_count'] for entry in entries), 21)
+        self.assertEqual(RETIRED_WOOD_CODES, {
+            'W05': '原独立下横梁与底板完全重叠，已取消；编号保留不重排。',
+        })
+        for entry, row in zip(entries, expected):
+            self.assertEqual(entry['title'], row['title'])
+            self.assertEqual(entry['ids'], row['ids'])
+            self.assertEqual(entry['stock_count'], row['quantity'])
+            self.assertEqual(entry['stock_mm'], row['stock_mm'])
+            self.assertEqual(entry['stock_note'], row['stock_note'])
 
 
 if __name__ == '__main__':

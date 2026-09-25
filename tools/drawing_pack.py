@@ -18,6 +18,7 @@ from reportlab.graphics import renderPDF
 from svglib.svglib import svg2rlg
 from drawing_detail_pages import hole_sheet_page, section_page
 from mechanism_notes import spring_positions_note
+from wood_stock import RETIRED_WOOD_CODES, stock_rows
 
 ROOT=Path(__file__).resolve().parents[1]
 MM=72/25.4
@@ -247,28 +248,23 @@ def positions_page(book,cards,code,title):
 
 def stock_page(book,data):
     book.start('木板矩形备料汇总','A-STOCK','整数名义尺寸 / 成形与接口尺寸详见零件页')
-    rows={}
-    for card in data['cards']:
-        if 'stock_mm' not in card:continue
-        key=card['ids'][0]
-        if key not in rows:rows[key]=[card,0]
-        rows[key][1]+=card['quantity']
-    for x,label in [(18,'板件'),(116,'数量'),(141,'备料长 L'),(177,'备料宽 W'),(213,'板厚 T'),(253,'后续加工')]:
+    rows=stock_rows(data['cards'])
+    for x,label in [(18,'导览'),(36,'板件'),(118,'数量'),(143,'备料长 L'),
+                    (177,'备料宽 W'),(211,'板厚 T'),(246,'后续加工')]:
         book.text(x,43,label,10,MUTED)
     y=55
-    labels={'SideLeft':'左右侧板','AcousticDividerLeft':'左右低音隔板','Slat01':'横向木格栅条'}
-    for key,(card,quantity) in rows.items():
-        title=labels.get(key,card['title'].split(' · ')[0].split(' / ')[0])
+    for row in rows:
         book.line(18,y+7,402,y+7)
-        if key=='Baffle':title+='（B-H01 / A-03）'
-        book.text(18,y,title,9)
-        book.text(116,y,str(quantity),10)
-        for x,value in zip((141,177,213),card['stock_mm']):book.text(x,y,num(value),11,DIM)
-        book.paragraph(253,y,card['stock_note'],147,8,INK,4)
+        book.text(18,y,row['code'],9,DIM)
+        book.text(36,y,row['title'],9)
+        book.text(118,y,str(row['quantity']),10)
+        for x,value in zip((143,177,211),row['stock_mm']):book.text(x,y,num(value),11,DIM)
+        book.paragraph(246,y,row['stock_note'],156,8,INK,4)
         y+=14
     y=max(y+10,228)
     for note in [
-        f'共 {sum(quantity for _,quantity in rows.values())} 块 / 条。L、W 为板件自身平面的矩形备料尺寸，T 为法向板厚；与装配包络 XYZ 不同。',
+        f'共 {sum(row["quantity"] for row in rows)} 块 / 条；与整机导览 W01-W11 一一对应。L、W 为板件自身平面的矩形备料尺寸，T 为法向板厚。',
+        f'W05 已退役：{RETIRED_WOOD_CODES["W05"]}',
         '斜障板备料后修斜口，隔板备料后修斜前缘，顶板切 T 形轮廓；几何小数保留在成形图中，不能把接缝坐标逐项取整。',
         '名义板厚须实测；本表不含锯缝、打磨、贴皮、封边及拼接余量。材料、连接方式与公差确认后才能作最终下料放行。',
     ]:y=book.paragraph(18,y,note,384,9,INK,4.8)+3

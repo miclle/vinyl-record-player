@@ -331,7 +331,7 @@ def build_structure():
     stock_specs={
         'SideLeft':(V(1,0,0),t,'矩形板'), 'SideRight':(V(1,0,0),t,'矩形板'),
         'Bottom':(V(0,0,1),t,f"矩形板；低音通孔；4×Ø{p['feet']['panel_hole_diameter_assumption']:g} 脚座通孔、12×Ø{p['feet']['pilot_diameter_assumption']:g} 深{p['feet']['pilot_depth_assumption']:g} 底面盲预孔（安装假设）"),
-        'Back':(V(0,1,0),t,f"矩形板；倒相孔及沉台；AC 横孔 48×28 R3、上下 2×Ø4.5 孔距 40；4×Ø{p['hinges']['wood_pilot_diameter_assumption']:g} 深{p['hinges']['wood_pilot_depth_assumption']:g} 后侧铰链盲预孔（假设）"),
+        'Back':(V(0,1,0),t,f"矩形板；倒相孔及沉台；AC 横孔 {p['ac_inlet']['cutout_width']:g}×{p['ac_inlet']['cutout_height']:g} R{p['ac_inlet']['cutout_radius']:g}、上下 2×Ø{p['ac_inlet']['mount_hole_diameter']:g} 孔距 {p['ac_inlet']['mount_hole_pitch']:g}；4×Ø{p['hinges']['wood_pilot_diameter_assumption']:g} 深{p['hinges']['wood_pilot_depth_assumption']:g} 后侧铰链盲预孔（假设）"),
         'Baffle':(inward,ac['baffle_thickness'],f'整数矩形备料；上下两边修 {90-p["front_angle"]:g}° 斜口至安装竖高 {zhi-zlo:g}；另开法向孔'),
         'AcousticRoof':(V(0,0,1),ac['roof_thickness'],f"T 形板；成形前缘 Y={fd['roof_front']:g}；顶面前缘台阶宽 {fd['rebate_rear']-fd['roof_front']:g}、深 {fd['rebate_depth']:g}、余厚 {fd['remaining_roof']:g}；Ø28 轴承孔"),
         'AcousticRear':(V(0,1,0),pt,'两块独立矩形板'),

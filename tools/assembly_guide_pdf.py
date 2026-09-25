@@ -10,6 +10,7 @@ from reportlab.pdfgen import canvas
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib.colors import HexColor
+from wood_stock import RETIRED_WOOD_CODES
 
 ROOT = Path(__file__).resolve().parents[1]
 MM = 72/25.4
@@ -24,6 +25,9 @@ def number(value):
 
 
 def validate_annotations(data):
+    wood_entries = [entry for entry in data['entries'] if entry['code'].startswith('W')]
+    if not wood_entries or any('stock_count' not in entry for entry in wood_entries):
+        raise ValueError('Guide catalog is stale; rerun assembly-guide.FCMacro')
     shown = {'overview': {e['code'] for e in data['entries'] if e['page'] == 1},
              'exploded': {e['code'] for e in data['entries'] if e['page'] == 2} - {'W04', 'E05', 'E06'},
              'rear': {'W04', 'E05', 'E06', 'A03'}}
@@ -142,7 +146,9 @@ class Guide:
         dims = ' × '.join(number(n) for n in self.data['nominal_cabinet_mm'])
         self.text(47, 372, '木箱与闭盖名义外廓  '+dims+' mm', 11)
         self.text(47, 380, '合页与 AC 插座法兰超出后板；含合页外廓见 A-01。机芯安装尺寸仍待确认。', 9, MUTED)
-        self.text(47, 390, '读图路径：定位编号 → 查看材料与数量 → 按 A / B / C 图号查尺寸。', 9, MUTED)
+        stock_total = sum(entry.get('stock_count', 0) for entry in self.data['entries'])
+        self.text(47, 388, f'木板矩形备料合计 {stock_total} 块／条；完整加工说明见图册 01 / A-STOCK。', 9, MUTED)
+        self.text(47, 396, f'W05 已退役：{RETIRED_WOOD_CODES["W05"]}', 8.5, MUTED)
         self.c.showPage()
 
         self.start(2, '02  分层展开，认识内部结构',

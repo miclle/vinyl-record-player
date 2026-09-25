@@ -15,15 +15,14 @@ import FreeCAD as App
 import Part
 import drawing_data
 from hinges import moving_names, rotation as hinge_rotation
+from wood_stock import stock_rows
 
 ROOT = Path(__file__).resolve().parents[1]
 V = App.Vector
 
 # Each physical object belongs to exactly one numbered entry. A bought-in
 # assembly may combine several modeled objects; quantities below are explicit.
-CATALOG = [
-    ('W01', 1, '左右侧板', ['SideLeft', 'SideRight'], '2 块', '胡桃木饰面；基材待定'),
-    ('W02', 1, '横向木格栅', [f'Slat{i:02}' for i in range(1, 9)], '8 条', '木饰条；木种待定'),
+NON_WOOD_CATALOG = [
     ('F01', 1, '前沿银色 T 型铝饰条', ['Fascia'], '1 件', '铝合金 T 型材；固定待实测'),
     ('C01', 1, '透明防尘盖', ['DustCover'], '1 件', '烟灰亚克力；壁厚为暂估'),
     ('C02', 1, '可调定位合页与安装板', [f'{prefix}{i}' for i in range(2) for prefix in ('HingeBase','HingePin','HingeSpacer','HingeBacking')], '2 只 + 2 垫片 + 2 压板', '锌合金合页；铝垫片及压板为安装假设'),
@@ -37,14 +36,6 @@ CATALOG = [
     ('K07', 1, '连接套、唱头壳与唱头', ['KitHeadshell', 'KitCartridge'], '各 1 件', '双槽与指托按参考图近似；唱头型号待确认'),
     ('K08', 1, '停臂架', ['KitArmRest'], '1 件', '外观占位；材质与固定方式待确认'),
     ('E01', 1, '控制旋钮与底座', ['ControlKnob', 'ControlBase'], '各 1 件', '实心外观占位；控制接口待确认'),
-    ('W03', 2, '底板', ['Bottom'], '1 块', '木质板材；基材待定'),
-    ('W04', 2, '后板', ['Back'], '1 块', '木质板材；基材待定'),
-    ('W06', 2, '倾斜扬声器障板', ['Baffle'], '1 块', '木质板材；斜口按精确轮廓修切'),
-    ('W07', 2, '三音腔共用顶板', ['AcousticRoof'], '1 块', '木质板材；基材待定'),
-    ('W08', 2, '左右全频腔后板', ['AcousticRear'], '2 块', '一个 CAD 对象内的两块独立木板'),
-    ('W09', 2, '低音腔全深隔板', ['AcousticDividerLeft', 'AcousticDividerRight'], '2 块', '木质板材；前缘按斜线修切'),
-    ('W10', 2, '后部承托梁', ['RearSupport'], '2 件', '一个 CAD 对象内的两块独立木梁'),
-    ('W11', 2, '浮动承载台面', ['FloatingDeck'], '1 块', '木质结构板；机芯开口仍待设计'),
     ('F02', 2, '透声布', ['GrilleCloth'], '1 片', '织物；CAD 薄实体仅用于显示'),
     ('F03', 2, '灯槽与扩散片', ['LightChannel', 'LightDiffuser'], '各 1 件', '灯槽／扩散片占位；LED 灯带未建模'),
     ('S01', 2, '轴承密封避让杯', ['BearingPocket'], '1 件', '材质待定；通用轴承遗留结构，待适配'),
@@ -71,11 +62,19 @@ def catalog_from_drawings(data):
             for name in card['ids']:
                 references.setdefault(name, set()).add(ref)
                 cards_by_id[name] = card
-    entries = []
-    for code, page, title, names, quantity, material in CATALOG:
-        if code == 'W02':
-            names = cards_by_id['Slat01']['ids']
-            quantity = f'{len(names)} 条'
+    wood_entries = []
+    for row in stock_rows(data['cards']):
+        names = row['ids']
+        entry = dict(code=row['code'], page=row['page'], title=row['title'], ids=names,
+                     quantity=f"{row['quantity']} {row['unit']}", material=row['material'],
+                     stock_count=row['quantity'], stock_mm=row['stock_mm'],
+                     stock_note=row['stock_note'])
+        entry['drawings'] = sorted({r for n in names for r in references[n]})
+        entry['size_mm'] = cards_by_id[names[0]]['size_mm']
+        wood_entries.append(entry)
+
+    other_entries = []
+    for code, page, title, names, quantity, material in NON_WOOD_CATALOG:
         if code == 'C01':
             material = f'烟灰亚克力；壁厚 {cards_by_id["DustCover"]["thickness_mm"]:g} mm 暂估'
         if code == 'F01':
@@ -87,7 +86,11 @@ def catalog_from_drawings(data):
         entry['size_mm'] = cards_by_id[names[0]]['size_mm']
         if 'stock_mm' in cards_by_id[names[0]]:
             entry['stock_mm'] = cards_by_id[names[0]]['stock_mm']
-        entries.append(entry)
+        other_entries.append(entry)
+    entries = []
+    for page in (1, 2):
+        entries.extend(entry for entry in wood_entries if entry['page'] == page)
+        entries.extend(entry for entry in other_entries if entry['page'] == page)
     return entries
 
 

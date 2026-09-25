@@ -161,6 +161,8 @@ class DrawingPackTests(unittest.TestCase):
             with patch.object(build_model,'ROOT',root):
                 doc,_,_,_=build_model.build()
             try:
+                self.assertIn('AC 横孔 48.4×28.4 R3、上下 2×Ø4.8 孔距 40',
+                              doc.Back.StockNote)
                 sheets={s['key']:s for s in panel_details(doc,p,drawing_data.project_shape,True)}
                 for sheet in sheets.values():
                     for actual,want in zip(sheet['projection']['size_mm'],sheet['size_mm']):
