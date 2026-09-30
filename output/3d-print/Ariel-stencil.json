@@ -1,0 +1,60 @@
+{
+  "text": "Ariel",
+  "font": "Sigmar One",
+  "units": "mm",
+  "print_size_mm": [
+    109.5,
+    32.0,
+    6.5
+  ],
+  "face_thickness_mm": 1.2,
+  "stop_thickness_mm": 2.0,
+  "stop_depth_mm": 5.3,
+  "bridge_width_mm": 1.2,
+  "bare_fascia_face_mm": [
+    425.0,
+    30.0,
+    5.0
+  ],
+  "local_fascia_right_mm": 107.5,
+  "local_fascia_top_mm": 30.0,
+  "local_origin_in_assembly_mm": [
+    330.0,
+    0,
+    116.5
+  ],
+  "text_bounds_mm": [
+    11.003966042684398,
+    6.869600867351873,
+    86.9960339573156,
+    23.13039913264813
+  ],
+  "bridges": [
+    {
+      "letter": "A",
+      "direction": "up",
+      "x_mm": 20.74603456357041,
+      "y_mm": 15.167511758517879,
+      "width_mm": 1.2,
+      "height_mm": 8.06288737413025
+    },
+    {
+      "letter": "r",
+      "direction": "right",
+      "x_mm": 40.69110561132445,
+      "y_mm": 16.246957372782163,
+      "width_mm": 7.65046007131412,
+      "height_mm": 1.2
+    }
+  ],
+  "print_orientation": "Working face at Z=0; stops upwards; no supports",
+  "use": "Bare fascia only, cover/woodwork excluded; bridge gaps require touch-up",
+  "tool_fit": "Tool tip and shaft clearance require a trial; no depth control",
+  "validation": {
+    "valid_solid": true,
+    "solid_count": 1,
+    "closed_mesh": true,
+    "mesh_components": 1,
+    "triangles": 14464
+  }
+}

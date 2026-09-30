@@ -1,5 +1,7 @@
 # Ariel 定制铭牌与激光标记稿
 
+当前手工加工方案已交付 [一体打印的镂空雕刻定位支架](../../output/3d-print/README.md)，在裸饰条上辅助磨字。本文记录保留在主 CAD 中的激光铭牌方案；它的 0.6 mm 板厚和 0.02 mm 可视化浅凹不用于打印支架或手工雕刻深度。
+
 右侧 LOGO 的文字为 **Ariel**，字体为 [Google Fonts 的 Sigmar One](https://fonts.google.com/specimen/Sigmar+One)。项目保存了 [字体文件](../fonts/sigmar-one/SigmarOne-Regular.ttf)与 [OFL 许可证](../fonts/sigmar-one/OFL.txt)，因此重新生成 CAD 和矢量稿时不依赖本机字体安装。字体视觉上接近全大写，但源文字保留 `Ariel`。
 
 [Ariel-laser.svg](Ariel-laser.svg) 是已转成矢量轮廓的黑色标记稿，画布为 **98 × 22 mm**，可交给铭牌商家核对激光标记范围。SVG 不依赖商家的字体文件；其中没有板材切边或安装孔。下单前应由商家确认打开比例为 1:1、文字朝向和工艺效果。
@@ -17,3 +19,5 @@
 生成器要求铭牌外廓完全落在饰条正面内；铭牌高度不得超过饰条的 30 mm 正面高度。超高参数会在生成前拒绝，防止把上下悬空的铭牌视为已贴合安装。
 
 模型入口为 [tools/nameplate.py](../../tools/nameplate.py)；主模型中的 `Nameplate` 是独立 `Part::Feature`，在闭盖 STEP、零件清单和 F01 导览中计为一件。A-P02 仍是饰条本体图号，并注明铭牌位置；铭牌的商家标记稿单独使用上述 SVG，现有 A-Pxx 图号保持不变。
+
+手工加工的另一方案见 [Ariel 镂空雕刻定位支架](../../output/3d-print/README.md)：一件 3D 打印，直接在裸饰条上辅助磨字，沿用这里的字体和排字位置。该工具独立交付，现有激光铭牌 CAD 和矢量稿保留。

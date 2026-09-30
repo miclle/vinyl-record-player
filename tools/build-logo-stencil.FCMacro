@@ -1,0 +1,20 @@
+# Run in FreeCAD: Macro > Macros > Execute. Regenerates only the independent tool.
+from pathlib import Path
+import sys
+
+import FreeCAD as App
+import FreeCADGui as Gui
+
+tools = Path(__file__).resolve().parent
+if str(tools) not in sys.path:
+    sys.path.insert(0, str(tools))
+source = tools / 'build_logo_stencil.py'
+namespace = {'__name__': 'logo_stencil_macro', '__file__': str(source)}
+exec(compile(source.read_bytes(), str(source), 'exec'), namespace)
+namespace['export']()
+
+# Reopen the saved artifact so the user sees the persisted visibility and camera.
+doc = App.openDocument(str(namespace['OUTPUT'] / 'Ariel-stencil.FCStd'))
+if not doc.ArielStencil.ViewObject.Visibility:
+    raise RuntimeError('Saved engraving stencil reopened hidden')
+Gui.getDocument(doc.Name).activeView().fitAll()
