@@ -94,7 +94,7 @@ class ParameterValidationTests(unittest.TestCase):
                     build_model.build_structure()
 
     def test_incompatible_model_replaces_success_report_and_closes_document(self):
-        missing_neighbors = ['GrilleCloth', 'Fascia', 'LightChannel', 'LightDiffuser']
+        missing_neighbors = ['GrilleCloth', 'Fascia', 'Nameplate', 'LightChannel', 'LightDiffuser']
         cases = ['old_schema', 'missing_property', 'missing_snapshot', 'invalid_snapshot',
                  'missing_section', 'invalid_section'] + missing_neighbors
         with tempfile.TemporaryDirectory() as tmp:
@@ -356,6 +356,7 @@ class MacroReloadTests(unittest.TestCase):
                 (root / 'ac_inlet.py').write_text(f'value = {version}\n')
                 (root / 'feet.py').write_text(f'value = {version}\n')
                 (root / 'fascia.py').write_text(f'value = {version}\n')
+                (root / 'nameplate.py').write_text(f'value = {version}\n')
                 (root / 'hinges.py').write_text(f'value = {version}\n')
                 (root / 'model_sections.py').write_text(f'value = {version}\n')
                 (root / 'build_model.py').write_text('from types import SimpleNamespace\nimport model_sections\nclass Doc:\n    StudyBasis = SimpleNamespace(ConfigurationJSON="{}")\n    def save(self): pass\ndef deliver():\n    return Doc(), {"cover_angle_open":70}, model_sections.value\n')
@@ -368,7 +369,7 @@ class MacroReloadTests(unittest.TestCase):
                 gui=types.ModuleType('FreeCADGui')
                 gui.activeDocument=lambda: types.SimpleNamespace(activeView=lambda: types.SimpleNamespace(fitAll=lambda: None))
                 with patch.dict(sys.modules, {'FreeCADGui': gui}):
-                    for name in ['ac_inlet', 'feet', 'fascia', 'hinges', 'model_sections',
+                    for name in ['ac_inlet', 'feet', 'fascia', 'nameplate', 'hinges', 'model_sections',
                                  'build_model', 'render_views', 'dimension_sheet',
                                  'mechanism_study', 'assembly_pose']:
                         sys.modules.pop(name, None)

@@ -72,7 +72,7 @@ class DrawingPackTests(unittest.TestCase):
         data = drawing_data.collect(ROOT, project=False)
         cards = {c['key']: c for c in data['cards']}
         self.assertEqual(data['coverage']['missing'], [])
-        self.assertEqual(data['coverage']['physical_count'], 64)
+        self.assertEqual(data['coverage']['physical_count'], 65)
         self.assertEqual(data['coverage']['reference_count'], 16)
         self.assertEqual(set(data['sources']), {'record-player.FCStd'})
         self.assertNotIn('LowerRail', cards)

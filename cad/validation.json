@@ -42,6 +42,8 @@
     "fascia_t_section_matches": true,
     "fascia_neighbors_clear": true,
     "fascia_roof_rebate_and_shelf_match": true,
+    "nameplate_position_and_mark_match": true,
+    "nameplate_fascia_contact_clear": true,
     "deck_supports_match_parameters": true,
     "deck_support_recesses_clear_and_seated": true,
     "wood_panel_normal_thickness_matches": true,
@@ -60,11 +62,11 @@
     "step_bounds": true
   },
   "metrics": {
-    "part_count": 64,
-    "solid_count": 81,
+    "part_count": 65,
+    "solid_count": 82,
     "overall_mm": [
       450.0,
-      363.2,
+      363.8000010213903,
       210.7
     ],
     "deck_clearances_mm": {
@@ -297,6 +299,19 @@
       "closed_cover_gap_mm": 1.0,
       "deck_gap_mm": 1.0,
       "collisions": [],
+      "installation_released": false
+    },
+    "nameplate": {
+      "bounds_mm": [
+        330.0,
+        -0.6,
+        120.5,
+        98.0,
+        0.6,
+        22.0
+      ],
+      "mark_visual_depth_mm": 0.02,
+      "logo_text": "Ariel",
       "installation_released": false
     },
     "deck_supports": {
@@ -669,6 +684,7 @@
     "原厂 214.2 mm 测量基准未明确；本版按已购脚垫名义高度调整闭盖总高",
     "脚垫未压缩；脚座孔距、板预孔及密封为安装假设；低音离地19.5 mm，低于此前20 mm试验目标，声学待测",
     "T 型铝条按30×30×5总外廓、等厚居中截面建模；端隙、槽隙为假设，根部圆角、胶层及固定件待实测",
+    "Ariel 独立铭牌的外廓、厚度、材质与固定待商家确认；0.02 mm 字面浅凹仅为激光效果可视化",
     "盖壳每5度、合页活动总成每1度抽样检查至设定开角；非连续运动求解",
     "HFA5751-3434总厚13.2/12.8存在冲突；轴心、筒节、安装孔与压板为假设；3 N.m为用户提供最大值，非扭矩寿命实测",
     "未对所有零件做全局干涉放行；这里只检查列出的关键部件与外壳",

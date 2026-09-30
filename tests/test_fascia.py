@@ -14,6 +14,25 @@ sys.path.insert(0,str(ROOT/'tools'))
 import build_model
 import validate_model
 import fascia
+import nameplate
+
+
+class NameplateParameterTests(unittest.TestCase):
+    def setUp(self):
+        self.p=json.loads((ROOT/'cad/parameters.json').read_text())
+
+    def test_nameplate_cannot_overhang_fascia_vertically(self):
+        for height in (30.001,40):
+            with self.subTest(height=height):
+                self.p['fascia']['nameplate']['height']=height
+                with self.assertRaisesRegex(ValueError,'must fit on the fascia face'):
+                    nameplate.dimensions(self.p)
+
+    def test_nameplate_can_match_full_fascia_height(self):
+        self.p['fascia']['nameplate']['height']=self.p['fascia']['face_height']
+        d=nameplate.dimensions(self.p)
+        self.assertAlmostEqual(d['bottom'],self.p['cabinet_top']-self.p['fascia']['face_height'])
+        self.assertAlmostEqual(d['top'],self.p['cabinet_top'])
 
 
 class FasciaTests(unittest.TestCase):
@@ -51,6 +70,26 @@ class FasciaTests(unittest.TestCase):
         self.assertFalse(roof.isInside(App.Vector(225,3,127),1e-6,False))
         checks,_=validate_model.check_acoustics(self.doc,self.p,[])
         self.assertTrue(checks['three_independent_enclosed_chambers'])
+
+    def test_separate_laser_marked_nameplate_is_on_right_front(self):
+        plate=self.doc.Nameplate
+        d=nameplate.dimensions(self.p)
+        b=plate.Shape.optimalBoundingBox(False)
+        self.assertAlmostEqual(b.XMin,330,places=5)
+        self.assertAlmostEqual(b.XMax,428,places=5)
+        self.assertAlmostEqual(b.YMin,-0.6,places=5)
+        self.assertAlmostEqual(b.ZMin,120.5,places=5)
+        self.assertAlmostEqual(b.ZMax,142.5,places=5)
+        self.assertEqual(plate.LogoText,'Ariel')
+        self.assertEqual(plate.AssemblySection,'Front')
+        self.assertGreater(98*22*0.6-plate.Shape.Volume,1)
+        checks,_=validate_model.check_nameplate(self.doc,self.p)
+        self.assertTrue(all(checks.values()),checks)
+        self.assertGreater(d['left'],self.p['width']/2)
+        artwork=(self.root/'references/nameplate/Ariel-laser.svg').read_text()
+        self.assertIn('width="98mm" height="22mm"',artwork)
+        self.assertEqual(artwork.count('<path '),5)
+        self.assertNotIn('<text',artwork)
 
     def test_rectangle_in_same_bounds_cannot_masquerade_as_t_section(self):
         self.doc.Fascia.Shape=Part.makeBox(425,30,30,App.Vector(12.5,0,116.5))

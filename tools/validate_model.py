@@ -10,6 +10,7 @@ from hinges import check_installation as check_hinges
 from ac_inlet import installation as inlet_installation
 from feet import installation as feet_installation
 from fascia import dimensions as fascia_dimensions, installation as fascia_installation
+from nameplate import dimensions as nameplate_dimensions
 from model_sections import SECTION_NAMES, section_objects
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -49,6 +50,7 @@ def _validate_document(doc,p):
         '原厂 214.2 mm 测量基准未明确；本版按已购脚垫名义高度调整闭盖总高',
         '脚垫未压缩；脚座孔距、板预孔及密封为安装假设；低音离地19.5 mm，低于此前20 mm试验目标，声学待测',
         'T 型铝条按30×30×5总外廓、等厚居中截面建模；端隙、槽隙为假设，根部圆角、胶层及固定件待实测',
+        'Ariel 独立铭牌的外廓、厚度、材质与固定待商家确认；0.02 mm 字面浅凹仅为激光效果可视化',
         '盖壳每5度、合页活动总成每1度抽样检查至设定开角；非连续运动求解',
         'HFA5751-3434总厚13.2/12.8存在冲突；轴心、筒节、安装孔与压板为假设；3 N.m为用户提供最大值，非扭矩寿命实测',
         '未对所有零件做全局干涉放行；这里只检查列出的关键部件与外壳',
@@ -83,9 +85,10 @@ def _validate_document(doc,p):
         required[name]=['Shape']
     # Slat clearance checks dereference these neighbors; reject missing parts
     # here so the failure report replaces any previous successful validation.
-    for name in ['GrilleCloth','Fascia','LightChannel','LightDiffuser']:
+    for name in ['GrilleCloth','Fascia','Nameplate','LightChannel','LightDiffuser']:
         required[name]=['Shape']
     required['Fascia'].append('InstallationReleased')
+    required['Nameplate'].extend(['LogoText','InstallationReleased'])
     for name in ['Woofer','TweeterLeft','TweeterRight']:
         required[name]=['Shape','DriverRole','FlangeDiameter','CutoutDiameter','ReservedDepth',
                         'TotalHeight','FlangeThickness','MountCentre','InwardAxis']
@@ -144,7 +147,7 @@ def _validate_document(doc,p):
     compound=Part.makeCompound([o.Shape for o in objects]);bb=compound.BoundBox
     metrics['part_count']=len(objects);metrics['solid_count']=len(compound.Solids)
     metrics['overall_mm']=[bb.XLength,bb.YLength,bb.ZLength]
-    expected_overall=[p['width'],p['depth']+max(p['ac_inlet']['flange_thickness'],p['hinges']['overall_projection_assumption']),p['closed_height']]
+    expected_overall=[p['width'],p['depth']+max(p['ac_inlet']['flange_thickness'],p['hinges']['overall_projection_assumption'])+p['fascia']['nameplate']['thickness'],p['closed_height']]
     checks['overall_matches_parameters']=all(abs(v-e)<1e-5 for v,e in zip(metrics['overall_mm'],expected_overall))
     deck_clearances=_deck_clearances(doc,p)
     metrics['deck_clearances_mm']=deck_clearances
@@ -267,6 +270,8 @@ def _validate_document(doc,p):
     checks.update(hinge_checks);metrics['hinges']=hinge_metrics
     fascia_checks,fascia_metrics=check_fascia(doc,p)
     checks.update(fascia_checks);metrics['fascia']=fascia_metrics
+    plate_checks,plate_metrics=check_nameplate(doc,p)
+    checks.update(plate_checks);metrics['nameplate']=plate_metrics
     support_checks,support_metrics=check_deck_supports(doc,p)
     checks.update(support_checks);metrics['deck_supports']=support_metrics
     wood_checks,wood_metrics=check_woodworking(doc,p)
@@ -499,6 +504,28 @@ def check_fascia(doc,p):
         'rebate_to_baffle_seal_mm':d['seal_margin'],'closed_cover_gap_mm':lid_gap,
         'deck_gap_mm':actual.distToShape(doc.FloatingDeck.Shape)[0],
         'collisions':hits,'installation_released':False}
+
+
+def check_nameplate(doc,p):
+    d=nameplate_dimensions(p)
+    actual=doc.Nameplate.Shape
+    blank=Part.makeBox(d['width'],d['thickness'],d['height'],
+                       App.Vector(d['left'],d['front'],d['bottom']))
+    b=actual.optimalBoundingBox(False)
+    bounds_ok=all(abs(a-e)<1e-5 for a,e in zip(
+        (b.XMin,b.YMin,b.ZMin,b.XLength,b.YLength,b.ZLength),
+        (d['left'],d['front'],d['bottom'],d['width'],d['thickness'],d['height'])))
+    mark_volume=blank.Volume-actual.Volume
+    shape_ok=(len(actual.Solids)==1 and actual.isValid()
+              and actual.cut(blank).Volume<1e-5
+              and mark_volume>1 and mark_volume<d['width']*d['height']*p['fascia']['nameplate']['mark_depth']
+              and doc.Nameplate.LogoText=='Ariel')
+    contact=actual.distToShape(doc.Fascia.Shape)[0]
+    return {'nameplate_position_and_mark_match':bounds_ok and shape_ok,
+            'nameplate_fascia_contact_clear':contact<1e-5 and actual.common(doc.Fascia.Shape).Volume<1e-5}, {
+        'bounds_mm':[d['left'],d['front'],d['bottom'],d['width'],d['thickness'],d['height']],
+        'mark_visual_depth_mm':p['fascia']['nameplate']['mark_depth'],
+        'logo_text':doc.Nameplate.LogoText,'installation_released':False}
 
 
 def check_deck_supports(doc,p):

@@ -1,7 +1,7 @@
 {
   "revision": "v0.11-10x6-grille-slats",
   "sources": {
-    "record-player.FCStd": "0babcb831caca3fa34089d4067b9ffa54a0f77b043d93c50d023c4b8668d66e5"
+    "record-player.FCStd": "08db7b527fcfc7747c2f7a8d27714b8630ba7e80b7e7a8a5b4e3a5e7ee5ed833"
   },
   "entries": [
     {
@@ -64,12 +64,13 @@
     {
       "code": "F01",
       "page": 1,
-      "title": "前沿银色 T 型铝饰条",
+      "title": "前沿银色 T 型铝饰条与 Ariel 铭牌",
       "ids": [
-        "Fascia"
+        "Fascia",
+        "Nameplate"
       ],
-      "quantity": "1 件",
-      "material": "铝合金 T 型材 30×30×5；固定待实测",
+      "quantity": "1 条 + 1 片",
+      "material": "铝合金 T 型材 30×30×5；铭牌激光标记；固定待确认",
       "drawings": [
         "A-P02"
       ],
@@ -750,7 +751,7 @@
     350.0,
     210.7
   ],
-  "physical_object_count": 64,
+  "physical_object_count": 65,
   "embedded_in": {
     "file": "01-assembly-and-enclosure.pdf",
     "after": "A-STOCK",

@@ -17,6 +17,7 @@ from feet import positions as foot_positions
 from drawing_details import panel_details, baffle_section
 from hinges import dimensions as hinge_dimensions
 from fascia import dimensions as fascia_dimensions
+from nameplate import dimensions as nameplate_dimensions
 from mechanism_notes import spring_positions_note
 from model_sections import section_objects
 
@@ -156,11 +157,19 @@ def collect(root=ROOT, project=True):
                 f"法兰厚 {f(inlet['flange_thickness'])}；自前表面总深 {f(inlet['total_depth'])}；背后另留 {f(inlet['wire_clearance_assumption'])} 接线空间（暂估）。",
                 '商家资料未验证；保护接地不可用，整机绝缘、额定负载、保险及接线待确认，未放行通电。'])
             fascia_spec=p['fascia']; fd=fascia_dimensions(p)
+            ns=fascia_spec['nameplate']; nd=nameplate_dimensions(p)
             add('Fascia',1,fascia_spec['thickness'],[
                 f"T 型材外廓 {f(fascia_spec['face_height'])}×{f(fascia_spec['overall_depth'])}、等厚 {f(fascia_spec['thickness'])}；宽面朝前，居中筋板向后。",
                 f"安装长 {f(fd['length'])}；两端各留 {f(fascia_spec['end_gap_assumption'])}（假设）。上沿 Z={f(H)}，与木箱齐平。",
                 f"顶板台阶深 {f(fd['rebate_depth'])}；含 {f(fascia_spec['fit_clearance_assumption'])} 胶层/试装余量。局部剖视见 A-03。",
-                '总外廓解释、根部圆角、表面处理与紧固待实测；未定义固定孔。'])
+                '总外廓解释、根部圆角、表面处理与紧固待实测；未定义固定孔。',
+                f"右侧另贴独立 Ariel 激光标记铭牌；外廓{f(ns['width'])}×{f(ns['height'])}×{f(ns['thickness'])}，整机 X={f(nd['left'])}..{f(nd['right'])}、Z={f(nd['bottom'])}..{f(nd['top'])}（概念假设）。",
+                '铭牌标记轮廓单独见 references/nameplate/Ariel-laser.svg；本页 T 型材不刻字。'])
+            # The custom-marked accessory uses the vendor SVG as its own drawing.
+            # Keep the existing A-P02 fascia slot and all later part IDs stable.
+            if base.getObject('Nameplate') is None:
+                raise ValueError('Missing drawing object Nameplate')
+            covered.add('Nameplate')
             add('GrilleCloth',1,0.5*sin,[f'Y 向显示厚度 0.5；法向显示厚度 {f(0.5*sin)}。','透声布仅是薄实体外观占位，实物布厚未知。',f'斜面实际高度 {f((p["acoustic"]["roof_bottom_z"]-zlo)/sin)}；后倾 {f(90-p["front_angle"])}°。'])
             add('Slat01',1,p['slat_thickness'],[f'矩形截面：面宽 {f(p["slat_face_width"])} × 法向厚 {f(p["slat_thickness"])}；整体后倾 {f(90-p["front_angle"])}°。',f'竖向节距 {f(p["slat_pitch"])}；前表面下缘首条 Z={f(zlo+2)}，共 {p["slat_count"]} 条。','尺寸表为倾斜安装包络；直接下料使用上方矩形备料尺寸。'],[f'Slat{i:02}' for i in range(2,p['slat_count']+1)])
             add('LightChannel',1,2,['模型为实心薄块；未建 U 形槽，不能作为型材截面图。'])

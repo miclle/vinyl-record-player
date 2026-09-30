@@ -14,6 +14,7 @@ from ac_inlet import installation as inlet_installation
 from feet import installation as feet_installation
 from hinges import installation as hinge_installation, dimensions as hinge_dimensions
 from fascia import dimensions as fascia_dimensions, installation as fascia_installation
+from nameplate import installation as nameplate_installation
 from model_sections import assign_section, section_objects
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -146,6 +147,18 @@ def build_structure():
                basis='用户选定 30×30×5 商家图；按总外廓、等厚居中 T 截面解释，圆角及公差待实测',
                material=f"铝合金 T 型材 {fs['face_height']:g}×{fs['overall_depth']:g}×{fs['thickness']:g}；安装长 {fd['length']:g} mm")
     fascia.addProperty('App::PropertyBool','InstallationReleased','Installation').InstallationReleased=False
+    plate_shape=nameplate_installation(p,doc,ROOT/'references/nameplate/Ariel-laser.svg')
+    ns=fs['nameplate']
+    plate=add('Nameplate','Ariel 激光标记铭牌',plate_shape,'Front',SILVER,
+              basis=f"Sigmar One 字体；{ns['width']:g}×{ns['height']:g}×{ns['thickness']:g} mm 铭牌外廓、位置和标记效果均为概念假设",
+              material='独立定制铭牌；激光标记与固定方式待商家确认')
+    plate.addProperty('App::PropertyString','LogoText','Design').LogoText='Ariel'
+    plate.addProperty('App::PropertyBool','InstallationReleased','Installation').InstallationReleased=False
+    if App.GuiUp:
+        front=-ns['thickness']
+        mark=front+ns['mark_depth']
+        plate.ViewObject.DiffuseColor=[BLACK if abs(face.CenterOfMass.y-mark)<0.005 else SILVER
+                                       for face in plate.Shape.Faces]
     # Seat the thin visual cloth proxy against the baffle front so the deeper
     # grille slats retain a real gap. The cloth is acoustically open in reality.
     cloth = add('GrilleCloth','透声布外观占位（非实心材料）',slope(z0+t,H-22,7.5,0.5),'Front',BLACK,

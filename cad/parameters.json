@@ -160,6 +160,14 @@
     "thickness": 5.0,
     "end_gap_assumption": 0.5,
     "fit_clearance_assumption": 0.2,
+    "nameplate": {
+      "width": 98.0,
+      "height": 22.0,
+      "thickness": 0.6,
+      "right_inset": 9.5,
+      "text_height": 16.0,
+      "mark_depth": 0.02
+    },
     "installation_released": false,
     "note": "Selected 30 x 30 x 5 aluminium T extrusion, broad face forward and centred web rearward. Total outer dimensions and equal wall thickness assumed from vendor image. End gaps, rebate clearance, root radii, finish and fastening require physical confirmation."
   },
