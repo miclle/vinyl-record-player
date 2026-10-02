@@ -5,12 +5,16 @@
   "print_size_mm": [
     109.5,
     32.0,
-    6.5
+    16.3
   ],
   "face_thickness_mm": 1.2,
   "stop_thickness_mm": 2.0,
   "stop_depth_mm": 5.3,
-  "bridge_width_mm": 1.2,
+  "bridge_width_mm": 3.0,
+  "bridge_clearance_mm": 8.0,
+  "bridge_thickness_mm": 3.0,
+  "post_profile": "Full enclosed glyph counter extruded vertically",
+  "anchor_width_mm": 3.0,
   "bare_fascia_face_mm": [
     425.0,
     30.0,
@@ -33,28 +37,62 @@
     {
       "letter": "A",
       "direction": "up",
-      "x_mm": 20.74603456357041,
-      "y_mm": 15.167511758517879,
-      "width_mm": 1.2,
-      "height_mm": 8.06288737413025
+      "post_area_mm2": 6.860651624364517,
+      "post_bounds_xy_mm": [
+        20.251849960459488,
+        12.979395305078599,
+        22.438839277750905,
+        19.326771563119713
+      ],
+      "post_center_mm": [
+        21.346034563570413,
+        15.167511758517879
+      ],
+      "anchor_center_mm": [
+        21.346034563570413,
+        24.83039913264813
+      ],
+      "beam_bounds_xy_mm": [
+        19.846034563570413,
+        12.979395305078599,
+        22.846034563570413,
+        26.33039913264813
+      ]
     },
     {
       "letter": "r",
-      "direction": "right",
-      "x_mm": 40.69110561132445,
-      "y_mm": 16.246957372782163,
-      "width_mm": 7.65046007131412,
-      "height_mm": 1.2
+      "direction": "up",
+      "post_area_mm2": 5.802428507052628,
+      "post_bounds_xy_mm": [
+        39.597339682345826,
+        15.285562173276906,
+        42.022684501451025,
+        18.233277004474004
+      ],
+      "post_center_mm": [
+        40.69110561132445,
+        16.846957372782164
+      ],
+      "anchor_center_mm": [
+        40.69110561132445,
+        22.548222590931076
+      ],
+      "beam_bounds_xy_mm": [
+        39.19110561132445,
+        15.285562173276906,
+        42.19110561132445,
+        24.048222590931076
+      ]
     }
   ],
-  "print_orientation": "Working face at Z=0; stops upwards; no supports",
-  "use": "Bare fascia only, cover/woodwork excluded; bridge gaps require touch-up",
+  "print_orientation": "Operating face upwards; stops on bed; supports required under panel, islands and beams",
+  "use": "Bare fascia only; continuous engraving plane; raised beams still restrict tool approach",
   "tool_fit": "Tool tip and shaft clearance require a trial; no depth control",
   "validation": {
     "valid_solid": true,
     "solid_count": 1,
     "closed_mesh": true,
     "mesh_components": 1,
-    "triangles": 14464
+    "triangles": 15182
   }
 }
