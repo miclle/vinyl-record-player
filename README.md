@@ -85,6 +85,10 @@
 
 [脚座安装剖视](previews/feet-installation.png) · [底部预览](previews/bottom.png) · [尺寸及安装边界](references/feet/README.md#当前-cad-安装方式)
 
+## 障板加固角码：独立打印件
+
+[四孔加固角码](output/3d-print/baffle-bracket/README.md) 的外廓为 50 × 50 × 50 mm，两安装板和两侧三角加强筋均厚 6 mm，按障板与底板的 72° 内夹角贴合。每面两个 Ø4 mm 法向通孔，共四孔，孔口两端 C0.3 × 45°。提供 [STL](output/3d-print/baffle-bracket/Baffle-bracket.stl)、[STEP](output/3d-print/baffle-bracket/Baffle-bracket.step) 和 [FreeCAD](output/3d-print/baffle-bracket/Baffle-bracket.FCStd)，底面朝下打印。X=170／280 mm 两处候选位置通过当前保存 CAD 的接触和无干涉检查；紧固件与实物强度待确认，角码暂未纳入主装配或图册。
+
 ## 前沿 T 型铝饰条
 
 采用用户选定的 **30 × 30 × 5 mm 铝合金 T 型材**，宽面朝前、筋板向后；安装长 425 mm，两端各暂留 0.5 mm。10 mm 顶板前缘退至 Y=5.2，并加工 25 mm 宽、5.7 mm 深的顶面台阶，余厚 4.3 mm；其中 0.2 mm 为胶层／试装余量假设。饰条上沿仍齐平木箱，闭盖间隙 1 mm。固定孔、胶种、根部圆角与实物公差待确认。

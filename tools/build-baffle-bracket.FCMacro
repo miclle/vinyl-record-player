@@ -1,0 +1,18 @@
+# Independent brace only; does not rebuild or save the main assembly.
+from pathlib import Path
+import sys
+
+import FreeCAD as App
+import FreeCADGui as Gui
+
+tools = Path(__file__).resolve().parent
+if str(tools) not in sys.path:
+    sys.path.insert(0, str(tools))
+source = tools / 'build_baffle_bracket.py'
+namespace = {'__name__': 'baffle_bracket_macro', '__file__': str(source)}
+exec(compile(source.read_bytes(), str(source), 'exec'), namespace)
+namespace['export']()
+doc = App.openDocument(str(namespace['OUTPUT'] / 'Baffle-bracket.FCStd'))
+if not doc.BaffleBracket.ViewObject.Visibility:
+    raise RuntimeError('Saved bracket reopened hidden')
+Gui.getDocument(doc.Name).activeView().fitAll()

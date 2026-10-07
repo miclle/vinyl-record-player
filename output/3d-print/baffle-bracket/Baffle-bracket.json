@@ -1,0 +1,125 @@
+{
+  "design": "Open screw-mounted angle bracket with two triangular side gussets",
+  "units": "mm",
+  "length_mm": 50.0,
+  "width_mm": 50.0,
+  "vertical_height_mm": 50.0,
+  "wall_thickness_mm": 6.0,
+  "print_size_mm": [
+    50.0,
+    50.0,
+    50.0
+  ],
+  "joint_angle_deg": 72.0,
+  "top_setback_mm": 16.245984811645318,
+  "sloping_contact_length_mm": 52.573111211913364,
+  "bottom_contact_area_mm2": 2466.76194972502,
+  "baffle_contact_area_mm2": 2595.417510320688,
+  "hole_diameter_mm": 4.0,
+  "holes_per_face": 2,
+  "hole_count": 4,
+  "transverse_hole_pitch_mm": 25.0,
+  "hole_distance_from_joint_mm": 30.0,
+  "chamfer_mm": 0.3,
+  "chamfer_angle_deg": 45,
+  "chamfer_mouth_diameter_mm": 4.6,
+  "chamfer_scope": "Both mouths of each hole; not a screw-head countersink",
+  "holes": [
+    {
+      "face": "Bottom",
+      "center_mm": [
+        12.5,
+        30.0,
+        0.0
+      ],
+      "inward_axis": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    {
+      "face": "Bottom",
+      "center_mm": [
+        37.5,
+        30.0,
+        0.0
+      ],
+      "inward_axis": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    {
+      "face": "Baffle",
+      "center_mm": [
+        12.5,
+        9.270509831248424,
+        28.531695488854606
+      ],
+      "inward_axis": [
+        0.0,
+        0.9510565162951535,
+        -0.30901699437494745
+      ]
+    },
+    {
+      "face": "Baffle",
+      "center_mm": [
+        37.5,
+        9.270509831248424,
+        28.531695488854606
+      ],
+      "inward_axis": [
+        0.0,
+        0.9510565162951535,
+        -0.30901699437494745
+      ]
+    }
+  ],
+  "volume_mm3": 36804.30205085583,
+  "print_orientation": "Bottom mounting face on bed; Z=0..50 mm; inspect angled holes in slicer",
+  "mounting": "Four diameter-4 mm through holes; screw type, head and engagement unconfirmed",
+  "installation_centers_x_mm": [
+    170.0,
+    280.0
+  ],
+  "installation_root_yz_mm": [
+    26.51462224238267,
+    34.5
+  ],
+  "installation_released": false,
+  "assembly_fit": {
+    "model_sha256": "08db7b527fcfc7747c2f7a8d27714b8630ba7e80b7e7a8a5b4e3a5e7ee5ed833",
+    "positions": [
+      {
+        "center_x_mm": 170.0,
+        "checked_physical_objects": 65,
+        "overlap_mm3": 0,
+        "contact_area_mm2": {
+          "Bottom": 2466.76194972502,
+          "Baffle": 2595.4175103206876
+        }
+      },
+      {
+        "center_x_mm": 280.0,
+        "checked_physical_objects": 65,
+        "overlap_mm3": 0,
+        "contact_area_mm2": {
+          "Bottom": 2466.76194972502,
+          "Baffle": 2595.4175103206876
+        }
+      }
+    ]
+  },
+  "validation": {
+    "valid_solid": true,
+    "solid_count": 1,
+    "cad_step_readback_match": true,
+    "closed_mesh": true,
+    "mesh_components": 1,
+    "triangles": 7636,
+    "mesh_volume_mm3": 36804.46484375
+  }
+}
