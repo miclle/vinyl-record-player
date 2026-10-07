@@ -97,6 +97,10 @@
 
 [旋钮面板与打印说明](output/3d-print/control-panel/README.md)提供 65 × 160 × 3.5 mm 面板、背面两侧 10 mm 定位条、11 个孔与黑白齐平嵌字，总打印厚度 13.5 mm。独立 FCStd／STEP／STL、通用分色 3MF、Bambu 0.4／0.2 mm 项目及 [A4 木板开孔纸样](output/pdf/control-panel-cutting-template-A4.pdf)均已保存。源参数为 `cad/control-panel.json`；未纳入主装配，调整版打印、PCB 与木板窗口配合仍待试装。
 
+## 旋钮面板底板：独立打印件
+
+[阶梯底板与安装说明](output/3d-print/control-panel-backing/README.md)提供 2 mm 底板、左侧 8 mm 加宽区和总高 8 mm 的凸条，打印外廓为 73 × 160 × 8 mm。四个固定孔沿用面板坐标，底部增加 36 × 10 mm PCB 避让口；独立 FCStd／STEP／STL 与验证报告已保存。源参数为 `cad/control-panel-backing.json`；叠放后定位条进入木板 8 mm，螺丝长度、底板强度及 PCB 实物配合待核对。
+
 ## 前沿 T 型铝饰条
 
 采用用户选定的 **30 × 30 × 5 mm 铝合金 T 型材**，宽面朝前、筋板向后；安装长 425 mm，两端各暂留 0.5 mm。10 mm 顶板前缘退至 Y=5.2，并加工 25 mm 宽、5.7 mm 深的顶面台阶，余厚 4.3 mm；其中 0.2 mm 为胶层／试装余量假设。饰条上沿仍齐平木箱，闭盖间隙 1 mm。固定孔、胶种、根部圆角与实物公差待确认。

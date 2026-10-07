@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="980" viewBox="0 0 1200 980">
+<rect width="1200" height="980" fill="#fafafa"/><g font-family="PingFang SC,sans-serif" fill="#263b49">
+<text x="48" y="56" font-size="29" font-weight="600">旋钮面板底板 · 左侧阶梯加宽 8 mm</text>
+<text x="48" y="98" font-size="19">底板厚 2 mm · 左凸条总高 8 / 宽 3 mm · 外廓 73 × 160 × 8 mm</text>
+<text x="48" y="150" font-size="21">底板开孔 · 沿用原面板坐标</text>
+<g transform="translate(90 195) scale(3.8)" stroke="#38586e" stroke-width="0.25" fill="white"><path d="M 0 0 L 65 0 L 65 160 L -8 160 L -8 30 L 0 30 Z M 2.8 12 L 62.2 12 L 62.2 148 L 50.5 148 L 50.5 158 L 14.5 158 L 14.5 148 L 2.8 148 Z" fill-rule="evenodd" fill="#d8e3ea"/><circle cx="9.5" cy="6" r="1.75"/><circle cx="55.5" cy="6" r="1.75"/><circle cx="9.5" cy="154" r="1.75"/><circle cx="55.5" cy="154" r="1.75"/><rect x="-8.0" y="30.0" width="3.0" height="130.0" fill="#b66a39" stroke="#8d4924"/>
+<path d="M -8 30 H 65 M 0 0 V 160" stroke-dasharray="1.5 1" stroke="#8195a2"/>
+<g fill="#263b49" stroke="none" font-size="3.2"><text x="32.5" y="-5" text-anchor="middle">65</text>
+<text x="28.5" y="167" text-anchor="middle">73</text><text x="-12" y="30" text-anchor="end">Y=30</text>
+<text x="32.5" y="75" text-anchor="middle">主窗口 59.4 × 136</text>
+<text x="32.5" y="85" text-anchor="middle">X=2.8 / Y=12</text>
+<text x="32.5" y="152.8" font-size="2.6" text-anchor="middle">下方避让口 36 × 10</text></g></g>
+<text x="510" y="150" font-size="21">叠放示意 · 正面投影</text>
+<g transform="translate(550 195) scale(3.8)" stroke-width="0.25">
+<path d="M 0 0 L 65 0 L 65 160 L -8 160 L -8 30 L 0 30 Z" fill="#d8e3ea" stroke="#38586e"/>
+<rect x="-8.0" y="30.0" width="3.0" height="130.0" fill="#b66a39" stroke="#8d4924"/><rect width="65" height="160" fill="#262a2d" stroke="#111"/>
+<g stroke="#fafafa" fill="#fafafa"><circle cx="9.5" cy="6" r="1.75"/><circle cx="55.5" cy="6" r="1.75"/><circle cx="9.5" cy="154" r="1.75"/><circle cx="55.5" cy="154" r="1.75"/><circle cx="16.5" cy="20.0" r="3.75"/><circle cx="25.0" cy="20.0" r="1.75"/><circle cx="45.0" cy="20.0" r="3.75"/><circle cx="45.0" cy="50.0" r="3.75"/><circle cx="45.0" cy="72.0" r="3.75"/><circle cx="45.0" cy="94.0" r="3.75"/><circle cx="45.0" cy="112.0" r="1.75"/></g>
+<path d="M 3.1 12.3 V 147.7 M 61.9 12.3 V 147.7" fill="none" stroke="#e19c52" stroke-dasharray="1.5 1"/>
+<g fill="white" font-size="3.5"><text x="10" y="51.5">VOLUME</text><text x="10" y="73.5">TREBLE</text>
+<text x="10" y="95.5">BASS</text><text x="10" y="113.5">POWER</text><text x="32.5" y="141" text-anchor="middle" font-size="7">Ariel</text></g></g>
+<g font-size="17"><text x="880" y="215">四孔 Ø3.5，位置不变：</text><text x="880" y="250">(9.5, 6) / (55.5, 6)</text>
+<text x="880" y="285">(9.5, 154) / (55.5, 154)</text><text x="880" y="350">灰蓝：新增底板；棕：凸条</text>
+<text x="880" y="385">黑色：原旋钮面板</text><text x="880" y="420">橙虚线：背面定位条</text>
+<text x="880" y="480">侧面叠放：</text><text x="880" y="515">旋钮面板 3.5 mm</text><text x="880" y="550">底板 2 mm</text><text x="880" y="585">木板 10 mm</text>
+<text x="880" y="650">凸条朝正面，净高 6 mm。</text><text x="880" y="685">X=−8…−5，Y=30…160。</text>
+<text x="880" y="730">原定位条进入木板 8 mm。</text></g>
+<text x="48" y="872" font-size="18">PCB 下方避让：X=14.5…50.5，Y=148…158；下排孔保留完整 Ø7 螺丝头承压范围。</text>
+<text x="48" y="910" font-size="17">PCB 下缘 Y=157 有 1 mm 名义余量；实际板宽、元件和木板原窗口需试装核对。</text>
+<text x="48" y="947" font-size="17">示意文字仅用于识别；新增底板为无文字的单色平板。STL：73 × 160 × 8 mm，底板背面贴热床。</text>
+</g></svg>
