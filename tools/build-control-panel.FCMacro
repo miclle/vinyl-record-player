@@ -1,0 +1,18 @@
+# Independent panel only; does not rebuild or save the main assembly.
+from pathlib import Path
+import sys
+
+import FreeCAD as App
+import FreeCADGui as Gui
+
+tools = Path(__file__).resolve().parent
+if str(tools) not in sys.path:
+    sys.path.insert(0, str(tools))
+source = tools / 'build_control_panel.py'
+namespace = {'__name__': 'control_panel_macro', '__file__': str(source)}
+exec(compile(source.read_bytes(), str(source), 'exec'), namespace)
+namespace['export']()
+doc = App.openDocument(str(namespace['OUTPUT'] / 'Control-panel.FCStd'))
+if not doc.ControlPanel.ViewObject.Visibility:
+    raise RuntimeError('Saved panel reopened hidden')
+Gui.getDocument(doc.Name).activeView().fitAll()

@@ -63,3 +63,6 @@ cad/*.log
 cad/render.done
 
 tmp/
+
+# Bambu Studio command-line scratch result
+/result.json

@@ -93,6 +93,10 @@
 
 [嵌入式三腔顶板](output/3d-print/chamber-roofs/README.md) 按实测尺寸提供左全频 117 × 108 mm、右全频 119 × 110 mm，以及拆成两件的低音 167 × 284 mm 顶板，全频主体厚度 5 mm、低音 8 mm。长方向两侧设 45° 三角固定柱，螺丝从顶面沉孔斜向拧入木竖板；Ø8.2 试用头孔适配实测 Ø7.6 螺钉头。低音接缝为 12 mm 台阶搭接，上下叶各 3.5 mm，搭接面留 1 mm 胶层间隙，需配合连续密封胶。提供四个独立 STL／STEP／FCStd 与[安装方向模型](output/3d-print/chamber-roofs/Chamber-roofs.FCStd)，最大单件打印外廓 167 × 148 × 22 mm。源尺寸独立保存在 `cad/chamber-roofs.json`；未替换整机顶板，实物紧固、气密及相邻机构净空待试装。
 
+## 旋钮面板：独立打印件
+
+[旋钮面板与打印说明](output/3d-print/control-panel/README.md)提供 65 × 160 × 3.5 mm 面板、背面两侧 10 mm 定位条、11 个孔与黑白齐平嵌字，总打印厚度 13.5 mm。独立 FCStd／STEP／STL、通用分色 3MF、Bambu 0.4／0.2 mm 项目及 [A4 木板开孔纸样](output/pdf/control-panel-cutting-template-A4.pdf)均已保存。源参数为 `cad/control-panel.json`；未纳入主装配，调整版打印、PCB 与木板窗口配合仍待试装。
+
 ## 前沿 T 型铝饰条
 
 采用用户选定的 **30 × 30 × 5 mm 铝合金 T 型材**，宽面朝前、筋板向后；安装长 425 mm，两端各暂留 0.5 mm。10 mm 顶板前缘退至 Y=5.2，并加工 25 mm 宽、5.7 mm 深的顶面台阶，余厚 4.3 mm；其中 0.2 mm 为胶层／试装余量假设。饰条上沿仍齐平木箱，闭盖间隙 1 mm。固定孔、胶种、根部圆角与实物公差待确认。

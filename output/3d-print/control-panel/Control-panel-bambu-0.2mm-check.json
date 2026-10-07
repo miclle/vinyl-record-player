@@ -1,0 +1,67 @@
+{
+  "checked_on": "2026-10-07",
+  "project": "Control-panel-bambu-0.2mm.3mf",
+  "sha256": "e450ddcdf3cbfa4a40088e22864f2a761c9184af5e295281df4245869266b094",
+  "gui_slice_completed": true,
+  "printer_profile": "Bambu Lab P2S 0.2 nozzle",
+  "process_profile": "0.10mm Standard @BBL P2S 0.2 nozzle",
+  "settings": {
+    "nozzle_diameter": [
+      "0.2"
+    ],
+    "layer_height": "0.1",
+    "initial_layer_print_height": "0.1",
+    "wall_generator": "arachne",
+    "wall_loops": "4",
+    "line_width": "0.22",
+    "initial_layer_line_width": "0.25",
+    "seam_position": "aligned",
+    "seam_gap": "15%",
+    "flush_into_infill": "0",
+    "flush_into_objects": "0",
+    "enable_prime_tower": "1",
+    "filament_colour": [
+      "#000000",
+      "#FFFFFF"
+    ]
+  },
+  "assignments": [
+    {
+      "part": "Panel",
+      "extruder": 1
+    },
+    {
+      "part": "Letters and Ariel",
+      "extruder": 2
+    }
+  ],
+  "geometry_readback": {
+    "triangle_indices_unchanged": true,
+    "maximum_vertex_difference_mm": [
+      0.0,
+      0.0
+    ]
+  },
+  "gui_preview": {
+    "seam_markers_enabled_white_dots_visible": true,
+    "seam_markers_disabled_white_dots_disappear": true,
+    "view": "bottom",
+    "final_seam_markers_visible": false
+  },
+  "slice_estimate": {
+    "layer_count": 135,
+    "total_time": "4h22m",
+    "total_filament_g": 29.72,
+    "filament_changes": 5
+  },
+  "device_readback": {
+    "registered_nozzle_mm": 0.4,
+    "user_installed_nozzle_mm": 0.2,
+    "correction_requires_printer_touchscreen": true
+  },
+  "limitations": [
+    "Physical 0.2 mm print quality not yet verified",
+    "Printer registered nozzle must be changed to 0.2 mm before printing",
+    "Project stores model and settings; no G-code is delivered"
+  ]
+}
