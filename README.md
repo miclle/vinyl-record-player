@@ -89,6 +89,10 @@
 
 [四孔加固角码](output/3d-print/baffle-bracket/README.md) 的外廓为 50 × 50 × 50 mm，两安装板和两侧三角加强筋均厚 6 mm，按障板与底板的 72° 内夹角贴合。每面两个 Ø4 mm 法向通孔，共四孔，孔口两端 C0.3 × 45°。提供 [STL](output/3d-print/baffle-bracket/Baffle-bracket.stl)、[STEP](output/3d-print/baffle-bracket/Baffle-bracket.step) 和 [FreeCAD](output/3d-print/baffle-bracket/Baffle-bracket.FCStd)，底面朝下打印。X=170／280 mm 两处候选位置通过当前保存 CAD 的接触和无干涉检查；紧固件与实物强度待确认，角码暂未纳入主装配或图册。
 
+## 三腔顶板：独立打印件
+
+[嵌入式三腔顶板](output/3d-print/chamber-roofs/README.md) 按实测尺寸提供左全频 117 × 108 mm、右全频 119 × 110 mm，以及拆成两件的低音 167 × 284 mm 顶板，全频主体厚度 5 mm、低音 8 mm。长方向两侧设 45° 三角固定柱，螺丝从顶面沉孔斜向拧入木竖板；Ø8.2 试用头孔适配实测 Ø7.6 螺钉头。低音接缝为 12 mm 台阶搭接，上下叶各 3.5 mm，搭接面留 1 mm 胶层间隙，需配合连续密封胶。提供四个独立 STL／STEP／FCStd 与[安装方向模型](output/3d-print/chamber-roofs/Chamber-roofs.FCStd)，最大单件打印外廓 167 × 148 × 22 mm。源尺寸独立保存在 `cad/chamber-roofs.json`；未替换整机顶板，实物紧固、气密及相邻机构净空待试装。
+
 ## 前沿 T 型铝饰条
 
 采用用户选定的 **30 × 30 × 5 mm 铝合金 T 型材**，宽面朝前、筋板向后；安装长 425 mm，两端各暂留 0.5 mm。10 mm 顶板前缘退至 Y=5.2，并加工 25 mm 宽、5.7 mm 深的顶面台阶，余厚 4.3 mm；其中 0.2 mm 为胶层／试装余量假设。饰条上沿仍齐平木箱，闭盖间隙 1 mm。固定孔、胶种、根部圆角与实物公差待确认。

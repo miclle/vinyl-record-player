@@ -1,0 +1,45 @@
+{
+  "units": "mm",
+  "revision": "v2-5mm-satellites-8mm-woofer-1mm-glue-gap",
+  "measured": {
+    "left_width": 117.0,
+    "left_length": 108.0,
+    "right_width": 119.0,
+    "right_length": 110.0,
+    "woofer_width": 167.0,
+    "woofer_length": 284.0,
+    "satellite_plate_thickness": 5.0,
+    "woofer_plate_thickness": 8.0,
+    "lap_glue_gap": 1.0,
+    "screw_diameter": 3.5,
+    "screw_length": 18.2,
+    "screw_head_diameter": 7.6,
+    "screw_angle_from_vertical_deg": 45.0,
+    "satellite_posts_per_side": 2,
+    "woofer_posts_per_side": 4,
+    "printer_volume": [256.0, 256.0, 256.0]
+  },
+  "trial": {
+    "mount_total_height": 22.0,
+    "post_along_edge_width": 12.0,
+    "head_seat_inset": 8.5,
+    "head_seat_below_top": 5.5,
+    "head_pocket_diameter": 8.2,
+    "hole_diameter": 4.0,
+    "hole_entry_chamfer": 0.3,
+    "satellite_end_inset": 20.0,
+    "woofer_hole_y": [22.0, 104.0, 180.0, 262.0],
+    "split_y": 142.0,
+    "lap_length": 12.0,
+    "joint_end_clearance": 0.2
+  },
+  "installation_released": false,
+  "notes": [
+    "User dimensions describe independent rectangular plates, not a replacement of the saved main CAD roof.",
+    "Plate is inserted inside the chamber. Each triangular post sits under its side edge, with a flat vertical face touching the upright wooden wall. Screw axis points outward and downward at 45 degrees, from the top pocket into that wall.",
+    "Post size, head pocket, hole positions, bore clearance and joint clearance are trial design values. The supplied 45 degree orientation and 7.6 mm head diameter are confirmed; head height and underside shape are not.",
+    "Nominal wood engagement assumes the reported screw length is measured below its head; no washer or gasket allowance is included.",
+    "The lap and perimeter require continuous sealing; a dry lap or screw head is not an airtight seal.",
+    "No spindle holes or floating-deck support recesses are inferred from the main assembly."
+  ]
+}

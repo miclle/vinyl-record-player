@@ -1,0 +1,586 @@
+{
+  "parameters": {
+    "units": "mm",
+    "revision": "v2-5mm-satellites-8mm-woofer-1mm-glue-gap",
+    "measured": {
+      "left_width": 117.0,
+      "left_length": 108.0,
+      "right_width": 119.0,
+      "right_length": 110.0,
+      "woofer_width": 167.0,
+      "woofer_length": 284.0,
+      "satellite_plate_thickness": 5.0,
+      "woofer_plate_thickness": 8.0,
+      "lap_glue_gap": 1.0,
+      "screw_diameter": 3.5,
+      "screw_length": 18.2,
+      "screw_head_diameter": 7.6,
+      "screw_angle_from_vertical_deg": 45.0,
+      "satellite_posts_per_side": 2,
+      "woofer_posts_per_side": 4,
+      "printer_volume": [
+        256.0,
+        256.0,
+        256.0
+      ]
+    },
+    "trial": {
+      "mount_total_height": 22.0,
+      "post_along_edge_width": 12.0,
+      "head_seat_inset": 8.5,
+      "head_seat_below_top": 5.5,
+      "head_pocket_diameter": 8.2,
+      "hole_diameter": 4.0,
+      "hole_entry_chamfer": 0.3,
+      "satellite_end_inset": 20.0,
+      "woofer_hole_y": [
+        22.0,
+        104.0,
+        180.0,
+        262.0
+      ],
+      "split_y": 142.0,
+      "lap_length": 12.0,
+      "joint_end_clearance": 0.2
+    },
+    "installation_released": false,
+    "notes": [
+      "User dimensions describe independent rectangular plates, not a replacement of the saved main CAD roof.",
+      "Plate is inserted inside the chamber. Each triangular post sits under its side edge, with a flat vertical face touching the upright wooden wall. Screw axis points outward and downward at 45 degrees, from the top pocket into that wall.",
+      "Post size, head pocket, hole positions, bore clearance and joint clearance are trial design values. The supplied 45 degree orientation and 7.6 mm head diameter are confirmed; head height and underside shape are not.",
+      "Nominal wood engagement assumes the reported screw length is measured below its head; no washer or gasket allowance is included.",
+      "The lap and perimeter require continuous sealing; a dry lap or screw head is not an airtight seal.",
+      "No spindle holes or floating-deck support recesses are inferred from the main assembly."
+    ]
+  },
+  "validation": {
+    "FullrangeLeft": {
+      "valid_solid": true,
+      "solid_count": 1,
+      "cad_step_readback_match": true,
+      "closed_mesh": true,
+      "mesh_components": 1,
+      "non_manifold": false,
+      "self_intersections": false,
+      "triangles": 17690,
+      "cad_volume_mm3": 67866.32590839795,
+      "mesh_volume_mm3": 67866.43453576557,
+      "print_size_mm": [
+        117.0,
+        108.0,
+        22.000000000000014
+      ]
+    },
+    "FullrangeRight": {
+      "valid_solid": true,
+      "solid_count": 1,
+      "cad_step_readback_match": true,
+      "closed_mesh": true,
+      "mesh_components": 1,
+      "non_manifold": false,
+      "self_intersections": false,
+      "triangles": 17690,
+      "cad_volume_mm3": 70136.32590840154,
+      "mesh_volume_mm3": 70136.43453576535,
+      "print_size_mm": [
+        119.0,
+        110.0,
+        22.000000000000014
+      ]
+    },
+    "WooferFront": {
+      "valid_solid": true,
+      "solid_count": 1,
+      "cad_step_readback_match": true,
+      "closed_mesh": true,
+      "mesh_components": 1,
+      "non_manifold": false,
+      "self_intersections": false,
+      "triangles": 17700,
+      "cad_volume_mm3": 191164.32590850923,
+      "mesh_volume_mm3": 191164.43442489553,
+      "print_size_mm": [
+        167.0,
+        148.0,
+        22.000000000000014
+      ]
+    },
+    "WooferRear": {
+      "valid_solid": true,
+      "solid_count": 1,
+      "cad_step_readback_match": true,
+      "closed_mesh": true,
+      "mesh_components": 1,
+      "non_manifold": false,
+      "self_intersections": false,
+      "triangles": 17700,
+      "cad_volume_mm3": 190897.12590850977,
+      "mesh_volume_mm3": 190897.23854046685,
+      "print_size_mm": [
+        167.00000000000003,
+        147.8,
+        22.000000000000018
+      ]
+    }
+  },
+  "assembled_woofer_size_mm": [
+    167.0,
+    284.0,
+    8.0
+  ],
+  "nominal_wood_engagement_mm": 6.17918471982869,
+  "maximum_flush_cylindrical_head_height_mm": 3.9781745930520236,
+  "lap_leaf_thickness_mm": 3.5,
+  "print_orientation": "Installed top on bed, downward posts become upward; rigid 180 degree X rotation, never mirror",
+  "rear_lap_support_required": true,
+  "parts": {
+    "FullrangeLeft": {
+      "nominal_size_mm": [
+        117.0,
+        108.0,
+        5.0
+      ],
+      "print_size_mm": [
+        117.0,
+        108.0,
+        22.000000000000014
+      ],
+      "holes_installed": [
+        {
+          "side": "Left",
+          "head_seat_center_mm": [
+            8.5,
+            20.0,
+            -0.5
+          ],
+          "outward_down_axis": [
+            -0.7071067811865475,
+            0,
+            -0.7071067811865475
+          ],
+          "wall_entry_mm": [
+            0,
+            20.0,
+            -9.0
+          ],
+          "top_opening_center_mm": [
+            14.0,
+            20.0,
+            5.0
+          ]
+        },
+        {
+          "side": "Left",
+          "head_seat_center_mm": [
+            8.5,
+            88.0,
+            -0.5
+          ],
+          "outward_down_axis": [
+            -0.7071067811865475,
+            0,
+            -0.7071067811865475
+          ],
+          "wall_entry_mm": [
+            0,
+            88.0,
+            -9.0
+          ],
+          "top_opening_center_mm": [
+            14.0,
+            88.0,
+            5.0
+          ]
+        },
+        {
+          "side": "Right",
+          "head_seat_center_mm": [
+            108.5,
+            20.0,
+            -0.5
+          ],
+          "outward_down_axis": [
+            0.7071067811865475,
+            0,
+            -0.7071067811865475
+          ],
+          "wall_entry_mm": [
+            117.0,
+            20.0,
+            -9.0
+          ],
+          "top_opening_center_mm": [
+            103.0,
+            20.0,
+            5.0
+          ]
+        },
+        {
+          "side": "Right",
+          "head_seat_center_mm": [
+            108.5,
+            88.0,
+            -0.5
+          ],
+          "outward_down_axis": [
+            0.7071067811865475,
+            0,
+            -0.7071067811865475
+          ],
+          "wall_entry_mm": [
+            117.0,
+            88.0,
+            -9.0
+          ],
+          "top_opening_center_mm": [
+            103.0,
+            88.0,
+            5.0
+          ]
+        }
+      ],
+      "mounting_datums": {
+        "post_depth_mm": 17.0,
+        "head_seat_z_mm": -0.5,
+        "wall_exit_z_mm": -9.0
+      },
+      "post_count": 4
+    },
+    "FullrangeRight": {
+      "nominal_size_mm": [
+        119.0,
+        110.0,
+        5.0
+      ],
+      "print_size_mm": [
+        119.0,
+        110.0,
+        22.000000000000014
+      ],
+      "holes_installed": [
+        {
+          "side": "Left",
+          "head_seat_center_mm": [
+            8.5,
+            20.0,
+            -0.5
+          ],
+          "outward_down_axis": [
+            -0.7071067811865475,
+            0,
+            -0.7071067811865475
+          ],
+          "wall_entry_mm": [
+            0,
+            20.0,
+            -9.0
+          ],
+          "top_opening_center_mm": [
+            14.0,
+            20.0,
+            5.0
+          ]
+        },
+        {
+          "side": "Left",
+          "head_seat_center_mm": [
+            8.5,
+            90.0,
+            -0.5
+          ],
+          "outward_down_axis": [
+            -0.7071067811865475,
+            0,
+            -0.7071067811865475
+          ],
+          "wall_entry_mm": [
+            0,
+            90.0,
+            -9.0
+          ],
+          "top_opening_center_mm": [
+            14.0,
+            90.0,
+            5.0
+          ]
+        },
+        {
+          "side": "Right",
+          "head_seat_center_mm": [
+            110.5,
+            20.0,
+            -0.5
+          ],
+          "outward_down_axis": [
+            0.7071067811865475,
+            0,
+            -0.7071067811865475
+          ],
+          "wall_entry_mm": [
+            119.0,
+            20.0,
+            -9.0
+          ],
+          "top_opening_center_mm": [
+            105.0,
+            20.0,
+            5.0
+          ]
+        },
+        {
+          "side": "Right",
+          "head_seat_center_mm": [
+            110.5,
+            90.0,
+            -0.5
+          ],
+          "outward_down_axis": [
+            0.7071067811865475,
+            0,
+            -0.7071067811865475
+          ],
+          "wall_entry_mm": [
+            119.0,
+            90.0,
+            -9.0
+          ],
+          "top_opening_center_mm": [
+            105.0,
+            90.0,
+            5.0
+          ]
+        }
+      ],
+      "mounting_datums": {
+        "post_depth_mm": 17.0,
+        "head_seat_z_mm": -0.5,
+        "wall_exit_z_mm": -9.0
+      },
+      "post_count": 4
+    },
+    "WooferFront": {
+      "nominal_size_mm": [
+        167.0,
+        148.0,
+        8.0
+      ],
+      "print_size_mm": [
+        167.0,
+        148.0,
+        22.000000000000014
+      ],
+      "holes_installed": [
+        {
+          "side": "Left",
+          "head_seat_center_mm": [
+            8.5,
+            22.0,
+            2.5
+          ],
+          "outward_down_axis": [
+            -0.7071067811865475,
+            0,
+            -0.7071067811865475
+          ],
+          "wall_entry_mm": [
+            0,
+            22.0,
+            -6.0
+          ],
+          "top_opening_center_mm": [
+            14.0,
+            22.0,
+            8.0
+          ]
+        },
+        {
+          "side": "Left",
+          "head_seat_center_mm": [
+            8.5,
+            104.0,
+            2.5
+          ],
+          "outward_down_axis": [
+            -0.7071067811865475,
+            0,
+            -0.7071067811865475
+          ],
+          "wall_entry_mm": [
+            0,
+            104.0,
+            -6.0
+          ],
+          "top_opening_center_mm": [
+            14.0,
+            104.0,
+            8.0
+          ]
+        },
+        {
+          "side": "Right",
+          "head_seat_center_mm": [
+            158.5,
+            22.0,
+            2.5
+          ],
+          "outward_down_axis": [
+            0.7071067811865475,
+            0,
+            -0.7071067811865475
+          ],
+          "wall_entry_mm": [
+            167.0,
+            22.0,
+            -6.0
+          ],
+          "top_opening_center_mm": [
+            153.0,
+            22.0,
+            8.0
+          ]
+        },
+        {
+          "side": "Right",
+          "head_seat_center_mm": [
+            158.5,
+            104.0,
+            2.5
+          ],
+          "outward_down_axis": [
+            0.7071067811865475,
+            0,
+            -0.7071067811865475
+          ],
+          "wall_entry_mm": [
+            167.0,
+            104.0,
+            -6.0
+          ],
+          "top_opening_center_mm": [
+            153.0,
+            104.0,
+            8.0
+          ]
+        }
+      ],
+      "mounting_datums": {
+        "post_depth_mm": 14.0,
+        "head_seat_z_mm": 2.5,
+        "wall_exit_z_mm": -6.0
+      },
+      "post_count": 4
+    },
+    "WooferRear": {
+      "nominal_size_mm": [
+        167.0,
+        147.8,
+        8.0
+      ],
+      "print_size_mm": [
+        167.00000000000003,
+        147.8,
+        22.000000000000018
+      ],
+      "holes_installed": [
+        {
+          "side": "Left",
+          "head_seat_center_mm": [
+            8.5,
+            180.0,
+            2.5
+          ],
+          "outward_down_axis": [
+            -0.7071067811865475,
+            0,
+            -0.7071067811865475
+          ],
+          "wall_entry_mm": [
+            0,
+            180.0,
+            -6.0
+          ],
+          "top_opening_center_mm": [
+            14.0,
+            180.0,
+            8.0
+          ]
+        },
+        {
+          "side": "Left",
+          "head_seat_center_mm": [
+            8.5,
+            262.0,
+            2.5
+          ],
+          "outward_down_axis": [
+            -0.7071067811865475,
+            0,
+            -0.7071067811865475
+          ],
+          "wall_entry_mm": [
+            0,
+            262.0,
+            -6.0
+          ],
+          "top_opening_center_mm": [
+            14.0,
+            262.0,
+            8.0
+          ]
+        },
+        {
+          "side": "Right",
+          "head_seat_center_mm": [
+            158.5,
+            180.0,
+            2.5
+          ],
+          "outward_down_axis": [
+            0.7071067811865475,
+            0,
+            -0.7071067811865475
+          ],
+          "wall_entry_mm": [
+            167.0,
+            180.0,
+            -6.0
+          ],
+          "top_opening_center_mm": [
+            153.0,
+            180.0,
+            8.0
+          ]
+        },
+        {
+          "side": "Right",
+          "head_seat_center_mm": [
+            158.5,
+            262.0,
+            2.5
+          ],
+          "outward_down_axis": [
+            0.7071067811865475,
+            0,
+            -0.7071067811865475
+          ],
+          "wall_entry_mm": [
+            167.0,
+            262.0,
+            -6.0
+          ],
+          "top_opening_center_mm": [
+            153.0,
+            262.0,
+            8.0
+          ]
+        }
+      ],
+      "mounting_datums": {
+        "post_depth_mm": 14.0,
+        "head_seat_z_mm": 2.5,
+        "wall_exit_z_mm": -6.0
+      },
+      "post_count": 4
+    }
+  }
+}

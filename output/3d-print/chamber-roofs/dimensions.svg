@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1100" viewBox="0 0 1400 1100">
+<rect width="1400" height="1100" fill="#f5f4ef"/>
+<g font-family="PingFang SC, sans-serif" fill="#26343d">
+<text x="55" y="55" font-size="30" font-weight="bold">三腔顶板 · 实测尺寸 / 独立打印件</text>
+<text x="55" y="90" font-size="18">单位 mm · 全频厚 5 / 低音厚 8 · 45° 斜柱与通孔 · 螺钉斜向拧入竖板</text>
+<text x="90" y="140" font-size="22" font-weight="bold">左全频</text>
+<rect x="90" y="175" width="245.70000000000002" height="226.8" fill="#9dbecd" stroke="#364750" stroke-width="2"/>
+<ellipse cx="119.4" cy="217.0" rx="12.176378772032347" ry="8.61" fill="#f5f4ef" stroke="#364750"/>
+<ellipse cx="119.4" cy="359.8" rx="12.176378772032347" ry="8.61" fill="#f5f4ef" stroke="#364750"/>
+<ellipse cx="306.3" cy="217.0" rx="12.176378772032347" ry="8.61" fill="#f5f4ef" stroke="#364750"/>
+<ellipse cx="306.3" cy="359.8" rx="12.176378772032347" ry="8.61" fill="#f5f4ef" stroke="#364750"/>
+<text x="212.85000000000002" y="431.8" font-size="19" text-anchor="middle">宽 117</text>
+<text x="349.70000000000005" y="288.4" font-size="18">长 108</text>
+<text x="90" y="165" font-size="15">前边 / Y=0</text>
+<text x="450" y="140" font-size="22" font-weight="bold">右全频</text>
+<rect x="450" y="175" width="249.9" height="231.0" fill="#9dcabc" stroke="#364750" stroke-width="2"/>
+<ellipse cx="479.4" cy="217.0" rx="12.176378772032347" ry="8.61" fill="#f5f4ef" stroke="#364750"/>
+<ellipse cx="479.4" cy="364.0" rx="12.176378772032347" ry="8.61" fill="#f5f4ef" stroke="#364750"/>
+<ellipse cx="670.5" cy="217.0" rx="12.176378772032347" ry="8.61" fill="#f5f4ef" stroke="#364750"/>
+<ellipse cx="670.5" cy="364.0" rx="12.176378772032347" ry="8.61" fill="#f5f4ef" stroke="#364750"/>
+<text x="574.95" y="436.0" font-size="19" text-anchor="middle">宽 119</text>
+<text x="713.9" y="290.5" font-size="18">长 110</text>
+<text x="450" y="165" font-size="15">前边 / Y=0</text>
+<text x="930" y="125" font-size="22" font-weight="bold">低音 · 前后两件</text>
+<rect x="930" y="160" width="267.2" height="454.40000000000003" fill="#dbc091" stroke="#364750" stroke-width="2"/>
+<ellipse cx="952.4" cy="195.2" rx="9.277240969167503" ry="6.56" fill="#f5f4ef" stroke="#364750"/>
+<ellipse cx="952.4" cy="326.4" rx="9.277240969167503" ry="6.56" fill="#f5f4ef" stroke="#364750"/>
+<ellipse cx="952.4" cy="448.0" rx="9.277240969167503" ry="6.56" fill="#f5f4ef" stroke="#364750"/>
+<ellipse cx="952.4" cy="579.2" rx="9.277240969167503" ry="6.56" fill="#f5f4ef" stroke="#364750"/>
+<ellipse cx="1174.8" cy="195.2" rx="9.277240969167503" ry="6.56" fill="#f5f4ef" stroke="#364750"/>
+<ellipse cx="1174.8" cy="326.4" rx="9.277240969167503" ry="6.56" fill="#f5f4ef" stroke="#364750"/>
+<ellipse cx="1174.8" cy="448.0" rx="9.277240969167503" ry="6.56" fill="#f5f4ef" stroke="#364750"/>
+<ellipse cx="1174.8" cy="579.2" rx="9.277240969167503" ry="6.56" fill="#f5f4ef" stroke="#364750"/>
+<text x="1063.6" y="644.4000000000001" font-size="19" text-anchor="middle">宽 167</text>
+<text x="1211.2" y="387.20000000000005" font-size="18">长 284</text>
+<text x="930" y="150" font-size="15">前边 / Y=0</text>
+<path d="M930 377.6 h267.2" stroke="#705b37" stroke-dasharray="6 4"/>
+<path d="M930 396.8 h267.2" stroke="#705b37" stroke-dasharray="6 4"/>
+<text x="962" y="372.20000000000005" font-size="16">12 mm 台阶搭接区</text>
+<text x="85" y="480" font-size="19">全频每侧 2 柱；低音每侧 4 柱。</text>
+<text x="85" y="510" font-size="18">顶面沉孔中心距侧边 14；全频距前后端 20。</text>
+<text x="85" y="540" font-size="18">低音孔距前边 Y=22 / 104 / 180 / 262。</text>
+<text x="55" y="685" font-size="23" font-weight="bold">安装剖面 · 斜柱侧面贴竖板内壁</text>
+<rect x="85" y="750" width="100" height="230" fill="#c5ab87" stroke="#705b37"/>
+<rect x="185" y="760" width="235" height="50.0" fill="#9dbecd" stroke="#364750"/>
+<path d="M185 810.0 H355.0 L185 980 Z" fill="#9dbecd" stroke="#364750"/>
+<path d="M325 760 L270 815" stroke="#f5f4ef" stroke-width="82"/>
+<path d="M270 815 L185 900" stroke="#f5f4ef" stroke-width="40"/>
+<path d="M270 815 L141.3 943.7" stroke="#536770" stroke-width="6"/>
+<text x="440" y="795" font-size="18">顶面开口 → 45° 斜向沉孔</text>
+<text x="440" y="830" font-size="18">头径 Ø7.6 / 沉孔 Ø8.2 / 通孔 Ø4</text>
+<text x="440" y="870" font-size="18">全频斜柱：17 × 12 × 17（试用值）</text>
+<text x="440" y="900" font-size="18">低音斜柱：14 × 12 × 14（试用值）</text>
+<text x="440" y="935" font-size="18">柱侧面贴竖板；螺丝斜着拧入竖板</text>
+<text x="440" y="970" font-size="18">18.2 杆长：名义入木约 6.18</text>
+<text x="760" y="685" font-size="23" font-weight="bold">低音搭接剖面 · 示意放大</text>
+<path d="M780 775 H1180 V818.75 H980 V875 H780 Z" fill="#c9a367" stroke="#705b37" stroke-width="2"/>
+<path d="M982 831.25 H1182 V775 H1340 V875 H982 Z" fill="#e2c994" stroke="#705b37" stroke-width="2"/>
+<path d="M981 875 V826 H1181 V775" fill="none" stroke="#c96348" stroke-width="3"/>
+<text x="780" y="925" font-size="18">搭接 12；上下叶各 3.5；搭接面胶缝 1</text>
+<text x="780" y="955" font-size="18">红线：连续胶层；总厚 8；端部台阶间隙 0.2</text>
+<text x="55" y="1040" font-size="17">柱尺寸、沉孔、孔位及配合间隙为试用设计值；周边和螺钉处也需密封。实物强度和气密待试装。</text>
+</g></svg>

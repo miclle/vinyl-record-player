@@ -1,0 +1,18 @@
+# Independent chamber plates only; never rebuilds or saves the main assembly.
+from pathlib import Path
+import sys
+
+import FreeCAD as App
+import FreeCADGui as Gui
+
+tools = Path(__file__).resolve().parent
+if str(tools) not in sys.path:
+    sys.path.insert(0, str(tools))
+source = tools / 'build_chamber_roofs.py'
+namespace = {'__name__': 'chamber_roofs_macro', '__file__': str(source)}
+exec(compile(source.read_bytes(), str(source), 'exec'), namespace)
+namespace['export']()
+doc = App.openDocument(str(namespace['OUTPUT'] / 'Chamber-roofs.FCStd'))
+if not all(obj.ViewObject.Visibility for obj in doc.Objects if obj.TypeId == 'Part::Feature'):
+    raise RuntimeError('Saved roof plate reopened hidden')
+Gui.getDocument(doc.Name).activeView().fitAll()

@@ -1,5 +1,7 @@
 # 当前工作交接
 
+- **独立三腔打印顶板（2026-10-05）：** 已按实测左 117 × 108、右 119 × 110、低音 167 × 284 mm 制作 [四个独立打印件](../output/3d-print/chamber-roofs/README.md)，最新版本为全频主体厚 5 mm、低音 8 mm；低音为 12 mm 台阶搭接，上下叶各厚 3.5 mm，搭接面留 1 mm 胶层间隙，两端台阶仍留 0.2 mm。45° 三角柱贴木竖板，螺丝从顶面斜向拧入竖板；按 3.5 × 18.2、头径 7.6 mm 设计 Ø4 通孔与 Ø8.2 试用头孔，名义入木约 6.18 mm。减薄后头座随顶面下移，板下斜柱深度为全频 17／低音 14 mm，总打印高仍为 22 mm。源参数为 `cad/chamber-roofs.json`，入口为 `tools/build-chamber-roofs.FCMacro`；10 项专项检查通过，最大单件 167 × 148 × 22 mm。实际头高／底面形状、斜柱与喇叭避让、紧固和气密待试装；该方案未替换主装配顶板、未继承机芯／台面孔位，主装配图册不变。
+
 - **状态：** 截至 2026-09-30，唯一主装配为 `cad/record-player.FCStd`，FreeCAD 文档名为 `RecordPlayerAssembly`；当前保存版本已包含 Ariel 铭牌，提交为 `ab2cd96`。结构参数版本 `v0.11-10x6-grille-slats`，机芯参数版本 `v0.6-centered-mechanism`。三册最终为19／11／14页，共44页；第一册含17张A3图纸和2张原尺寸A2导览。安装与电气仍未放行。
 - **LOGO 当前方向：** 用户选择先尝试一体打印的 [Ariel 镂空雕刻定位支架](../output/3d-print/README.md)，配合微型雕刻机在裸铝饰条上磨字；打印文件与几何验证已交付，实物打印和试刻尚未进行。该工具不计入装配。主 CAD 仍保留独立激光标记铭牌及 [Sigmar One 矢量稿与字体授权](../references/nameplate/README.md)，尚未改成直接磨字后的饰条。
 - **规范入口：** 主模型与闭盖交换文件为 `cad/record-player.FCStd`／`cad/record-player.step`，机芯参数为 `cad/mechanism.json`，专题说明为 `docs/mechanism.md`，机芯预览统一使用 `previews/mechanism-*.png`。旧入口不再保留在工作树中。
