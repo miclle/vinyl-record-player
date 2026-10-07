@@ -159,6 +159,8 @@ class Book:
             self.text(x+w-5,y+13,'开孔定位 '+refs[card['key']],8,DIM,'right')
         main=card['primary']
         ox,oy,scale=self.view(card['views'][main],main,x+5,y+19,w-10,100)
+        if 'cut_profile' in card:
+            self.divider_cut_dimensions(card['cut_profile'],ox,oy,scale)
         for feature in card.get('holes',[]):
             cx=ox+feature['u_mm']*scale
             cy=oy+(card['views'][main]['size_mm'][1]-feature['v_mm'])*scale
@@ -186,6 +188,29 @@ class Book:
             yy=self.paragraph(x+5,yy,note,w-10,8.5,INK,4)
         if yy>y+244:
             raise ValueError(f'Notes overflow: {card["key"]}: {yy-y}')
+
+
+    def divider_cut_dimensions(self,cut,ox,oy,scale):
+        setback=cut['setback_mm']*scale
+        length=cut['bottom_length_mm']*scale
+        height=cut['height_mm']*scale
+        self.hdim(ox+setback,oy-6,cut['top_length_mm']*scale,
+                  '上边 '+num(cut['top_length_mm']),oy)
+        self.hdim(ox,oy-15,setback,'退让 '+num(cut['setback_mm']),oy)
+        # Dashed vertical datum exposes the removed triangle without adding a solid edge.
+        self.c.saveState();self.c.setDash(2,2)
+        self.line(ox,oy,ox,oy+height,MUTED)
+        self.c.restoreState()
+        mx,my=ox+setback/2,oy+height/2
+        self.line(mx,my,mx+12,my-4,DIM)
+        self.text(mx+13,my-4,'斜边 '+num(cut['slant_length_mm']),8,DIM)
+        self.text(mx+13,my+1,'偏竖直 '+num(cut['from_vertical_deg'])+'°',8,DIM)
+        self.text(ox+setback+4,oy+5,num(cut['top_corner_deg'])+'°',8,DIM)
+        self.text(ox+5,oy+height-3,num(cut['bottom_corner_deg'])+'°',8,DIM)
+        self.text(ox+length-3,oy+5,'90°',7,DIM,'right')
+        self.text(ox+length-3,oy+height-3,'90°',7,DIM,'right')
+        self.text(ox,oy+height+14,'前 / 切割端',8,MUTED)
+        self.text(ox+length,oy+height+14,'后 / 定位基准',8,MUTED,'right')
 
 
 def assembly_page(book,assembly,views,title,code,notes):

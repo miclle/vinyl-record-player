@@ -105,6 +105,11 @@ data=drawing_data.collect(root)
             self.assertIn('Slat01',first.pages[8].extract_text())
             self.assertIn('A-P07',first.pages[11].extract_text())
             self.assertIn('FootMount0',first.pages[11].extract_text())
+            second=PdfReader(Path(tmp)/summaries[1]['file'])
+            divider=next(p.extract_text() for p in second.pages
+                         if 'AcousticDividerLeft' in p.extract_text())
+            for value in ('311.485','282.243','29.243','94.632','18°','72°','108°','0°'):
+                self.assertIn(value,divider)
         self.assertEqual(before,{p:hashlib.sha256(p.read_bytes()).hexdigest() for p in sources})
 
     def test_svg_pixel_units_do_not_shrink_geometry_relative_to_dimensions(self):

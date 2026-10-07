@@ -30,6 +30,20 @@ def bounds(shape):
     return [round(v, 6) for v in (b.XLength, b.YLength, b.ZLength)], [round(v, 6) for v in (b.XMin, b.YMin, b.ZMin)]
 
 
+def divider_cut_profile(shape):
+    """Read the front cut endpoints from the saved extruded panel."""
+    b = shape.optimalBoundingBox(False)
+    bottom_y = min(v.Point.y for v in shape.Vertexes if abs(v.Point.z-b.ZMin) < 1e-6)
+    top_y = min(v.Point.y for v in shape.Vertexes if abs(v.Point.z-b.ZMax) < 1e-6)
+    setback = top_y-bottom_y
+    angle = math.degrees(math.atan2(setback, b.ZLength))
+    return {'bottom_length_mm': b.YMax-bottom_y, 'top_length_mm': b.YMax-top_y,
+            'height_mm': b.ZLength, 'setback_mm': setback,
+            'slant_length_mm': math.hypot(setback, b.ZLength),
+            'from_vertical_deg': angle, 'bottom_corner_deg': 90-angle,
+            'top_corner_deg': 90+angle}
+
+
 def project_shape(shape, view):
     # Right-handed rotations: projected horizontal / vertical axes are explicit.
     rotations = {
@@ -200,6 +214,14 @@ def collect(root=ROOT, project=True):
             add('AcousticRear',2,ac['partition_thickness'],['此对象包含左右两块独立后板，分别绘制。','两块均由原实体直接读取，不以跨空区总包络下料。'],split=True)
             front_bottom=16+ac['baffle_thickness']/sin
             add('AcousticDividerLeft',2,ac['partition_thickness'],[f'前缘倾斜 {f(90-p["front_angle"])}°；后缘 Y={f(D-t)}。',f'下前角 Y={f(front_bottom)}；上前角 Y={f(front_bottom+(ac["roof_bottom_z"]-zlo)/math.tan(math.radians(p["front_angle"])))}。','两块同形；板厚方向 X。整数备料后按斜前缘精确修切。'],['AcousticDividerRight'])
+            cut = divider_cut_profile(base.AcousticDividerLeft.Shape)
+            cards[-1]['cut_profile'] = cut
+            cards[-1]['notes'] = [
+                f'成品：下边 {f(cut["bottom_length_mm"])}；上边 {f(cut["top_length_mm"])}；高 {f(cut["height_mm"])}；厚 {f(ac["partition_thickness"])}。两块同形。',
+                f'以后缘为共同基准：沿下边向前量 {f(cut["bottom_length_mm"])}，沿上边向前量 {f(cut["top_length_mm"])}；连接两点切前缘。',
+                f'先修矩形长至 {f(cut["bottom_length_mm"])}；再切去前上角底 {f(cut["setback_mm"])} × 高 {f(cut["height_mm"])} 的三角料。',
+                f'板面内切线偏离竖直 {f(cut["from_vertical_deg"])}°；切面垂直板面，贯穿板厚；锯片倾斜 0°。',
+                '尺寸为 CAD 名义值；锯缝留在废料侧，公差与装配余量另核。当前无连接孔。']
             add('BearingPocket',2,2,['外径 Ø28；内径 Ø24；底厚 2；杯顶开口。','仅适配基线通用轴承；当前机芯安装时须重新核对。'])
             add('BassPort',2,p['bass_port']['wall_thickness'],[f"通径 Ø{f(p['bass_port']['inner_diameter'])}；管壁 {f(p['bass_port']['wall_thickness'])}；总长 {f(p['bass_port']['length'])}（含法兰）。",f"法兰 Ø{f(p['bass_port']['flange_diameter'])} × {f(p['bass_port']['flange_thickness'])}；主体长 {f(p['bass_port']['length']-p['bass_port']['flange_thickness'])}。",'长度是当前试验初值，非已验证声学调谐。'])
             deck_x=t+p['deck_side_clearance']

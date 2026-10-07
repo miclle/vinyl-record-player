@@ -98,6 +98,13 @@ class DrawingPackTests(unittest.TestCase):
         self.assertEqual(cards['Baffle']['stock_mm'], [426.0, 98.0, 10.0])
         self.assertEqual(cards['Slat01']['stock_mm'], [426.0, 10.0, 6.0])
         self.assertEqual(cards['DustCover']['thickness_mm'], 3.0)
+        cut=cards['AcousticDividerLeft']['cut_profile']
+        self.assertAlmostEqual(cut['bottom_length_mm'],311.485377758,places=6)
+        self.assertAlmostEqual(cut['top_length_mm'],282.242605097,places=6)
+        self.assertAlmostEqual(cut['setback_mm'],29.242772661,places=6)
+        self.assertAlmostEqual(cut['slant_length_mm'],94.631600181,places=6)
+        self.assertAlmostEqual(cut['from_vertical_deg'],18,places=6)
+        self.assertIn('锯片倾斜 0°',' '.join(cards['AcousticDividerLeft']['notes']))
         self.assertIsNone(cards['KitCurvedArm']['thickness_mm'])
         self.assertEqual(before, {p: hashlib.sha256(p.read_bytes()).hexdigest() for p in paths})
 
@@ -196,6 +203,9 @@ class DrawingPackTests(unittest.TestCase):
                 back=sheets['Back']['holes']
                 self.assertEqual(back[1]['width_mm'],48.4)
                 self.assertEqual(back[2]['diameter_mm'],4.8)
+                cut=drawing_data.divider_cut_profile(doc.AcousticDividerLeft.Shape)
+                self.assertAlmostEqual(cut['from_vertical_deg'],20,places=6)
+                self.assertAlmostEqual(cut['setback_mm'],90/math.tan(math.radians(70)),places=6)
             finally:
                 App.closeDocument(doc.Name)
 
