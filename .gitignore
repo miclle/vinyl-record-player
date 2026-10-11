@@ -66,3 +66,6 @@ tmp/
 
 # Bambu Studio command-line scratch result
 /result.json
+
+# Reproducible delivery archives; keep canonical files in Git
+/output/**/*.zip

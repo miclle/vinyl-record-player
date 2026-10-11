@@ -1,0 +1,54 @@
+{
+  "units": "mm",
+  "revision": "v7-length90-hole4-countersink3",
+  "measured": {
+    "panel_hole_diameter": 38.0,
+    "tube_outer_height": 25.0,
+    "wall_thickness": 3.0,
+    "panel_thickness": 12.0,
+    "tube_outer_diameter": 38.0,
+    "screw_shank_diameter": 3.8,
+    "screw_head_diameter": 7.5,
+    "screw_head_height": 2.5
+  },
+  "trial": {
+    "clock10_radial_relief": 10.0,
+    "total_length": 90.0,
+    "coupon_total_length": 24.0,
+    "base_diameter": 60.0,
+    "base_thickness": 4.0,
+    "screw_hole_diameter": 4.0,
+    "screw_count": 4,
+    "screw_pitch_diameter": 50.0,
+    "screw_start_angle_deg": 45.0,
+    "mouth_fillet_radius": 1.5,
+    "entrance_transition_start_y": -1.0,
+    "printer_volume": [
+      256.0,
+      256.0,
+      256.0
+    ],
+    "countersink_depth": 3.0
+  },
+  "length_estimate": {
+    "reference_round_bore_diameter": 32.0,
+    "reference_round_physical_length": 160.0,
+    "end_correction_coefficient": 0.732,
+    "assumption": "Historical constant-D-section estimate only: same net chamber volume and target tuning as the original round trial port, using an equal-area circular end correction. The current circular entrance, variable-area transition and rounded mouths are not represented by this estimate. The selected 90 mm total length is a user-approved trial following the updated chamber size, not the result of this equal-volume comparison."
+  },
+  "view_convention": "Clock positions seen from outside facing the rear panel. Installed X right, Z up, +Y into cabinet; flat tube top at 12 o'clock, relief at 10 o'clock. Four screw holes on PCD50 at 45, 135, 225 and 315 degrees from +X toward +Z.",
+  "installation_released": false,
+  "notes": [
+    "User confirmed 25 mm is the tube outer height, and authorized provisional screw-post relief for a trial version.",
+    "The 10 o'clock relief is a continuous flat 10 mm inward, as requested by the user, from the nominal outer circle along its 10 o'clock radius. Actual post position, extent and required clearance are unknown.",
+    "User confirmed 12 mm rear panel thickness and a round wood hole. The complete 0..12 mm insertion segment has circular OD38; the D exterior and clock10 relief begin at the panel inside face Y=12 mm.",
+    "The bore changes gradually from round to D between Y=-1 and Y=12 inside the base/collar, so the full D exterior can begin directly behind the panel without an internal blocking ledge. The transition has locally thicker walls.",
+    "Both airway mouth edges have inward R1.5 fillets cut from existing material, without increasing the installation envelope; nominal straight walls remain 3 mm and the interior D-mouth lip is locally 1.5 mm thick.",
+    "This independent print part does not modify the main assembly, roof plates, drawings or acoustic validation.",
+    "User corrected the 38 mm value: it already includes the required fit allowance. Use tube OD38 directly, without a further 0.4 mm diameter reduction. panel_hole_diameter is the nominal fixture/reference diameter, not a newly measured real clearance.",
+    "Base, screw length, holding strength, seal and external clearance remain trial inputs.",
+    "User approved a 90 mm total trial length including the 4 mm external base, giving 86 mm insertion from the rear panel outside face and 74 mm protrusion beyond its 12 mm inside face. The throat-only equal-volume constant-section comparison remains 78.3 mm and is historical, not a prediction for this variable-area port.",
+    "User screw dimensions remain shank OD3.8 and head OD7.5 x2.5. Latest requested passage OD4 and countersink depth3; interpret3 mm as depth, retaining entrance OD7.5. Cut a full conical countersink OD7.5 toOD4 over3 mm, leaving1 mm base below. The resulting angle differs from the previous cone; physical head seating requires trial.",
+    "User estimated chamber dimensions as 300 x180 x75 mm and clarified that only the 300 mm dimension includes 12 mm board thickness. Assuming two end boards each12 mm gives a 276 x180 x75 mm internal gross volume of3.726 L; if only one board is included it is3.888 L. The two-board interpretation is provisional. Driver, port and other occupancy have not been subtracted, so neither value is a measured net volume. The 90 mm trial does not establish acoustic tuning."
+  ]
+}
