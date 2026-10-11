@@ -8,8 +8,8 @@
   "print_scaling": "None",
   "view": "Front, X right, Y down; no mirroring",
   "panel_outline_mm": [
-    65,
-    160
+    70,
+    170
   ],
   "wood_window_mm": {
     "x_mm": 2.8,
@@ -24,16 +24,16 @@
       6
     ],
     [
-      55.5,
+      60.5,
       6
     ],
     [
       9.5,
-      154
+      164
     ],
     [
-      55.5,
-      154
+      60.5,
+      164
     ]
   ],
   "wood_pilot_diameter_specified": false,
@@ -44,12 +44,12 @@
     "Four center marks measured",
     "100 mm ruler measured",
     "50 mm square measured",
-    "Chinese text extracted and page bounds checked",
+    "Chinese text extracted",
     "Rendered page visually checked"
   ],
   "sha256": {
-    "output/pdf/control-panel-cutting-template-A4.pdf": "af6166758edff917a355b7559c31ba98717c07c91aea183a0192c14d139a7145",
-    "cad/control-panel.json": "83972fc4bb7e71c938f8af0355d6c227929e0567f184693bd57824ca5623c3cc",
-    "tools/control_panel_template.py": "4d45e953771d60646d5cf2b0e1f9856b8dfac99824c04b7508ccf048cac2bb31"
+    "output/pdf/control-panel-cutting-template-A4.pdf": "79fc2e79ac78594154439da18ad92623c36712e9f9321400cc8dccc2580238b5",
+    "cad/control-panel.json": "facd6e336b90c6006d76dbe58c774ce71bf350a82fd59b84fb867308b373c154",
+    "tools/control_panel_template.py": "5df61d519e70249e4ec31e6bee7ba78552153aa601fa5ca01510423b78e49d65"
   }
 }

@@ -95,11 +95,11 @@
 
 ## 旋钮面板：独立打印件
 
-[旋钮面板与打印说明](output/3d-print/control-panel/README.md)提供 65 × 160 × 3.5 mm 面板、背面两侧 10 mm 定位条、11 个孔与黑白齐平嵌字，总打印厚度 13.5 mm。独立 FCStd／STEP／STL、通用分色 3MF、Bambu 0.4／0.2 mm 项目及 [A4 木板开孔纸样](output/pdf/control-panel-cutting-template-A4.pdf)均已保存。源参数为 `cad/control-panel.json`；未纳入主装配，调整版打印、PCB 与木板窗口配合仍待试装。
+[旋钮面板与打印说明](output/3d-print/control-panel/README.md)提供 70 × 170 × 3.5 mm 平背面板、11 个孔与白色 0.4 mm 凸起文字／LOGO／三角标识，总打印厚度 3.9 mm，背面贴床打印。独立 FCStd／STEP／STL、通用分色 3MF、Bambu 0.4／0.2 mm 项目及 [A4 木板开孔纸样](output/pdf/control-panel-cutting-template-A4.pdf)均已保存。源参数为 `cad/control-panel.json`；未纳入主装配，调整版打印、PCB 与木板窗口配合仍待试装。
 
 ## 旋钮面板底板：独立打印件
 
-[阶梯底板与安装说明](output/3d-print/control-panel-backing/README.md)提供 2 mm 底板、左侧 8 mm 加宽区和总高 8 mm 的凸条，打印外廓为 73 × 160 × 8 mm。四个固定孔沿用面板坐标，底部增加 36 × 10 mm PCB 避让口；独立 FCStd／STEP／STL 与验证报告已保存。源参数为 `cad/control-panel-backing.json`；叠放后定位条进入木板 8 mm，螺丝长度、底板强度及 PCB 实物配合待核对。
+[阶梯底板与安装说明](output/3d-print/control-panel-backing/README.md)提供主体上下均为 70 mm 的 2 mm 底板，与面板对齐；左侧 8 mm 支承区仅在 Y=30～165，以及向左到 X=-65 mm 的上下 65 × 6 mm 长条（上条 Y=30～36，下条 Y=159～165）。左侧凸条与上下长条的内侧凸条均宽 3 mm，总高 12 mm（含板厚），交接处内外拐角均为上方 R3、下方 R1 圆角，内圆角补料至背面，打印外廓为 135 × 170 × 12 mm。四个固定孔与面板对齐，下排为 Y=164，右列为 X=60.5；底板窗口为 59.4 × 146 mm（X=2.8～62.2、Y=12～158），下横边高 12 mm（Y=158～170），孔中心上下各留 6 mm，保留完整 Ø7 螺丝头承压范围。独立 FCStd／STEP／STL 与验证报告已保存，源参数为 `cad/control-panel-backing.json`；面板背面定位条已移除，长条强度、螺丝长度及 PCB 配合待试装。
 
 ## 前沿 T 型铝饰条
 

@@ -1,13 +1,13 @@
 {
-  "width_mm": 65,
-  "height_mm": 160,
+  "width_mm": 70,
+  "height_mm": 170,
   "thickness_mm": 3.5,
   "drawing_origin": "Upper-left corner of front face; X right, Y down",
   "holes": [
     {
       "id": "PhonoHeadphone",
       "label": "唱机耳机输出",
-      "x_mm": 16.5,
+      "x_mm": 15.3,
       "y_mm": 20.0,
       "diameter_mm": 7.5,
       "x_assumed": false,
@@ -79,7 +79,7 @@
     {
       "id": "MountTopRight",
       "label": "右上固定",
-      "x_mm": 55.5,
+      "x_mm": 60.5,
       "y_mm": 6,
       "diameter_mm": 3.5,
       "x_assumed": false,
@@ -89,7 +89,7 @@
       "id": "MountBottomLeft",
       "label": "左下固定",
       "x_mm": 9.5,
-      "y_mm": 154,
+      "y_mm": 164,
       "diameter_mm": 3.5,
       "x_assumed": false,
       "role": "mounting"
@@ -97,8 +97,8 @@
     {
       "id": "MountBottomRight",
       "label": "右下固定",
-      "x_mm": 55.5,
-      "y_mm": 154,
+      "x_mm": 60.5,
+      "y_mm": 164,
       "diameter_mm": 3.5,
       "x_assumed": false,
       "role": "mounting"
@@ -119,14 +119,8 @@
     }
   },
   "back_rim": {
-    "height_mm": 10,
-    "wall_thickness_mm": 1.5,
-    "window_clearance_per_side_mm": 0.3,
-    "dimensions_are_trial": true,
-    "edges": [
-      "left",
-      "right"
-    ]
+    "height_mm": 0,
+    "edges": []
   },
   "pcb_installation": {
     "orientation_to_panel_deg": 90,
@@ -142,12 +136,11 @@
     "width_mm": 42,
     "center_x_mm": 32.5,
     "center_y_mm": 139,
-    "depth_mm": 0.5,
-    "style": "engraved",
-    "source": "Same continuous glyph outline as Ariel-stencil"
+    "style": "raised",
+    "source": "Same continuous glyph outline as Ariel-stencil",
+    "height_mm": 0.4
   },
   "front_markings": {
-    "depth_mm": 0.5,
     "font": "references/fonts/noto-sans/NotoSans-Bold.ttf",
     "labels": [
       {
@@ -219,6 +212,19 @@
       "y_mm": 32,
       "length_mm": 45,
       "width_mm": 0.6
+    },
+    "height_mm": 0.4,
+    "style": "raised",
+    "level_indicators": {
+      "knob_ids": [
+        "VolumeKnob",
+        "TrebleKnob",
+        "BassKnob"
+      ],
+      "x_mm": 55,
+      "length_mm": 11,
+      "height_mm": 3,
+      "direction": "left small, right large"
     }
   }
 }

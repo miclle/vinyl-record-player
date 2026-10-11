@@ -2,7 +2,7 @@
   "knob_cap_diameter_mm": 14.0,
   "phono_control_label_baseline_y_mm": 12.5,
   "separator_y_mm": 32.0,
-  "scope": "Panel and flush lettering/logo inlays have separate solids and colors; knob caps and screw heads remain projections",
+  "scope": "Flat panel and raised lettering/logo/level indicators have separate solids and colors; knob caps and screw heads remain projections",
   "knob_cap_height_confirmed": false,
   "label_shift_x_mm": 2.5,
   "panel_color": "#000000",

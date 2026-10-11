@@ -1,4 +1,4 @@
-"""Independent control panel with four face mounting bores and a rear locating rim; drawing Y runs down from the front top-left."""
+"""Independent control panel with four face mounting bores and raised two-color markings; drawing Y runs down from the front top-left."""
 import hashlib
 import html
 import json
@@ -35,10 +35,10 @@ def load_appearance():
 def logo_face(p):
     """Same continuous Sigmar One outline as Ariel-stencil; A/R counters remain open."""
     spec = p['front_logo']
-    width, depth = spec['width_mm'], spec['depth_mm']
-    if not (math.isfinite(width) and width > 0 and math.isfinite(depth)
-            and 0 < depth < p['thickness_mm']):
-        raise ValueError('Logo width and engraving depth must fit the plate')
+    width, height = spec['width_mm'], spec['height_mm']
+    if not (math.isfinite(width) and width > 0 and math.isfinite(height)
+            and 0 < height < p['thickness_mm']):
+        raise ValueError('Logo width and raised height must be positive and finite')
     font = ROOT / spec['font']
     if not font.is_file():
         raise FileNotFoundError(font)
@@ -65,8 +65,8 @@ def logo_face(p):
 def marking_faces(p):
     faces = list(logo_face(p).Faces)
     spec = p['front_markings']
-    if spec['depth_mm'] != p['front_logo']['depth_mm']:
-        raise ValueError('All front markings must share one inlay depth')
+    if spec['height_mm'] != p['front_logo']['height_mm'] or spec['style'] != 'raised' or p['front_logo']['style'] != 'raised':
+        raise ValueError('All front markings must share one raised height')
     font = str(ROOT / spec['font'])
     cap = Part.makeCompound(Part.makeWireString('M', font, 16, 0)[0]).BoundBox.YMax
     for label in spec['labels']:
@@ -81,6 +81,19 @@ def marking_faces(p):
     line = Part.makePlane(d['length_mm'], d['width_mm'],
                          V(d['x_mm'], p['height_mm']-d['y_mm']-d['width_mm']/2, 0))
     faces.append(line)
+    ramp = spec['level_indicators']
+    left, length, height = (ramp[key] for key in ('x_mm', 'length_mm', 'height_mm'))
+    if any(not math.isfinite(value) for value in (left, length, height)) or min(length, height) <= 0:
+        raise ValueError('Level indicator dimensions must be finite and positive')
+    holes_by_id = {hole['id']: hole for hole in p['holes']}
+    for knob_id in ramp['knob_ids']:
+        knob = holes_by_id[knob_id]
+        if not knob_id.endswith('Knob') or left-knob['x_mm']-7 < 3 or p['width_mm']-left-length < 4:
+            raise ValueError('Level indicators need 3 mm clearance to the 14 mm cap and 4 mm to the panel edge')
+        y = knob['y_mm']
+        points = [V(x, p['height_mm']-dy, 0) for x, dy in
+                  ((left, y+height/2), (left+length, y+height/2), (left+length, y-height/2))]
+        faces.append(Part.Face(Part.makePolygon(points+[points[0]])))
     flat = Part.makeCompound(faces)
     bounds = [face.optimalBoundingBox(False) for face in faces]
     for index, face in enumerate(faces):
@@ -127,8 +140,7 @@ def marking_svg(p, color):
 
 def print_shape(shape, p):
     result = shape.copy()
-    result.rotate(V(0,0,0),V(1,0,0),180)
-    result.translate(V(0,p['height_mm'],p['thickness_mm']))
+    # CAD already has the flat rear at Z=0 and the front lettering upwards.
     return result
 
 
@@ -151,8 +163,8 @@ def marking_polygon_faces(p):
 
 def marking_mesh_proxy(p):
     flat = marking_polygon_faces(p)
-    flat.translate(V(0,0,p['thickness_mm']-p['front_markings']['depth_mm']))
-    return flat.extrude(V(0,0,p['front_markings']['depth_mm']))
+    flat.translate(V(0,0,p['thickness_mm']))
+    return flat.extrude(V(0,0,p['front_markings']['height_mm']))
 
 
 def mesh_volume(mesh):
@@ -194,34 +206,7 @@ def write_color_3mf(path, meshes, appearance):
             'filament_type': ['PLA', 'PLA'], 'filament_diameter': ['1.75', '1.75']}))
 
 
-def rim_shape(p):
-    """Rear locating rim below Z=0; the front plate surface is Z=thickness."""
-    rim, window = p['back_rim'], p['mounting']['wood_window']
-    clearance, wall, height = (rim[key] for key in
-                               ('window_clearance_per_side_mm', 'wall_thickness_mm', 'height_mm'))
-    if any(not math.isfinite(v) or v <= 0 for v in (clearance, wall, height)):
-        raise ValueError('Rim dimensions must be finite and positive')
-    x, y = window['x_mm'] + clearance, window['y_mm'] + clearance
-    width, length = window['width_mm'] - 2*clearance, window['height_mm'] - 2*clearance
-    if min(width, length) <= 2*wall or min(x, y, p['width_mm']-x-width, p['height_mm']-y-length) <= 0:
-        raise ValueError('Rim must fit inside the panel and retain an inner opening')
-    bottom = p['height_mm'] - y - length
-    z = -height
-    if rim['edges'] != ['left', 'right']:
-        raise ValueError('This panel uses only left and right rear locating ribs')
-    frame = Part.makeCompound([Part.makeBox(wall, length, height, V(left, bottom, z))
-                               for left in (x, x+width-wall)])
-    if not frame.isValid() or len(frame.Solids) != 2:
-        raise ValueError('Rear locating ribs must form two separate solids before joining the plate')
-    for hole in p['holes']:
-        probe = Part.makeCylinder(hole['diameter_mm']/2, height,
-                                  V(hole['x_mm'], p['height_mm']-hole['y_mm'], z))
-        if frame.common(probe).Volume > 1e-7:
-            raise ValueError('Rim obstructs a panel bore')
-    return frame
-
-
-def build(p, insert=None):
+def build(p):
     width, height, thickness = (p[key] for key in ('width_mm', 'height_mm', 'thickness_mm'))
     if any(not math.isfinite(value) or value <= 0 for value in (width, height, thickness)):
         raise ValueError('Panel dimensions must be finite and positive')
@@ -241,13 +226,12 @@ def build(p, insert=None):
                 raise ValueError('Hole boundaries must remain separate')
     shape = Part.makeBox(width, height, thickness)
     for hole in holes:
-        # Front drawing X=x, Y=height-y. CAD plate is Z=0..thickness; rear rim below Z=0.
+        # Front drawing X=x, Y=height-y. CAD plate is Z=0..thickness; the flat rear lies on the bed.
         bore = Part.makeCylinder(hole['diameter_mm'] / 2, thickness + 2,
                                  V(hole['x_mm'], height - hole['y_mm'], -1))
         shape = shape.cut(bore)
-    shape = shape.fuse(rim_shape(p)).removeSplitter()
-    insert = marking_insert(p) if insert is None else insert
-    shape = shape.cut(insert).removeSplitter()
+    if p['back_rim'] != {'height_mm': 0, 'edges': []}:
+        raise ValueError('This panel must have a flat rear without locating ribs')
     if not shape.isValid() or len(shape.Solids) != 1:
         raise ValueError('Panel must be one valid solid')
     return shape
@@ -288,18 +272,13 @@ def verify_exports(output, expected, p):
         analytic_volume = p['width_mm'] * p['height_mm'] * p['thickness_mm']
         analytic_volume -= sum(math.pi * (h['diameter_mm'] / 2) ** 2
                                * p['thickness_mm'] for h in p['holes'])
-        rim, window = p['back_rim'], p['mounting']['wood_window']
-        frame_length = window['height_mm'] - 2*rim['window_clearance_per_side_mm']
-        wall = rim['wall_thickness_mm']
-        analytic_volume += 2*wall*frame_length*rim['height_mm']
-        analytic_volume -= marking_insert(p).Volume
         for shape in shapes:
             if not shape.isValid() or len(shape.Solids) != 1:
                 raise ValueError('Invalid saved panel solid')
             bounds = shape.optimalBoundingBox(False)
             values = (bounds.XMin, bounds.YMin, bounds.ZMin, bounds.XLength,
                       bounds.YLength, bounds.ZLength)
-            targets = (0, 0, -p['back_rim']['height_mm'], p['width_mm'], p['height_mm'], p['thickness_mm'] + p['back_rim']['height_mm'])
+            targets = (0, 0, 0, p['width_mm'], p['height_mm'], p['thickness_mm'])
             if any(abs(a - b) > 1e-6 for a, b in zip(values, targets)):
                 raise ValueError('Saved panel envelope differs')
             cylinders = [face for face in shape.Faces if isinstance(face.Surface, Part.Cylinder)]
@@ -318,7 +297,7 @@ def verify_exports(output, expected, p):
                 if abs(bore_bounds.ZMin) > 1e-6 or abs(bore_bounds.ZMax - p['thickness_mm']) > 1e-6:
                     raise ValueError('Saved bore must run through the whole panel')
             if abs(shape.Volume - analytic_volume) > 1e-4:
-                raise ValueError('Saved panel volume differs from plate, rim and engraving volume')
+                raise ValueError('Saved panel volume differs from flat plate and through-hole volume')
             assert_same_geometry(shape,expected)
         mesh = Mesh.Mesh(str(output / f'{STEM}.stl'))
         if (not mesh.isSolid() or mesh.countComponents() != 1 or mesh.Volume <= 0
@@ -326,7 +305,7 @@ def verify_exports(output, expected, p):
             raise ValueError('STL must be one closed, manifold, positive-volume component')
         bounds = mesh.BoundBox
         values = (bounds.XMin, bounds.YMin, bounds.ZMin, bounds.XLength, bounds.YLength, bounds.ZLength)
-        targets = (0, 0, 0, p['width_mm'], p['height_mm'], p['thickness_mm']+p['back_rim']['height_mm'])
+        targets = (0, 0, 0, p['width_mm'], p['height_mm'], p['thickness_mm'])
         if any(abs(a-b)>1e-5 for a,b in zip(values, targets)):
             raise ValueError('STL print envelope differs')
         if abs(mesh_volume(mesh) - expected.Volume) > 0.7:
@@ -336,19 +315,23 @@ def verify_exports(output, expected, p):
             raise ValueError('Invalid lettering mesh')
         if ink_mesh.countComponents() != len(insert.Solids) or abs(mesh_volume(ink_mesh)-insert.Volume) > 0.1:
             raise ValueError('Lettering mesh differs from CAD')
+        ink_bounds = ink_mesh.BoundBox
+        if abs(ink_bounds.ZMin-p['thickness_mm']) > 1e-5 or abs(ink_bounds.ZMax-p['thickness_mm']-p['front_markings']['height_mm']) > 1e-5:
+            raise ValueError('Raised lettering must start on the front face and rise 0.4 mm')
         return dict(passed=True, valid_solid=True, solid_count=1,
                     hole_count=len(p['holes']), functional_hole_count=7, mounting_hole_count=4,
                     cad_total_solid_count=1+len(insert.Solids),
                     rear_rim_height_mm=p['back_rim']['height_mm'],
                     rear_rim_edges=p['back_rim']['edges'],
-                    total_print_thickness_mm=p['thickness_mm']+p['back_rim']['height_mm'],
+                    total_print_thickness_mm=p['thickness_mm']+p['front_markings']['height_mm'],
+                    rear_face_on_bed=True,
                     saved_hole_positions_and_diameters_match=True,
                     through_holes=True, cad_step_readback_match=True,
                     saved_geometry_check="All face areas and centroids, edge types and lengths, vertex positions, volumes and bore surfaces",
                     printable_markings=True, marking_solid_count=len(insert.Solids),
                     markings_mesh_closed=True, markings_mesh_components=ink_mesh.countComponents(),
-                    front_logo_engraved=True, logo_depth_mm=p['front_logo']['depth_mm'],
-                    logo_floor_thickness_mm=p['thickness_mm']-p['front_logo']['depth_mm'],
+                    front_logo_raised=True, marking_height_mm=p['front_markings']['height_mm'],
+                    logo_base_thickness_mm=p['thickness_mm'],
                     volume_mm3=expected.Volume, closed_mesh=True, mesh_components=1,
                     mesh_nonmanifold_edges=False, mesh_self_intersections=False,
                     triangles=mesh.CountFacets, mesh_volume_mm3=mesh_volume(mesh), markings_mesh_volume_mm3=mesh_volume(ink_mesh),
@@ -394,17 +377,17 @@ def preview_svg(p, appearance=None):
     rows = ''.join(f'<text x="780" y="{240+i*38}">{html.escape(h["label"])}</text><text x="980" y="{240+i*38}">{h["x_mm"]:g}</text><text x="1050" y="{240+i*38}">{h["y_mm"]:g}</text><text x="1120" y="{240+i*38}">{h["diameter_mm"]:g}</text>' for i,h in enumerate(p['holes']))
     return f'''<svg xmlns="http://www.w3.org/2000/svg" width="1240" height="960" viewBox="0 0 1240 960">
 <rect width="1240" height="960" fill="#f5f7fa"/><g font-family="PingFang SC, sans-serif" fill="#223348">
-<text x="52" y="57" font-size="30" font-weight="600">唱机 + 音响 · 四螺丝面板与背面两侧定位条</text>
-<text x="52" y="97" font-size="19">{width:g} × {height:g} mm｜正面厚 3.5，背框高 10，总厚 13.5 mm｜7 个功能孔 + 4 个固定孔</text>
+<text x="52" y="57" font-size="30" font-weight="600">唱机 + 音响 · 平背面板与正面凸字</text>
+<text x="52" y="97" font-size="19">{width:g} × {height:g} mm｜板厚 3.5，凸字高 0.4，总厚 3.9 mm｜7 个功能孔 + 4 个固定孔</text>
 <text x="52" y="153" font-size="20" font-weight="600">正面标识 · Ø14 金属帽 / Ø7 螺丝头</text>
 <text x="432" y="153" font-size="20" font-weight="600">开孔定位图</text><text x="780" y="153" font-size="20" font-weight="600">孔位表 · 左上角原点 / mm</text>
 <g transform="translate(52 200) scale(3.45)">{face}</g>
 <g transform="translate(440 220) scale(3.3)" stroke="#42556b" stroke-width="0.2" fill="none"><rect width="{width:g}" height="{height:g}" fill="white"/>{bores}<path d="M {next(h["x_mm"] for h in holes if h["id"]=="VolumeKnob"):g} 0 V {height:g}" stroke="#8ea8bd" stroke-dasharray="1.5 1"/>
 <g font-size="3" fill="#42556b" stroke="none"><text x="{width/2:g}" y="-7" text-anchor="middle">{width:g}</text><text x="-6" y="{height/2:g}" text-anchor="end">{height:g}</text></g></g>
 <g font-size="16" fill="#687a8e"><text x="780" y="195">功能</text><text x="980" y="195">X</text><text x="1050" y="195">Y</text><text x="1120" y="195">Ø</text></g><g font-size="17">{rows}</g>
-<g font-size="17" fill="#516479"><text x="780" y="696">两侧定位条：各 1.5 × 135.4 × 10 mm。</text><text x="780" y="730">上下开放，面板底边 Y=160。</text><text x="780" y="764">木板窗口试排：{p["mounting"]["wood_window"]["width_mm"]:g} × {p["mounting"]["wood_window"]["height_mm"]:g} mm。</text><text x="780" y="798">PCB 下缘 Y=157；木条配合需核对。</text></g>
-<text x="52" y="865" font-size="17">文字和 Ariel LOGO 均为 0.5 mm 分色嵌字，可打印；黑色面板，白色标识。</text>
-<text x="52" y="907" font-size="17" fill="#687a8e">CAD：X=x，Y={height:g}−y，背框 Z=−10…0；STL 正面朝下，外廓 {width:g} × {height:g} × 13.5。</text>
+<g font-size="17" fill="#516479"><text x="780" y="696">背面平整：两条定位条已移除。</text><text x="780" y="730">四螺丝固定，面板底边 Y={height:g}。</text><text x="780" y="764">木板窗口试排：{p["mounting"]["wood_window"]["width_mm"]:g} × {p["mounting"]["wood_window"]["height_mm"]:g} mm。</text><text x="780" y="798">PCB 下缘 Y=157；木条配合需核对。</text></g>
+<text x="52" y="865" font-size="17">文字和 Ariel LOGO 均为 0.4 mm 分色凸字，可打印；黑色面板，白色标识。</text>
+<text x="52" y="907" font-size="17" fill="#687a8e">CAD：X=x，Y={height:g}−y，背面 Z=0；STL 背面贴床、正面朝上，外廓 {width:g} × {height:g} × 3.9。</text>
 </g></svg>\n'''
 
 
@@ -448,7 +431,7 @@ def export(output=OUTPUT, prepared_shapes=None):
     doc = App.newDocument('ControlPanelPrint')
     try:
         obj = doc.addObject('Part::Feature', 'ControlPanel')
-        obj.Label = f'唱机 + 音响旋钮面板 · {p["width_mm"]:g} × {p["height_mm"]:g} · 11 孔 · 背面定位框'
+        obj.Label = f'唱机 + 音响旋钮面板 · {p["width_mm"]:g} × {p["height_mm"]:g} · 11 孔 · 平背'
         obj.Shape = shape
         obj.addProperty('App::PropertyString', 'DesignJSON', 'Design').DesignJSON = json.dumps(p, ensure_ascii=False)
         obj.ViewObject.Visibility = True
@@ -456,7 +439,7 @@ def export(output=OUTPUT, prepared_shapes=None):
         rgb = lambda color: tuple(int(color[i:i+2],16)/255 for i in (1,3,5))
         obj.ViewObject.ShapeColor = rgb(appearance['panel_color'])
         markings = doc.addObject('Part::Feature','Markings')
-        markings.Label = '白色功能文字 + Ariel LOGO · 齐平嵌字'
+        markings.Label = '白色功能文字 + Ariel LOGO · 凸起 0.4 mm'
         markings.Shape = prepared_shapes[1] if prepared_shapes else marking_insert(p)
         markings.ViewObject.ShapeColor = rgb(appearance['markings_color'])
         markings.ViewObject.DisplayMode = 'Shaded'
@@ -484,8 +467,8 @@ def export(output=OUTPUT, prepared_shapes=None):
         render_model_preview(view, p, ROOT / 'previews/control-panel-model.png', rear=True)
     finally:
         App.closeDocument(doc.Name)
-    report = dict(parameters=p, cad_coordinates='X=x; Y=height-y; front face Z=3.5; plate Z=0..3.5; rear rim Z=-10..0',
-                  stl_print_coordinates=f'Rotate CAD 180 degrees about X, translate Y by {p["height_mm"]:g} and Z by 3.5: X=x, Y=y, front face Z=0, rear rim Z=3.5..13.5',
+    report = dict(parameters=p, cad_coordinates='X=x; Y=height-y; flat rear Z=0; plate Z=0..3.5; raised markings Z=3.5..3.9',
+                  stl_print_coordinates=f'CAD unchanged: X=x; Y={p["height_mm"]:g}-y; rear face on bed Z=0; plate Z=0..3.5; markings Z=3.5..3.9; no mirroring',
                   appearance=load_appearance(),
                   validation=verify_exports(output, shape, p))
     filenames = [f'{STEM}.{suffix}' for suffix in ('FCStd','step','stl')]
@@ -497,7 +480,7 @@ def export(output=OUTPUT, prepared_shapes=None):
                      'cad/control-panel.json','cad/control-panel-appearance.json',
                      p['front_logo']['font'], p['front_markings']['font'])}
     report['color_parts'] = dict(panel=appearance['panel_color'], markings=appearance['markings_color'],
-                                inlay_depth_mm=0.5, same_origin=True, printer_profile_included=False)
+                                raised_height_mm=0.4, same_origin=True, printer_profile_included=False)
     (output / f'{STEM}.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
     (output / f'{STEM}-outline.svg').write_text(outline_svg(p))
     (ROOT / 'previews/control-panel.svg').write_text(preview_svg(p))

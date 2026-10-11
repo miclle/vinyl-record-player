@@ -1,20 +1,42 @@
 {
-  "description": "旋钮面板与木板之间的独立 2 mm 底板",
+  "description": "独立 2 mm 底板：主体上下均与面板等宽，左侧延伸只保留到下长条下边",
   "thickness_mm": 2.0,
   "left_extension_mm": 8.0,
   "extension_start_y_mm": 30.0,
   "pcb_bottom_relief": {
-    "x_mm": 14.5,
-    "width_mm": 36.0,
-    "bottom_margin_mm": 2.0,
+    "x_mm": 2.8,
+    "width_mm": 59.4,
+    "bottom_margin_mm": 12,
     "pcb_width_fit_confirmed": false
   },
   "color": "#000000",
-  "datum": "沿用旋钮面板正面左上角：X 向右，Y 向下；新增左边为 X=-8",
+  "datum": "沿用旋钮面板正面左上角：X 向右，Y 向下；主体 X=0 至面板右边，左侧支承区 X=-8～0 仅在两横长条之间",
   "left_rib": {
     "width_mm": 3.0,
-    "height_mm": 6.0,
+    "height_mm": 10,
     "direction": "front",
-    "total_height_including_plate_mm": 8.0
+    "total_height_including_plate_mm": 12,
+    "flush_with_horizontal_ribs": true
+  },
+  "horizontal_arms": {
+    "left_x_mm": -65,
+    "right_x_mm": 0.0,
+    "strip_height_mm": 6.0,
+    "rib_width_mm": 3.0,
+    "rib_height_mm": 10.0,
+    "rib_total_height_including_plate_mm": 12.0,
+    "direction": "front",
+    "top_rib_edge": "lower",
+    "bottom_rib_edge": "upper",
+    "top_y_mm": 30.0,
+    "rib_end_at_left_rib_inner_edge": true,
+    "bottom_y_mm": 159
+  },
+  "rib_junction_fillets": {
+    "top_radius_mm": 3.0,
+    "bottom_radius_mm": 1.0,
+    "location": "inner and outer horizontal-to-vertical rib corners",
+    "outer_corners": true,
+    "extend_through_plate": true
   }
 }

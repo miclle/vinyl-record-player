@@ -1,42 +1,54 @@
 {
-  "bambu_studio_version": "02.08.04.57",
-  "cli_import_export_passed": true,
-  "logical_parts": [
-    "Panel",
-    "Letters and Ariel"
+  "passed": true,
+  "project": "Control-panel-bambu.3mf",
+  "sha256": "18ac191d9dbbb8deca696d5de0b52a703914c6a8f1e0d13da7a50d3ca6550ca0",
+  "checked_on": "2026-10-10",
+  "geometry_readback": [
+    {
+      "source": "Control-panel.stl",
+      "vertex_difference_mm": 4.9901416332431836e-11,
+      "triangle_indices_match": true,
+      "extruder": 1
+    },
+    {
+      "source": "Control-panel-markings.stl",
+      "vertex_difference_mm": 5.000089231543825e-11,
+      "triangle_indices_match": true,
+      "extruder": 2
+    }
   ],
-  "part_filament_ids": [
-    "1",
-    "2"
-  ],
-  "triangle_painting_present": false,
-  "native_project_file": "Control-panel-bambu.3mf",
-  "native_project_sha256": "2b0f55d18030926497377ceff3030ce5ddc0fd7c7a170494ca59a928de776506",
-  "source_3mf_sha256": "f05903d55d6ee7912c1debedcdb23bddfe9b2dfaff7b040dab0f2a0fb158411e",
-  "native_geometry_error_mm": [
-    3.862999998105465e-06,
-    9.91600000510573e-06
-  ],
-  "native_triangle_indices_identical": true,
-  "native_roundtrip_sha256": "625f766a84b520ef2962b07f3131d3b69143911860ca2e241322dc7c0b91ee6f",
-  "test_slice_colors": [
+  "filament_colour": [
     "#000000",
     "#FFFFFF"
   ],
-  "test_slice_layer_ranges": {
-    "0": "3 67",
-    "0 1": "0 2"
-  },
-  "white_path_regions_checked": 59,
-  "white_path_regions_present": 59,
-  "white_path_region_check_scope": "At least one white extrusion segment midpoint per glyph or divider bounding rectangle; not complete glyph fidelity",
-  "test_slice_geometry_generated": true,
-  "test_slice_gcode_delivered": false,
-  "slice_diagnostic": "Invalid T command (T65535) in trial machine end sequence; not a released print job",
-  "wall_generator": "arachne",
-  "native_project_profile": "P2S 0.4 mm / 0.20 mm / Arachne / two PLA Basic slots; starting profile",
-  "gui_updated_revision_verified": false,
-  "gui_blocker": "Bambu Studio accessibility reads timed out twice in this revision",
-  "previous_revision_gui_color_edit_verified": true,
-  "scope": "Current native geometry, logical parts, colors and white paths verified by CLI and archive readback. Previous revision demonstrated independent GUI color editing; updated GUI state and physical fit remain unverified."
+  "nozzle_diameter": [
+    "0.4"
+  ],
+  "layer_height": "0.2",
+  "gui_slice_completed": false,
+  "gcode_included": false,
+  "print_orientation": "Flat rear on bed; front upwards",
+  "plate_thickness_mm": 3.5,
+  "raised_markings_height_mm": 0.4,
+  "total_height_mm": 3.9,
+  "top_shell_layers": "4",
+  "top_shell_thickness": "0.8",
+  "top_surface_pattern": "monotonicline",
+  "top_surface_speed": [
+    "30",
+    "30"
+  ],
+  "ironing_type": "no ironing",
+  "support_enabled": "0",
+  "wipe_tower_xy_mm": [
+    [
+      "180"
+    ],
+    [
+      "216.972"
+    ]
+  ],
+  "limitations": [
+    "Reslice current raised-text geometry before printing; prior slice estimates are retired"
+  ]
 }

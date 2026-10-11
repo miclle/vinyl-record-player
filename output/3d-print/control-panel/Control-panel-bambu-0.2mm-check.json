@@ -1,67 +1,117 @@
 {
-  "checked_on": "2026-10-07",
+  "passed": true,
   "project": "Control-panel-bambu-0.2mm.3mf",
-  "sha256": "e450ddcdf3cbfa4a40088e22864f2a761c9184af5e295281df4245869266b094",
-  "gui_slice_completed": true,
-  "printer_profile": "Bambu Lab P2S 0.2 nozzle",
-  "process_profile": "0.10mm Standard @BBL P2S 0.2 nozzle",
-  "settings": {
-    "nozzle_diameter": [
-      "0.2"
-    ],
-    "layer_height": "0.1",
-    "initial_layer_print_height": "0.1",
-    "wall_generator": "arachne",
-    "wall_loops": "4",
-    "line_width": "0.22",
-    "initial_layer_line_width": "0.25",
-    "seam_position": "aligned",
-    "seam_gap": "15%",
-    "flush_into_infill": "0",
-    "flush_into_objects": "0",
-    "enable_prime_tower": "1",
-    "filament_colour": [
-      "#000000",
-      "#FFFFFF"
-    ]
-  },
-  "assignments": [
+  "sha256": "4ba60c10548293d6d6a94c0342e792e258743d3ccaef6fc8488a7fc2e54e6bec",
+  "checked_on": "2026-10-10",
+  "geometry_readback": [
     {
-      "part": "Panel",
+      "source": "Control-panel.stl",
+      "vertex_difference_mm": 4.9901416332431836e-11,
+      "triangle_indices_match": true,
       "extruder": 1
     },
     {
-      "part": "Letters and Ariel",
+      "source": "Control-panel-markings.stl",
+      "vertex_difference_mm": 5.000089231543825e-11,
+      "triangle_indices_match": true,
       "extruder": 2
     }
   ],
-  "geometry_readback": {
-    "triangle_indices_unchanged": true,
-    "maximum_vertex_difference_mm": [
-      0.0,
-      0.0
+  "filament_colour": [
+    "#000000",
+    "#FFFFFF"
+  ],
+  "nozzle_diameter": [
+    "0.2"
+  ],
+  "layer_height": "0.1",
+  "gui_slice_completed": true,
+  "gcode_included": false,
+  "print_orientation": "Flat rear on bed; front upwards",
+  "plate_thickness_mm": 3.5,
+  "raised_markings_height_mm": 0.4,
+  "total_height_mm": 3.9,
+  "top_shell_layers": "8",
+  "top_shell_thickness": "0.8",
+  "top_surface_pattern": "monotonicline",
+  "top_surface_speed": [
+    "30",
+    "30"
+  ],
+  "ironing_type": "no ironing",
+  "support_enabled": "0",
+  "wipe_tower_xy_mm": [
+    [
+      "180"
+    ],
+    [
+      "214.13"
+    ]
+  ],
+  "limitations": [
+    "GUI preview and path checks do not establish physical flatness or print quality; reslice after any project change"
+  ],
+  "cli_slice_trial": {
+    "passed": true,
+    "nozzle_diameter_mm": 0.2,
+    "total_layers": 39,
+    "black_layers": [
+      1,
+      35
+    ],
+    "white_layers": [
+      36,
+      39
+    ],
+    "estimated_total_seconds": 15024.958984375,
+    "estimated_filament_g": 27.037196278572083,
+    "warning_message": "",
+    "white_paths": {
+      "layers_with_white_markings": {
+        "3.6": 62,
+        "3.7": 62,
+        "3.8": 62,
+        "3.9": 62
+      },
+      "glyph_region_count": 62,
+      "all_regions_have_white_paths_each_layer": true,
+      "method": "Positive-extrusion G0-G3 endpoints and midpoints within 0.12 mm of each CAD marking footprint; excludes prime tower and custom code",
+      "limitations": "Path presence does not prove full stroke coverage or physical legibility"
+    },
+    "source_project_sha256": "4ba60c10548293d6d6a94c0342e792e258743d3ccaef6fc8488a7fc2e54e6bec",
+    "toolpath_conflict_check_completed": true,
+    "gcode_in_delivery": false,
+    "limitations": [
+      "Slice and path checks do not establish physical flatness or legibility",
+      "Original machine end G-code emits T65535 diagnostic in local CLI parser; machine code retained"
     ]
   },
-  "gui_preview": {
-    "seam_markers_enabled_white_dots_visible": true,
-    "seam_markers_disabled_white_dots_disappear": true,
-    "view": "bottom",
-    "final_seam_markers_visible": false
+  "gui_preview_review": {
+    "completed": true,
+    "checked_on": "2026-10-10",
+    "source_project_sha256": "4ba60c10548293d6d6a94c0342e792e258743d3ccaef6fc8488a7fc2e54e6bec",
+    "project": "Control-panel-bambu-0.2mm.3mf",
+    "total_layers": 39,
+    "inspected_layers": [
+      35,
+      36,
+      39
+    ],
+    "estimated_total_seconds": 13625,
+    "estimated_filament_g": 26.86,
+    "filament_changes": 1,
+    "seam_overlay_test": "White points around holes disappear when seam display is disabled; seam geometry is unchanged",
+    "black_top_surface": "Continuous dense fill visible; no obvious large missing areas",
+    "raised_markings": "Text, logo and all three triangular indicators visible on white layers",
+    "print_parameter_changes": false,
+    "limitations": "Visual slicing review only; physical flatness and seam quality require a print"
   },
-  "slice_estimate": {
-    "layer_count": 135,
-    "total_time": "4h22m",
-    "total_filament_g": 29.72,
-    "filament_changes": 5
-  },
-  "device_readback": {
-    "registered_nozzle_mm": 0.4,
-    "user_installed_nozzle_mm": 0.2,
-    "correction_requires_printer_touchscreen": true
-  },
-  "limitations": [
-    "Physical 0.2 mm print quality not yet verified",
-    "Printer registered nozzle must be changed to 0.2 mm before printing",
-    "Project stores model and settings; no G-code is delivered"
-  ]
+  "verification_sources_sha256": {
+    "tools/update_control_panel_bambu.py": "bbc1f5de4f28180beaa3db89d66e45d7a989eb1602a99a21c4ecb5c995bef545",
+    "tools/build_control_panel.py": "7f48ff67933a7607093006791099cb55adf2d8ae21b5698aa35d627fbe6cb1f1",
+    "cad/control-panel.json": "facd6e336b90c6006d76dbe58c774ce71bf350a82fd59b84fb867308b373c154",
+    "tests/test_control_panel_bambu.py": "a089510cd9c1f1e792eb2ff900534969588950c8ab48dfbac27477ce71f9e407",
+    "output/3d-print/control-panel/Control-panel.stl": "8999e699ae5d95eb59959540737ec37d51156f0c5890712ef3e99ee6101ab3b7",
+    "output/3d-print/control-panel/Control-panel-markings.stl": "e4660f12905339c4efd36751a51a735ffa3c0327864b40c9ef8a1f4cd186733f"
+  }
 }

@@ -1,14 +1,14 @@
 {
   "parameters": {
-    "width_mm": 65,
-    "height_mm": 160,
+    "width_mm": 70,
+    "height_mm": 170,
     "thickness_mm": 3.5,
     "drawing_origin": "Upper-left corner of front face; X right, Y down",
     "holes": [
       {
         "id": "PhonoHeadphone",
         "label": "唱机耳机输出",
-        "x_mm": 16.5,
+        "x_mm": 15.3,
         "y_mm": 20.0,
         "diameter_mm": 7.5,
         "x_assumed": false,
@@ -80,7 +80,7 @@
       {
         "id": "MountTopRight",
         "label": "右上固定",
-        "x_mm": 55.5,
+        "x_mm": 60.5,
         "y_mm": 6,
         "diameter_mm": 3.5,
         "x_assumed": false,
@@ -90,7 +90,7 @@
         "id": "MountBottomLeft",
         "label": "左下固定",
         "x_mm": 9.5,
-        "y_mm": 154,
+        "y_mm": 164,
         "diameter_mm": 3.5,
         "x_assumed": false,
         "role": "mounting"
@@ -98,8 +98,8 @@
       {
         "id": "MountBottomRight",
         "label": "右下固定",
-        "x_mm": 55.5,
-        "y_mm": 154,
+        "x_mm": 60.5,
+        "y_mm": 164,
         "diameter_mm": 3.5,
         "x_assumed": false,
         "role": "mounting"
@@ -120,14 +120,8 @@
       }
     },
     "back_rim": {
-      "height_mm": 10,
-      "wall_thickness_mm": 1.5,
-      "window_clearance_per_side_mm": 0.3,
-      "dimensions_are_trial": true,
-      "edges": [
-        "left",
-        "right"
-      ]
+      "height_mm": 0,
+      "edges": []
     },
     "pcb_installation": {
       "orientation_to_panel_deg": 90,
@@ -143,12 +137,11 @@
       "width_mm": 42,
       "center_x_mm": 32.5,
       "center_y_mm": 139,
-      "depth_mm": 0.5,
-      "style": "engraved",
-      "source": "Same continuous glyph outline as Ariel-stencil"
+      "style": "raised",
+      "source": "Same continuous glyph outline as Ariel-stencil",
+      "height_mm": 0.4
     },
     "front_markings": {
-      "depth_mm": 0.5,
       "font": "references/fonts/noto-sans/NotoSans-Bold.ttf",
       "labels": [
         {
@@ -220,16 +213,29 @@
         "y_mm": 32,
         "length_mm": 45,
         "width_mm": 0.6
+      },
+      "height_mm": 0.4,
+      "style": "raised",
+      "level_indicators": {
+        "knob_ids": [
+          "VolumeKnob",
+          "TrebleKnob",
+          "BassKnob"
+        ],
+        "x_mm": 55,
+        "length_mm": 11,
+        "height_mm": 3,
+        "direction": "left small, right large"
       }
     }
   },
-  "cad_coordinates": "X=x; Y=height-y; front face Z=3.5; plate Z=0..3.5; rear rim Z=-10..0",
-  "stl_print_coordinates": "Rotate CAD 180 degrees about X, translate Y by 160 and Z by 3.5: X=x, Y=y, front face Z=0, rear rim Z=3.5..13.5",
+  "cad_coordinates": "X=x; Y=height-y; flat rear Z=0; plate Z=0..3.5; raised markings Z=3.5..3.9",
+  "stl_print_coordinates": "CAD unchanged: X=x; Y=170-y; rear face on bed Z=0; plate Z=0..3.5; markings Z=3.5..3.9; no mirroring",
   "appearance": {
     "knob_cap_diameter_mm": 14.0,
     "phono_control_label_baseline_y_mm": 12.5,
     "separator_y_mm": 32.0,
-    "scope": "Panel and flush lettering/logo inlays have separate solids and colors; knob caps and screw heads remain projections",
+    "scope": "Flat panel and raised lettering/logo/level indicators have separate solids and colors; knob caps and screw heads remain projections",
     "knob_cap_height_confirmed": false,
     "label_shift_x_mm": 2.5,
     "panel_color": "#000000",
@@ -242,96 +248,52 @@
     "hole_count": 11,
     "functional_hole_count": 7,
     "mounting_hole_count": 4,
-    "cad_total_solid_count": 60,
-    "rear_rim_height_mm": 10,
-    "rear_rim_edges": [
-      "left",
-      "right"
-    ],
-    "total_print_thickness_mm": 13.5,
+    "cad_total_solid_count": 63,
+    "rear_rim_height_mm": 0,
+    "rear_rim_edges": [],
+    "total_print_thickness_mm": 3.9,
+    "rear_face_on_bed": true,
     "saved_hole_positions_and_diameters_match": true,
     "through_holes": true,
     "cad_step_readback_match": true,
     "saved_geometry_check": "All face areas and centroids, edge types and lengths, vertex positions, volumes and bore surfaces",
     "printable_markings": true,
-    "marking_solid_count": 59,
+    "marking_solid_count": 62,
     "markings_mesh_closed": true,
-    "markings_mesh_components": 59,
-    "front_logo_engraved": true,
-    "logo_depth_mm": 0.5,
-    "logo_floor_thickness_mm": 3.0,
-    "volume_mm3": 39255.74695941718,
+    "markings_mesh_components": 62,
+    "front_logo_raised": true,
+    "marking_height_mm": 0.4,
+    "logo_base_thickness_mm": 3.5,
+    "volume_mm3": 40674.83000537164,
     "closed_mesh": true,
     "mesh_components": 1,
     "mesh_nonmanifold_edges": false,
     "mesh_self_intersections": false,
-    "triangles": 22620,
-    "mesh_volume_mm3": 39255.89243439026,
-    "markings_mesh_volume_mm3": 231.08296331654995,
-    "mesh_outline_deflection_mm": 0.002,
-    "specialized_tests_passed": true,
-    "specialized_test_count": 9,
-    "bambu_native_two_parts_verified": true,
-    "bambu_native_geometry_error_mm": [
-      3.862999998105465e-06,
-      9.91600000510573e-06
-    ],
-    "bambu_white_path_regions_present": 59,
-    "bambu_updated_gui_verified": false,
-    "preview_front_and_rear_visually_checked": true
+    "triangles": 9296,
+    "mesh_volume_mm3": 40674.97549598546,
+    "markings_mesh_volume_mm3": 204.66660824440984,
+    "mesh_outline_deflection_mm": 0.002
   },
   "sha256": {
-    "Control-panel.FCStd": "ebeb0d3680a929af427e02fa40d7243952ba646da311684561d06632e677d4f4",
-    "Control-panel.step": "b0740603749c4307005503cdced47971dd17ceba5fae9c11ad2d71bb914571e4",
-    "Control-panel.stl": "028cdf9a974b8587c48ffde87709909afe8a2b097d3b591879f197b5520b7fb4",
-    "Control-panel-markings.stl": "31ec31167e8e2a57c7f650684877d5f6aa6614128e497c0346f187e69c2f378f",
-    "Control-panel-color.3mf": "f05903d55d6ee7912c1debedcdb23bddfe9b2dfaff7b040dab0f2a0fb158411e",
-    "Control-panel-bambu.3mf": "2b0f55d18030926497377ceff3030ce5ddc0fd7c7a170494ca59a928de776506",
-    "Control-panel-bambu-0.2mm.3mf": "e450ddcdf3cbfa4a40088e22864f2a761c9184af5e295281df4245869266b094"
+    "Control-panel.FCStd": "2f79e435e8f4399234d5afe3640f38bfadfd6ddb96de1bf60b8ca88c87c8da33",
+    "Control-panel.step": "1866a98ef59aee0760db1069351a8383e4ee794866deef8a021f369ff2497969",
+    "Control-panel.stl": "8999e699ae5d95eb59959540737ec37d51156f0c5890712ef3e99ee6101ab3b7",
+    "Control-panel-markings.stl": "e4660f12905339c4efd36751a51a735ffa3c0327864b40c9ef8a1f4cd186733f",
+    "Control-panel-color.3mf": "e3c556615aba8b200397109d741d37ba33eb3fb62b8297aa2357a777511e9523"
   },
   "verification_sources_sha256": {
-    "tools/build_control_panel.py": "b5af3ab4a48710f705955095920cb487239e46b94a4c32902deb0ae5dc40d560",
-    "tests/test_control_panel.py": "b3d950df56f0894d73aaea4eb81327de104ffe88378344985b4cd6a8d0ffb4cb",
-    "cad/control-panel.json": "83972fc4bb7e71c938f8af0355d6c227929e0567f184693bd57824ca5623c3cc",
-    "cad/control-panel-appearance.json": "2119829d104cabb5a5a99ee34343221b2d1a49ad6153df326552dc4e8b642de4",
+    "tools/build_control_panel.py": "7f48ff67933a7607093006791099cb55adf2d8ae21b5698aa35d627fbe6cb1f1",
+    "tests/test_control_panel.py": "3039e8ed98c80843c5fc892e46c608c222f51f8a2c4e508d4632bca1cdddf41c",
+    "cad/control-panel.json": "facd6e336b90c6006d76dbe58c774ce71bf350a82fd59b84fb867308b373c154",
+    "cad/control-panel-appearance.json": "85f92a5251ea7f2f99fafa4ec21531e5f3999075dff20f7f698540e044e85540",
     "references/fonts/sigmar-one/SigmarOne-Regular.ttf": "0817eb698a5c4aac2c07bb84be1ead806494c489da468db23f5ffd9bcf3f0970",
     "references/fonts/noto-sans/NotoSans-Bold.ttf": "c976e4b1b99edc88775377fcc21692ca4bfa46b6d6ca6522bfda505b28ff9d6a"
   },
   "color_parts": {
     "panel": "#000000",
     "markings": "#FFFFFF",
-    "inlay_depth_mm": 0.5,
+    "raised_height_mm": 0.4,
     "same_origin": true,
-    "printer_profile_included": false,
-    "native_project_file": "Control-panel-bambu.3mf",
-    "native_project_profile_included": true,
-    "bambu_part_names": [
-      "Panel",
-      "Letters and Ariel"
-    ],
-    "part_filament_ids": [
-      1,
-      2
-    ],
-    "triangle_painting": false
-  },
-  "delivery_sha256": {
-    "output/3d-print/control-panel/README.md": "00410402e0109bc007cacf863bc05e20b390264c74a2239214041ac4d79008fc",
-    "output/3d-print/control-panel/Control-panel-outline.svg": "fd196b26e82db0bbc7b645fb068a96ee9791f37dfaa633c2a1053532f7164d09",
-    "output/3d-print/control-panel/Control-panel-bambu-check.json": "1a20b9bb35363baf9d0dde3967e4cbae9e83dbde4947155a22f4e1b0398803f5",
-    "output/pdf/control-panel-cutting-template-A4.pdf": "af6166758edff917a355b7559c31ba98717c07c91aea183a0192c14d139a7145",
-    "output/pdf/control-panel-cutting-template-A4.json": "0b5166a9d44892e3fcbb26bf8254654fb751cbd76eb4d4cf54eec872a2dfce4b",
-    "previews/control-panel.svg": "36904e6a1741df8bff10b4d9d10e53b7d5445515c77b1ae2a993968bd3b802fd",
-    "previews/control-panel.png": "de3ddc36ec74ac32bed3125c7851c6b1b41ba6180e6fac4fdf920495e9f4d2ea",
-    "previews/control-panel-model.png": "a3d55dfdef063a4afd20617ea251c80eec65ec9ddec42cce3e1576226a6c7c39",
-    "previews/control-panel-front-model.png": "0954d2b9c1888fe3872e2b0d2d9dc8739f7e181591649501fb4d53b46bfb2d10",
-    "previews/control-panel-knob-clearance.svg": "9ea7de04be458206f72034c71ed38bfeda768fee9c12e64f6a3f1d3b242c5a28",
-    "previews/control-panel-knob-clearance.png": "9a7ec698e51e5f1de34d8d3eeba72d0edce724f96dd4f7010b08aadbc112e984",
-    "previews/control-panel-mounting-concept.html": "fe342f3dab7b37734c62e30307242aa0ba6ec90aabf26705e39e30ae7fd7b82d",
-    "previews/control-panel-slice-preview.svg": "6805c708d8611f2150248153787c9a8920a6a1ed6d330cc9fc91ac372d7463c1",
-    "previews/control-panel-slice-preview.png": "521e8129d67f23e42ead1f79e80a8cceded664dc3263e8ad38ae9d34b454d97f",
-    "output/3d-print/control-panel/Control-panel-bambu-0.2mm-check.json": "fd17f62667087d06a335672752342e49b8dcc48daeac95c2980b12ba81ef6349",
-    "previews/control-panel-bambu-0.2-seams.png": "3b2599014b4f65fb5e0771f38bacbc7bcf9e92e1f754dfb68fc1a64685289594",
-    "previews/control-panel-bambu-device-nozzle.png": "03bb352e00e1185df94ece7f02bc5ccc07a28600e1c2ed13a35c39a6372e83be"
+    "printer_profile_included": false
   }
 }
