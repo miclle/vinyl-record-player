@@ -1,0 +1,20 @@
+"""Build the independent flat plate and knob without modifying the assembly."""
+from pathlib import Path
+import sys
+
+import FreeCAD as App
+import FreeCADGui as Gui
+
+tools = Path(__file__).resolve().parent
+if str(tools) not in sys.path:
+    sys.path.insert(0, str(tools))
+source = tools / 'build_led_pot_mount.py'
+namespace = {'__name__': 'led_pot_controls_macro', '__file__': str(source)}
+exec(compile(source.read_bytes(), str(source), 'exec'), namespace)
+namespace['export']()
+namespace['package']()
+for name, stem in namespace['PARTS'].items():
+    doc = App.openDocument(str(namespace['OUTPUT'] / (stem + '.FCStd')))
+    if not doc.getObject(name).ViewObject.Visibility:
+        raise RuntimeError('Saved part reopened hidden: ' + name)
+    Gui.getDocument(doc.Name).activeView().fitAll()

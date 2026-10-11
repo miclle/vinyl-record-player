@@ -1,0 +1,199 @@
+{
+  "units": "mm",
+  "parameters": {
+    "units": "mm",
+    "revision": "trial-04-measured-splined-shaft",
+    "description": "独立内侧平板和内伸轴套旋钮；背板 Ø12 同径通孔，不修改主装配",
+    "potentiometer": {
+      "thread_length_mm": 6.8,
+      "nut_thickness_mm": 2.0,
+      "shaft_above_thread_mm": 8.5,
+      "nut_max_diameter_mm": 11.0,
+      "confirmed_fields": [
+        "thread_length_mm",
+        "nut_thickness_mm",
+        "shaft_above_thread_mm",
+        "nut_max_diameter_mm",
+        "shaft_diameter_min_mm",
+        "shaft_diameter_max_mm",
+        "shaft_profile"
+      ],
+      "shaft_length_datum": "螺纹顶端至轴尖 8.5 mm；本体端面至轴尖合计 15.3 mm",
+      "thread_diameter_mm": 7.0,
+      "shaft_diameter_min_mm": 5.8,
+      "shaft_diameter_max_mm": 5.9,
+      "shaft_diameter_mm": 5.9,
+      "shaft_profile": "splined",
+      "shaft_spline": {
+        "tooth_count": null,
+        "root_diameter_mm": null,
+        "tooth_profile": null,
+        "note": "待实测；暂不生成匹配齿形。shaft_diameter_mm 采用实测上限作为圆柱包络检查"
+      },
+      "shaft_flat_depth_mm": 0.8,
+      "washer_thickness_mm": 0.5,
+      "washer_outer_diameter_mm": 10.5,
+      "body_diameter_mm": 17.0,
+      "body_depth_mm": 12.0,
+      "wire_reservation_depth_mm": 8.0,
+      "assumption_note": "用户确认花轴，外径 5.8–5.9 mm；shaft_diameter_mm=5.9 为上限包络，并非精确实测单值。齿数、齿根直径和齿形待测；其余未确认字段仍为假设"
+    },
+    "plate": {
+      "width_mm": 22.0,
+      "height_mm": 36.0,
+      "thickness_mm": 2.0,
+      "corner_radius_mm": 3.0,
+      "thread_hole_diameter_mm": 7.2,
+      "screw_hole_diameter_mm": 3.4,
+      "screw_pitch_y_mm": 28.0,
+      "wood_pilot_diameter_mm": 2.5,
+      "wood_pilot_depth_mm": 6.0,
+      "minimum_wall_mm": 1.2,
+      "assumed_screw_head_diameter_mm": 6.0,
+      "seal_thickness_mm": 0.0,
+      "assumption_note": "平板和螺钉尺寸均可调；密封垫厚度指压紧后厚度，默认 0。无沉入凸台、沉孔或本体背面凹口"
+    },
+    "knob": {
+      "face_diameter_mm": 20.0,
+      "face_thickness_mm": 5.0,
+      "face_to_wood_gap_mm": 0.5,
+      "stem_diameter_mm": 9.0,
+      "root_flare_radial_mm": 1.0,
+      "root_flare_height_mm": 1.0,
+      "shaft_engagement_mm": 8.0,
+      "bore_diameter_mm": 6.0,
+      "bore_flat_clearance_mm": 0.05,
+      "bore_tip_clearance_mm": 0.3,
+      "minimum_bushing_gap_mm": 0.5,
+      "minimum_wall_mm": 1.2,
+      "grip_groove_count": 24,
+      "grip_groove_radius_mm": 0.6,
+      "grip_groove_center_offset_mm": 0.3,
+      "assumption_note": "全部为可调试设。已知花轴暂用 Ø6 圆孔试配，直径间隙 0.1–0.2 mm；没有匹配齿形，不能确认咬合传扭或抗松脱。齿形参数实测后再建匹配孔。D 轴参数化功能保留"
+    },
+    "back_panel": {
+      "thickness_mm": 12.0,
+      "opening_diameter_mm": 12.0,
+      "user_requested_fields": [
+        "opening_diameter_mm"
+      ],
+      "assumption_note": "用户指定 Ø12 前后同径通孔，无沉台或阶梯孔；板厚来自当前主模型，实物仍需核对"
+    },
+    "anti_rotation": {
+      "enabled": false,
+      "lug_center_radius_mm": 8.5,
+      "slot_width_mm": 2.4,
+      "slot_radial_length_mm": 2.4,
+      "assumption_note": "电位器止转凸耳未确认，默认关闭，实测后可开启平板上的止转孔"
+    },
+    "installation": {
+      "available_width_mm": 30.0,
+      "center_x_mm": null,
+      "center_z_mm": 88.5,
+      "assumption_note": "用户要求按插口左侧 30 mm 净宽处理；平板宽 22 mm，居中时两侧各留 4 mm。最终开孔中心 X 待按实物确定；Z 为等高建议，不改主装配"
+    }
+  },
+  "derived": {
+    "wood_inner_z_mm": 2.0,
+    "wood_outer_z_mm": 14.0,
+    "thread_end_z_mm": 6.8,
+    "shaft_end_z_mm": 15.3,
+    "shaft_tip_beyond_wood_mm": 1.3000000000000007,
+    "knob_stem_tip_z_mm": 7.300000000000001,
+    "knob_face_inner_z_mm": 14.5,
+    "knob_outer_z_mm": 19.5,
+    "stem_length_mm": 7.199999999999999,
+    "knob_print_height_mm": 12.2,
+    "bore_depth_mm": 8.3,
+    "bore_roof_mm": 3.8999999999999986,
+    "knob_projection_mm": 5.5,
+    "knob_bushing_gap_mm": 0.5000000000000009,
+    "shaft_bore_diametral_clearance_min_mm": 0.09999999999999964,
+    "shaft_bore_diametral_clearance_max_mm": 0.20000000000000018,
+    "screw_centers_mm": [
+      [
+        0,
+        -14.0
+      ],
+      [
+        0,
+        14.0
+      ]
+    ],
+    "side_clearance_mm": 4.0
+  },
+  "quantity_per_part": 1,
+  "print_envelopes_mm": {
+    "Plate": [
+      22.0,
+      36.0,
+      2.0
+    ],
+    "Knob": [
+      20.0,
+      20.0,
+      12.2
+    ]
+  },
+  "print_orientation": "Plate flat at Z=0; knob front face at Z=0, stem/bore upward. No supports in nominal geometry; inspect slice.",
+  "validation": {
+    "passed": true,
+    "parts": {
+      "Plate": {
+        "passed": true,
+        "solid_count": 1,
+        "saved_cad_step_match": true,
+        "closed_mesh": true,
+        "mesh_components": 1,
+        "mesh_self_intersections": false,
+        "mesh_nonmanifold_edges": false,
+        "mesh_triangles": 8084,
+        "cad_volume_mm3": 1450.8017751080708,
+        "mesh_volume_mm3": 1450.8033678424144
+      },
+      "Knob": {
+        "passed": true,
+        "solid_count": 1,
+        "saved_cad_step_match": true,
+        "closed_mesh": true,
+        "mesh_components": 1,
+        "mesh_self_intersections": false,
+        "mesh_nonmanifold_edges": false,
+        "mesh_triangles": 24574,
+        "cad_volume_mm3": 1783.364044719566,
+        "mesh_volume_mm3": 1783.3303491303643
+      }
+    },
+    "installation": {
+      "nominal_fixture_clear": true,
+      "knob_projection_mm": 5.5,
+      "shaft_tip_beyond_wood_mm": 1.3000000000000007,
+      "shaft_engagement_mm": 8.0,
+      "knob_bushing_gap_mm": 0.5000000000000009,
+      "shaft_profile": "splined",
+      "spline_geometry_modeled": false,
+      "bore_profile": "round_trial",
+      "shaft_bore_diametral_clearance_mm": [
+        0.09999999999999964,
+        0.20000000000000018
+      ],
+      "actual_shaft_fit_and_torque_verified": false,
+      "scope": "Static ideal fixtures only; actual shaft/profile, printing, PCB/wires, strength and sealing unverified"
+    }
+  },
+  "source_sha256": {
+    "cad/led-pot-mount.json": "097cd2a0db3e19bd2c8d67edd8b679c0aeffa0e9a34ad0c89bf40200973518b5",
+    "tools/build_led_pot_mount.py": "1048807c28ef2b7b34cb6bc3e4b599ea6f71e2481ffb5e330159bcfb17e70f2c"
+  },
+  "files_sha256": {
+    "LED-pot-plate.FCStd": "d0b7e93b7032c598f20fed723b962de5ef0cbca7d18e70569bb2c2dfc2b507c2",
+    "LED-pot-plate.step": "af2f16e3fade096dcdaaaa663b840c4ea81af582bb098ca3b9d9ddf14177dd79",
+    "LED-pot-plate.stl": "747a78f1b4813d9c31034ec32835a2731fde7957d523f93375c61343dad8c8c4",
+    "LED-pot-knob.FCStd": "4a8a4d362d234f7e6e814a31d692d77a88de9b4143f2924ac0ee1a3a6a9146aa",
+    "LED-pot-knob.step": "bdcb9dcadd0d99e513385ef1d845d3b67635b4cfa07493247189474b82875baa",
+    "LED-pot-knob.stl": "089e70f68556d2df07a4eb94dcc9c9da1c4dd47a61319baf2ee311c9d87dcdf7",
+    "plate-preview.png": "6a4ce6778f46770d82927422236263cec22d88a48554902d9dd06ab5d09e026a",
+    "knob-preview.png": "5a99198aca89ac589da41fc7e0fe6b332120e112210ec4ab44947142b7e42961",
+    "installation-section.png": "58b2b9a97ea9563dbe91b85d8c0d7d3931be4be52fd8dab28af933aaa38d1b7f"
+  }
+}

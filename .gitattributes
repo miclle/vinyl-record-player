@@ -4,3 +4,7 @@ cad/*.FCStd binary
 
 # Generated PDF streams must not be whitespace-normalized or line-merged.
 output/pdf/*.pdf binary
+
+# Preserve independent CAD exports verbatim like the main assembly.
+output/3d-print/**/*.step binary
+output/3d-print/**/*.FCStd binary
