@@ -1,0 +1,19 @@
+"""Build only the independent grille positioning tools."""
+from pathlib import Path
+import sys
+
+import FreeCAD as App
+import FreeCADGui as Gui
+
+tools = Path(__file__).resolve().parent
+if str(tools) not in sys.path:
+    sys.path.insert(0, str(tools))
+source = tools / 'build_grille_jigs.py'
+namespace = {'__name__': 'grille_jigs_macro', '__file__': str(source)}
+exec(compile(source.read_bytes(), str(source), 'exec'), namespace)
+namespace['export']()
+namespace['render_installation']()
+doc = App.openDocument(str(namespace['OUTPUT'] / (namespace['STEM'] + '.FCStd')))
+if not all(obj.ViewObject.Visibility for obj in doc.Objects):
+    raise RuntimeError('Saved jig reopened hidden')
+Gui.getDocument(doc.Name).activeView().fitAll()

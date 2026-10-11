@@ -1,0 +1,56 @@
+{
+  "units": "mm",
+  "quantity": 1,
+  "installation_quantity": 2,
+  "slat_count": 7,
+  "slat_face_width_mm": 6.0,
+  "slat_projection_mm": 10.0,
+  "nominal_gap_mm": 6.0,
+  "surface_pitch_mm": 12.0,
+  "nominal_array_height_mm": 78,
+  "slot_width_mm": 6.3,
+  "slot_total_clearance_mm": 0.2999999999999998,
+  "tooth_engagement_mm": 7.0,
+  "baffle_clearance_mm": 3.0,
+  "back_thickness_mm": 3.0,
+  "slot_mouth_chamfer_mm": 0.4,
+  "single_size_mm": [
+    32.0,
+    94.68272939645739,
+    10.000000000000004
+  ],
+  "baffle_angle_deg": 72.0,
+  "bottom_gap_vertical_mm": 6.0,
+  "bottom_datum": "Lowest slat lower edge at its baffle-facing rear surface; seat against lower slot wall",
+  "stop_contact_area_mm2": 231.3216893324188,
+  "print_orientation": "Flat continuous back on bed (Z=0), teeth upward; no supports",
+  "installation": "Foot rests on horizontal bottom panel; teeth toward baffle; seat strips downhill against lower slot walls; pull outward normal to baffle",
+  "tolerance_note": "Nominal 6 mm gaps; 0.3 mm slot clearance permits uphill movement. Seat all strips against lower slot walls to establish the 6 mm bottom datum.",
+  "assumptions": [
+    "Measured wood and printer fit require a dry test",
+    "Keep glue away from both 22 mm wide contact bands",
+    "Comb positions and holding pressure require physical confirmation"
+  ],
+  "source_sha256": "ce9344db58703e2aa3ec472c3c5c5a65d3e6e26b9478adfcb43d4dc364813e13",
+  "validation": {
+    "cad_step_readback_match": true,
+    "solid_count": 1,
+    "closed_mesh": true,
+    "mesh_components": 1,
+    "mesh_nonmanifold_edges": false,
+    "mesh_self_intersections": false,
+    "triangles": 204,
+    "mesh_volume_mm3": 14244.74694379804,
+    "installation": {
+      "bottom_gap_vertical_mm": 6.000000000000001,
+      "stop_contact_area_mm2": 231.32168933241886,
+      "floor_and_baffle_overlap_mm3": 0,
+      "normal_removal_clear": true
+    }
+  },
+  "files_sha256": {
+    "Grille-positioning-jigs.FCStd": "77444f5fae848be710a330f644bdcc97e28303d4bce69e6ede82851e35cff55e",
+    "Grille-positioning-jigs.step": "512941b51a2f5e62cb340967e4a9988cb03fe9b4f6ae00364c6dd71f9e164649",
+    "Grille-positioning-jigs.stl": "99060c87b57fbd7dcb88f860a0d36142357933e855accf18160a41974de6e585"
+  }
+}
