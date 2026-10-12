@@ -12,6 +12,7 @@ from feet import installation as feet_installation
 from fascia import dimensions as fascia_dimensions, installation as fascia_installation
 from nameplate import dimensions as nameplate_dimensions
 from model_sections import SECTION_NAMES, section_objects
+from dust_cover import dimensions as cover_dimensions
 
 ROOT=Path(__file__).resolve().parents[1]
 
@@ -47,7 +48,7 @@ def _validate_document(doc,p):
     result={'revision':p['revision'],'freecad':'.'.join(App.Version()[:3]),'checks':{},'metrics':{},'limitations':[
         '静态 Part 实体由 JSON 驱动重建，原生文件不含自动联动的完整特征历史',
         '音响与唱盘部件为概念包络；声学、隔振、连接工艺及电气均未验证',
-        '原厂 214.2 mm 测量基准未明确；本版按已购脚垫名义高度调整闭盖总高',
+        '盖外尺寸450×348×75、厚3为用户确认值；木壳CAD宽450与实测452的差异未扩改木件；唱臂实测60的动态状态未确认',
         '脚垫未压缩；脚座孔距、板预孔及密封为安装假设；低音离地19.5 mm，低于此前20 mm试验目标，声学待测',
         'T 型铝条按30×30×5总外廓、等厚居中截面建模；端隙、槽隙为假设，根部圆角、胶层及固定件待实测',
         'Ariel 独立铭牌的外廓、厚度、材质与固定待商家确认；0.02 mm 字面浅凹仅为激光效果可视化',
@@ -147,7 +148,7 @@ def _validate_document(doc,p):
     compound=Part.makeCompound([o.Shape for o in objects]);bb=compound.BoundBox
     metrics['part_count']=len(objects);metrics['solid_count']=len(compound.Solids)
     metrics['overall_mm']=[bb.XLength,bb.YLength,bb.ZLength]
-    expected_overall=[p['width'],p['depth']+max(p['ac_inlet']['flange_thickness'],p['hinges']['overall_projection_assumption'])+p['fascia']['nameplate']['thickness'],p['closed_height']]
+    expected_overall=[max(p['width'],p['cover_width']),p['depth']+max(p['ac_inlet']['flange_thickness'],p['hinges']['overall_projection_assumption'])+p['fascia']['nameplate']['thickness'],p['closed_height']]
     checks['overall_matches_parameters']=all(abs(v-e)<1e-5 for v,e in zip(metrics['overall_mm'],expected_overall))
     deck_clearances=_deck_clearances(doc,p)
     metrics['deck_clearances_mm']=deck_clearances
@@ -179,6 +180,19 @@ def _validate_document(doc,p):
     mechanisms=section_objects(doc, 'SelectedKit', 'Controls')
     stationary=section_objects(doc, 'Cabinet')+mechanisms+section_objects(doc, 'Deck')+[doc.Fascia]
     lid=doc.getObject('DustCover').Shape
+    cd=cover_dimensions(p)
+    lb=lid.optimalBoundingBox(False)
+    metrics['dust_cover_mm']={
+        'outer':[lb.XLength,lb.YLength,lb.ZLength],
+        'inner':[cd['inner_width'],cd['inner_depth'],cd['inner_height']],
+        'bottom_z':lb.ZMin,'inner_top_z':lb.ZMax-p['cover_wall'],
+        'measured_arm_above_deck':p['cover_measured_arm_height'],
+        'measured_arm_nominal_top_gap':lb.ZMax-p['cover_wall']-p['cabinet_top']-p['cover_measured_arm_height']}
+    checks['dust_cover_outer_dimensions']=all(abs(a-b)<1e-6 for a,b in zip(
+        [lb.XLength,lb.YLength,lb.ZLength],[cd['width'],cd['depth'],cd['height']]))
+    checks['dust_cover_lands_on_cabinet']=abs(lb.ZMin-p['cabinet_top'])<1e-6 and all(
+        lid.distToShape(doc.getObject(n).Shape)[0]<1e-6 for n in ('SideLeft','SideRight','Back','Fascia'))
+    checks['measured_arm_nominal_cover_gap_positive']=metrics['dust_cover_mm']['measured_arm_nominal_top_gap']>0
     def volume(a,b):
         if not a.BoundBox.intersect(b.BoundBox):return 0.0
         return a.common(b).Volume

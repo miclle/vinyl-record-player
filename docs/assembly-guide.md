@@ -1,6 +1,6 @@
 # 整机全景与组件导览
 
-[图册 01 中的两页 A2 导览](../output/pdf/01-assembly-and-enclosure.pdf)是三份尺寸图册的阅读入口，基于单一主 CAD 中的 `v0.11-10x6-grille-slats` 结构和 `v0.6-centered-mechanism` 机芯制作。两页原尺寸 A2 导览插在 A-STOCK 木板清单之后；不再另行交付内容重复的 00 PDF。
+[图册 01 中的两页 A2 导览](../output/pdf/01-assembly-and-enclosure.pdf)是三份尺寸图册的阅读入口，基于单一主 CAD 中的 `v0.12-inset-dust-cover` 结构和 `v0.6-centered-mechanism` 机芯制作。两页原尺寸 A2 导览插在 A-STOCK 木板清单之后；不再另行交付内容重复的 00 PDF。
 
 - **第 1 页：整机全景。** 开盖三维视图标出外壳、格栅、透明盖、铰链、脚垫、机芯和旋钮；彩色编号下直接显示部件名称。
 - **第 2 页：内部展开。** 移开台面、音腔顶板、障板等结构，显示扬声器、隔板、支承与电子模块；主图及后部接口小图在彩色编号下直接显示部件名称，右侧目录继续列出材料、数量和详图号；后部小图用半透明后板显示 AC 插座和接口板预留。
@@ -55,3 +55,5 @@ PYTHONPATH="${FREECAD_RESOURCES:?请先设置 FreeCAD 运行环境}/lib" \
 FREECAD_RESOURCES="${FREECAD_RESOURCES:?请先设置 FreeCAD 运行环境}" \
   python3 -m unittest discover -s tests -p '*_pdf.py' -v
 ```
+
+C01 的防尘盖已按用户确认更新为外尺寸 450 × 348 × 75 mm、3 mm 亚克力，内净尺寸 444 × 342 × 72 mm；底边落在壳体顶面。实测木壳宽 452 mm，现有 CAD 木壳仍宽 450 mm，定位差异见 [防尘盖说明](../README.md#防尘盖成形尺寸)。C02 外侧补偿垫片为 1 mm、内压板仍为 2 mm；导览编号和对象数量不变。

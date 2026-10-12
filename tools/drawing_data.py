@@ -188,7 +188,11 @@ def collect(root=ROOT, project=True):
             add('Slat01',1,p['slat_thickness'],[f'矩形截面：面宽 {f(p["slat_face_width"])} × 法向厚 {f(p["slat_thickness"])}；整体后倾 {f(90-p["front_angle"])}°。',f'竖向节距 {f(p["slat_pitch"])}；前表面下缘首条 Z={f(zlo+2)}，共 {p["slat_count"]} 条。','尺寸表为倾斜安装包络；直接下料使用上方矩形备料尺寸。'],[f'Slat{i:02}' for i in range(2,p['slat_count']+1)])
             add('LightChannel',1,2,['模型为实心薄块；未建 U 形槽，不能作为型材截面图。'])
             add('LightDiffuser',1,1,['扩散片外廓占位。'])
-            add('DustCover',1,p['cover_wall'],['五面空心罩，底面开口；厚度适用于顶面和四侧。',f"后壁4×Ø{f(hs['cover_hole_diameter_assumption'])}通孔为安装假设；坐标见 A-H03。",'本图为成形外廓，不是热弯展开图；弯曲半径、拼接未定义。'])
+            add('DustCover',1,p['cover_wall'],[
+                f"用户确认成形外尺寸 {f(p['cover_width'])}×{f(p['cover_depth'])}×{f(p['cover_height'])}；顶面及四侧厚 {f(p['cover_wall'])}。",
+                f"底面开口；净空 {f(p['cover_width']-2*p['cover_wall'])}×{f(p['cover_depth']-2*p['cover_wall'])}×{f(p['cover_height']-p['cover_wall'])}；底边与侧板顶面齐平。",
+                f"后壁4×Ø{f(hs['cover_hole_diameter_assumption'])}通孔为安装假设；坐标见 A-H03。",
+                '本图为成形外廓，不是热弯展开图；弯曲半径、拼接未定义。'])
             add('HingeBase0',1,p['hinges']['leaf_thickness'],['HFA5751-3434 固定叶与两端轴筒；与活动叶合计1只采购合页。',f"展开{f(hs['unfolded_height'])}×{f(hs['axis_length'])}，孔距{f(hs['hole_pitch'])}×{f(hs['hole_pitch'])}，4×Ø{f(hs['hole_diameter'])}。",f"总厚{f(hs['overall_projection_assumption'])}、筒径{f(hs['barrel_diameter_assumption'])}；轴位及筒节细节为假设。",'木板侧盲预孔见 A-H02；紧固与保持扭矩待实测。'],['HingeBase1'])
             add('HingePin0',1,p['hinges']['leaf_thickness'],['HFA5751-3434 活动叶与中间轴筒；旧轴对象ID保留。',f"沿X转轴；轴线Y={f(hd['axis'].y)}、Z={f(hd['axis'].z)}（安装假设）。",'用户提供最大3 N.m；单只口径暂按假设，范围/寿命待确认。',f"与上盖、{f(hd['spacer'])} mm补偿垫片及{f(hs['backing_thickness_assumption'])} mm内压板同步开合。"],['HingePin1'])
             add('Foot0',1,None,[

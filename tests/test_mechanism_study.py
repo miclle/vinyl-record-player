@@ -112,14 +112,14 @@ class MechanismStudyTests(unittest.TestCase):
                               - p['acoustic']['roof_thickness'])
                 self.assertEqual([s['roof_depth_deficit_mm'] for s in states],
                                  [24.5-roof_depth, 29.5-roof_depth])
-                self.assertAlmostEqual(states[0]['upper_vertical_lid_gap_mm'], 0.7)
-                self.assertAlmostEqual(states[1]['upper_vertical_lid_gap_mm'], 5.7)
+                self.assertAlmostEqual(states[0]['upper_vertical_lid_gap_mm'], 11.5)
+                self.assertAlmostEqual(states[1]['upper_vertical_lid_gap_mm'], 16.5)
                 for state in states:
                     self.assertEqual(state['cover_sweep_sample_count'], 71)
                     self.assertEqual(state['cover_sweep_collisions'], [])
                     self.assertIn('AcousticRoof', [hit['part'] for hit in state['local_underbody_overlaps']])
-                self.assertAlmostEqual(fit['display_cover_clearance_mm'], 5.7)
-                self.assertAlmostEqual(fit['illustrative_cover_clearance_mm'], 0.7)
+                self.assertAlmostEqual(fit['display_cover_clearance_mm'], 16.5)
+                self.assertAlmostEqual(fit['illustrative_cover_clearance_mm'], 11.5)
                 self.assertTrue(all(o.IsReference for o in section_objects(saved, 'Mechanism')))
                 self.assertFalse(any(o.TypeId == 'App::DocumentObjectGroup' for o in saved.Objects))
                 self.assertTrue(all(o in saved.RootObjects for o in saved.Objects
@@ -147,7 +147,10 @@ class MechanismStudyTests(unittest.TestCase):
             self.copy_inputs(root)
             path = root / 'cad/mechanism.json'
             cfg = json.loads(path.read_text())
-            cfg['spring_free_height'] = 16.5
+            p = json.loads((root / 'cad/parameters.json').read_text())
+            free = mechanism_study.measurement_datums(cfg, p['cabinet_top'], 0)
+            # Keep the free endpoint 0.3 mm inside the lid after a cover-height change.
+            cfg['spring_free_height'] += p['closed_height']-p['cover_wall']-free['highest_z_mm']+0.3
             path.write_text(json.dumps(cfg))
             try:
                 with patch.object(build_model, 'ROOT', root):

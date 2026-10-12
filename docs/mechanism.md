@@ -51,9 +51,9 @@
 
 ![机芯右视与局部下探估算](../previews/mechanism-side.png)
 
-压缩 0／5 mm 时，最高点到上盖内顶面的名义竖向差为 **0.7／5.7 mm**；未压缩状态余量很小。核对报告的13项几何／导出检查通过；两个状态闭盖实体最小距离分别为0.7／5.7 mm，均无重叠，0–70°每1°共71个姿态的盖总成抽样也未检出示意机芯干涉。示意实体无干涉不代表真实唱臂抬升、回臂、弹簧倾摆和盖壳公差已验证。报告保持 `installation_released=false`、`dimensions_confirmed=false` 和 `underbody_coverage_complete=false`。
+压缩 0／5 mm 时，最高点到上盖内顶面的名义竖向差为 **11.5／16.5 mm**（v0.12 防尘盖）。核对报告的13项几何／导出检查通过；两个状态闭盖实体最小距离分别为11.5／16.5 mm，均无重叠，0–70°每1°共71个姿态的盖总成抽样也未检出示意机芯干涉。示意实体无干涉不代表真实唱臂抬升、回臂、弹簧倾摆和盖壳公差已验证。报告保持 `installation_released=false`、`dimensions_confirmed=false` 和 `underbody_coverage_complete=false`。
 
-报告的 `display_closed_cover_clear`／`display_cover_clearance_mm` 仅描述当前显示状态；`illustrative_closed_cover_clear`／`illustrative_cover_clearance_mm` 汇总显示状态与两个弹簧端点，净空取最小值（当前为0.7 mm）。`spring_endpoints_closed_cover_clear` 与 `spring_endpoints_cover_sweep_clear` 纳入 `geometry_checks`；任一端点闭盖或开盖抽样发生碰撞，命令行／宏检查即失败，并保留报告供定位。两端抽样仍不等于连续弹簧行程或真实运动验证。
+报告的 `display_closed_cover_clear`／`display_cover_clearance_mm` 仅描述当前显示状态；`illustrative_closed_cover_clear`／`illustrative_cover_clearance_mm` 汇总显示状态与两个弹簧端点，净空取最小值（当前为11.5 mm）。`spring_endpoints_closed_cover_clear` 与 `spring_endpoints_cover_sweep_clear` 纳入 `geometry_checks`；任一端点闭盖或开盖抽样发生碰撞，命令行／宏检查即失败，并保留报告供定位。两端抽样仍不等于连续弹簧行程或真实运动验证。
 
 ## 后续适配与重建
 
@@ -79,3 +79,5 @@ PYTHONPATH="${FREECAD_RESOURCES:?请先设置 FreeCAD 运行环境}/lib" \
 终端入口不刷新 GUI 颜色和预览。查看开合使用 `tools/toggle-cover.FCMacro`；它只切换当前文档，不自动保存。出图、导览与验证在临时副本中恢复闭盖基准，不受保存的展示角度影响。
 
 音响布局详见 [SC-2103 三音腔设计](audio-layout.md)。低音腔向后延伸后，顶板与倒相管仍需按弯臂机芯真实底部重新核对。`BearingPocket` 是基线通用轴承的密封避让杯，在核对版中作为现有结构保留，不代表适配了当前机芯。
+
+2026-10-12 用户实测唱臂最高处距浮动承板上表面 60 mm；承板与侧板顶面齐平。v0.12 盖内顶距该平面 72 mm，实测基准名义净空为 12 mm。此实测值独立于机芯示意造型的 11.5／16.5 mm 弹簧端点净空；未据单一高度反推或修改唱臂局部轮廓。抬臂、回臂及浮动最高状态是否包含在 60 mm 内尚未确认。

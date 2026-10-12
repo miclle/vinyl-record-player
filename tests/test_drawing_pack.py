@@ -60,7 +60,7 @@ class DrawingPackTests(unittest.TestCase):
         notes=' '.join(sheets['DustCover']['notes'])
         self.assertIn('内侧3 mm压板',notes)
         self.assertIn('外廓51×20',notes)
-        self.assertIn('厚度分别为2/3',notes)
+        self.assertIn('厚度分别为1/3',notes)
         self.assertIn('(8.5,10)/(42.5,10)',notes)
 
     def test_saved_geometry_coverage_split_panels_and_slope_thickness(self):

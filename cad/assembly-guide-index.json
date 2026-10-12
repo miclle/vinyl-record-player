@@ -1,7 +1,7 @@
 {
-  "revision": "v0.11-10x6-grille-slats",
+  "revision": "v0.12-inset-dust-cover",
   "sources": {
-    "record-player.FCStd": "08db7b527fcfc7747c2f7a8d27714b8630ba7e80b7e7a8a5b4e3a5e7ee5ed833"
+    "record-player.FCStd": "d23d4d1a7b90717e4fe7eafa6e7ddb46dac5caafad1bc66030aeaf8f6d129fb2"
   },
   "entries": [
     {
@@ -88,14 +88,14 @@
         "DustCover"
       ],
       "quantity": "1 件",
-      "material": "烟灰亚克力；壁厚 3 mm 暂估",
+      "material": "烟灰亚克力；壁厚 3 mm 用户确认",
       "drawings": [
         "A-P05"
       ],
       "size_mm": [
-        426.0,
-        346.0,
-        63.2
+        450.0,
+        348.0,
+        75.0
       ]
     },
     {
@@ -749,7 +749,7 @@
   "nominal_cabinet_mm": [
     450.0,
     350.0,
-    210.7
+    221.5
   ],
   "physical_object_count": 65,
   "embedded_in": {

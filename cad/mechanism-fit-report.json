@@ -100,8 +100,8 @@
     "sample_count": 71,
     "collisions": [],
     "fixed_collisions": [],
-    "bare_cover_mass_estimate_kg": 0.8479268785506899,
-    "bare_cover_closed_moment_estimate_nm": 1.5135386608606896,
+    "bare_cover_mass_estimate_kg": 0.9577575025506896,
+    "bare_cover_closed_moment_estimate_nm": 1.7095149354350487,
     "max_torque_user_reported_nm": 3.0,
     "torque_scope": "User reports maximum 3 N.m; per-hinge interpretation provisional, range/tolerance/life not verified",
     "installation_released": false
@@ -177,9 +177,9 @@
             "overlap_mm3": 164612.075
           }
         ],
-        "closed_cover_clearance_mm": 0.6999999999999886,
+        "closed_cover_clearance_mm": 11.5,
         "closed_cover_overlap_mm3": 0.0,
-        "upper_vertical_lid_gap_mm": 0.6999999999999886,
+        "upper_vertical_lid_gap_mm": 11.5,
         "cover_sweep_collisions": [],
         "cover_sweep_sample_count": 71,
         "roof_depth_deficit_mm": 12.5
@@ -225,9 +225,9 @@
             "overlap_mm3": 263508.783
           }
         ],
-        "closed_cover_clearance_mm": 5.699999999999989,
+        "closed_cover_clearance_mm": 16.5,
         "closed_cover_overlap_mm3": 0.0,
-        "upper_vertical_lid_gap_mm": 5.699999999999989,
+        "upper_vertical_lid_gap_mm": 16.5,
         "cover_sweep_collisions": [],
         "cover_sweep_sample_count": 71,
         "roof_depth_deficit_mm": 17.5
@@ -261,9 +261,9 @@
       }
     ],
     "display_closed_cover_clear": true,
-    "display_cover_clearance_mm": 5.699999999999989,
+    "display_cover_clearance_mm": 16.5,
     "illustrative_closed_cover_clear": true,
-    "illustrative_cover_clearance_mm": 0.6999999999999886
+    "illustrative_cover_clearance_mm": 11.5
   },
   "limitations": [
     "除弯臂外用户确认与直臂图一致；部分尺寸已实测，安装接口仍未确认",
@@ -273,5 +273,5 @@
     "合页及盖总成对示意机芯做1度开盖抽样；真实机芯和自动回臂运动未验证",
     "STEP 仅导出装配示意，包络及红色干涉体保留在 FCStd"
   ],
-  "model_sha256": "08db7b527fcfc7747c2f7a8d27714b8630ba7e80b7e7a8a5b4e3a5e7ee5ed833"
+  "model_sha256": "d23d4d1a7b90717e4fe7eafa6e7ddb46dac5caafad1bc66030aeaf8f6d129fb2"
 }

@@ -5,15 +5,18 @@ mechanism. Fixed and moving leaves are separate so every preview uses one axis.
 """
 import FreeCAD as App
 import Part
+from dust_cover import dimensions as cover_dimensions
 
 V = App.Vector
 
 
 def dimensions(p):
     h = p['hinges']
-    # Rear cover is inset 2 mm relative to the cabinet in the current layout.
-    rear = p['depth'] - 2
-    axis_z = (p['cabinet_top'] + p['cover_bottom']) / 2
+    rear = cover_dimensions(p)['rear']
+    if not 0 < p['depth']-rear < p['wall']:
+        raise ValueError('Selected hinge installation requires a supported rear inset')
+    # Preserve the selected hinge and wood pilots when the cover landing changes.
+    axis_z = p['cabinet_top'] + h['axis_above_cabinet_assumption']
     radius = h['barrel_diameter_assumption'] / 2
     axis_y = p['depth'] + h['overall_projection_assumption'] - radius
     if not 0 < h['wood_pilot_depth_assumption'] < p['wall']:

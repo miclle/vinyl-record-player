@@ -35,8 +35,9 @@ class HingeTests(unittest.TestCase):
         for x in (83,117,333,367):
             self.assertFalse(self.doc.Back.Shape.isInside(App.Vector(x,346,130),1e-6,False))
             self.assertTrue(self.doc.Back.Shape.isInside(App.Vector(x,340,130),1e-6,False))
-            self.assertFalse(self.doc.DustCover.Shape.isInside(App.Vector(x,346.5,164),1e-6,False))
-        self.assertAlmostEqual(metrics['bare_cover_closed_moment_estimate_nm'],1.51354,places=4)
+            self.assertFalse(self.doc.DustCover.Shape.isInside(App.Vector(x,347.5,164),1e-6,False))
+        self.assertAlmostEqual(metrics['bare_cover_closed_moment_estimate_nm'],1.70951,places=4)
+        self.assertAlmostEqual(self.doc.HingeSpacer0.Shape.optimalBoundingBox(False).YLength,1)
 
     def test_filled_pilot_and_through_drilled_back_are_rejected(self):
         back=self.doc.Back; original=back.Shape.copy()
@@ -50,7 +51,7 @@ class HingeTests(unittest.TestCase):
     def test_upper_backing_collision_is_not_hidden_by_clear_cover(self):
         # Put a stationary obstacle only inside the upper backing plate.
         obstacle=self.doc.addObject('Part::Feature','BackingObstacle')
-        obstacle.Shape=Part.makeBox(2,1,2,App.Vector(99,343.5,162))
+        obstacle.Shape=Part.makeBox(2,1,2,App.Vector(99,344.5,162))
         checks,metrics=hinges.check_installation(self.doc,self.p,70)
         self.assertFalse(checks['hinge_cover_assembly_sweep_clear'])
         self.assertIn('BackingObstacle',[c['part'] for c in metrics['collisions']])
@@ -71,7 +72,7 @@ class HingeTests(unittest.TestCase):
         data={s['key']:s for s in panel_details(self.doc,self.p,None,False)}
         cover=data['DustCover']
         self.assertEqual([(h['u_mm'],h['v_mm']) for h in cover['holes']],
-                         [(71,16.5),(105,16.5),(321,16.5),(355,16.5)])
+                         [(83,17.5),(117,17.5),(333,17.5),(367,17.5)])
         pilots=[h for h in data['Back']['holes'] if h['id'].startswith('J')]
         self.assertEqual([(h['u_mm'],h['v_mm'],h['depth_mm']) for h in pilots],
                          [(71,95.5,8),(105,95.5,8),(321,95.5,8),(355,95.5,8)])

@@ -86,7 +86,7 @@ def panel_details(doc, p, project_shape, project=True):
             size=[b.XLength,b.ZLength]
             notes=[
                 '从罩内向后看；O 为后壁左下角；孔仅贯穿后壁，不能贯穿前壁。尺寸为安装假设。',
-                f"每只合页两孔横距{hs['hole_pitch']:g}；孔心距后壁下边{hd['top_hole_z']-b.ZMin:g}。同轴配合外侧{hd['spacer']:g} mm垫片与内侧{hs['backing_thickness_assumption']:g} mm压板。",
+                f"每只合页两孔横距{hs['hole_pitch']:g}；孔心距后壁下边{hd['top_hole_z']-b.ZMin:g}。同轴配合外侧{hd['spacer']:g} mm补偿垫片与内侧{hs['backing_thickness_assumption']:g} mm压板。",
                 f"垫片／压板外廓{hs['axis_length']:g}×{hs['plate_height_assumption']:g}，厚度分别为{hd['spacer']:g}/{hs['backing_thickness_assumption']:g}；局部孔心({(hs['axis_length']-hs['hole_pitch'])/2:g},{hs['plate_height_assumption']/2:g})/({(hs['axis_length']+hs['hole_pitch'])/2:g},{hs['plate_height_assumption']/2:g})，见 A-P08。",
                 '保持同轴，勿强行夹紧亚克力；孔边加工与紧固力须试装确认。',
                 'M5仅作拟用螺栓规格；螺栓长度、垫圈、孔隙、孔边加工与紧固力须试装确认。未放行加工。',

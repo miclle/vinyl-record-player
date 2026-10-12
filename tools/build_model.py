@@ -16,6 +16,7 @@ from hinges import installation as hinge_installation, dimensions as hinge_dimen
 from fascia import dimensions as fascia_dimensions, installation as fascia_installation
 from nameplate import installation as nameplate_installation
 from model_sections import assign_section, section_objects
+from dust_cover import dimensions as cover_dimensions
 
 ROOT = Path(__file__).resolve().parents[1]
 V = App.Vector
@@ -31,6 +32,7 @@ def build_structure():
     if p['driver_count'] != 3 or len(p['fullrange']['center_x']) != 2:
         raise ValueError('This layout requires one woofer and two full-range satellites')
     W, D, H = p['width'], p['depth'], p['cabinet_top']
+    cd = cover_dimensions(p)
     t, z0 = p['wall'], p['foot_height']
     foot_parts = feet_installation(p)
     hinge_parts = hinge_installation(p)
@@ -344,13 +346,17 @@ def build_structure():
     cyl('ArmRest','唱臂支架占位',4,26,V(pivot.x+10,pivot.y-69,H),'Mechanism',BLACK)
 
     # Closed cover is a five-sided hollow shell, not a solid box.
-    cw=p['cover_wall']; cb=p['cover_bottom']; ch=p['closed_height']-cb
-    cover=Part.makeBox(W-2*t,D-4,ch,V(t,2,cb)).cut(Part.makeBox(W-2*t-2*cw,D-4-2*cw,ch,V(t+cw,2+cw,cb-cw)))
+    cw=cd['wall']; cb=cd['bottom']; ch=cd['height']
+    cover=Part.makeBox(cd['width'],cd['depth'],ch,V(cd['left'],cd['front'],cb)).cut(
+        Part.makeBox(cd['inner_width'],cd['inner_depth'],ch,
+                     V(cd['left']+cw,cd['front']+cw,cb-cw)))
     for part in hinge_parts:
         for cut in part['cover_cuts']:
             cover = cover.cut(cut)
     hs=p['hinges']; hd=hinge_dimensions(p)
     lid=add('DustCover','烟灰透明防尘盖',cover,'Cover',(0.34,0.37,0.39),material=f"{cw:g} mm 亚克力概念壳；4×Ø{hs['cover_hole_diameter_assumption']:g} 铰链孔为安装假设",transparency=76)
+    lid.DimensionBasis = (f"用户确认成形外尺寸{cd['width']:g}×{cd['depth']:g}×{ch:g} mm、{cw:g} mm亚克力，底边落在侧板顶面；"
+                          f"实测机身452×350，四边各缩进1 mm；木壳CAD宽{W:g}未改；唱臂距承板最高{p['cover_measured_arm_height']:g} mm")
     for i,part in enumerate(hinge_parts):
         for prefix,key,label,material,color in [
                 ('HingeBase','fixed','定位合页固定叶','锌合金；HFA5751-3434 简化外形',BLACK),

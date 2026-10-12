@@ -21,6 +21,7 @@ def load_local_module(name):
 
 ac_inlet = load_local_module('ac_inlet')
 feet = load_local_module('feet')
+dust_cover = load_local_module('dust_cover')
 hinges = load_local_module('hinges')
 fascia = load_local_module('fascia')
 nameplate = load_local_module('nameplate')

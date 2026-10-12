@@ -1,9 +1,9 @@
 {
   "units": "mm",
-  "revision": "v0.11-10x6-grille-slats",
+  "revision": "v0.12-inset-dust-cover",
   "width": 450.0,
   "depth": 350.0,
-  "closed_height": 210.7,
+  "closed_height": 221.5,
   "foot_height": 22.5,
   "cabinet_top": 146.5,
   "wall": 12.0,
@@ -21,7 +21,7 @@
   "deck_side_clearance": 2.0,
   "deck_rear_clearance": 2.0,
   "cover_wall": 3.0,
-  "cover_bottom": 147.5,
+  "cover_bottom": 146.5,
   "cover_angle_open": 70.0,
   "front_angle": 72.0,
   "slat_count": 7,
@@ -198,6 +198,11 @@
     ],
     "acrylic_density_assumption_g_cm3": 1.18,
     "installation_released": false,
-    "note": "Two adjustable friction hinges selected by user. 13.2 vs 12.8 mm drawings conflict; use 13.2 conservative projection with assumed barrel/axis. Neck and knuckle outlines simplified. Upper 2 mm spacer compensates rear cover inset; 2 mm aluminium backing plate, M5 clearance and wood pilots are installation assumptions. Fasteners, torque performance and acrylic strength unverified."
-  }
+    "note": "Two selected adjustable friction hinges. 13.2 vs 12.8 mm drawings conflict; use 13.2 conservative projection with assumed barrel/axis. Cover rear inset is 1 mm, compensated by 1 mm outer spacers; retain 2 mm inner backing plates, original hinge axis and wood pilots. Fasteners, torque performance and acrylic strength unverified.",
+    "axis_above_cabinet_assumption": 0.5
+  },
+  "cover_width": 450.0,
+  "cover_depth": 348.0,
+  "cover_height": 75.0,
+  "cover_measured_arm_height": 60.0
 }

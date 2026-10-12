@@ -60,7 +60,7 @@ class FasciaTests(unittest.TestCase):
         self.assertFalse(shape.isInside(App.Vector(225,20,143),1e-6,False))
         checks,m=validate_model.check_fascia(self.doc,self.p)
         self.assertTrue(all(checks.values()),(checks,m))
-        self.assertAlmostEqual(m['closed_cover_gap_mm'],1)
+        self.assertAlmostEqual(m['closed_cover_gap_mm'],0)
         self.assertAlmostEqual(m['remaining_roof_mm'],4.3)
         self.assertAlmostEqual(m['rebate_depth_mm'],5.7)
         # Coordinates independent of the geometry helper verify actual shelf and slot.

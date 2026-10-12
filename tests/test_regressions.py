@@ -107,7 +107,9 @@ class ParameterValidationTests(unittest.TestCase):
             shutil.copy2(ROOT / 'tools/ac_inlet.py', root / 'tools/ac_inlet.py')
             shutil.copy2(ROOT / 'tools/feet.py', root / 'tools/feet.py')
             shutil.copy2(ROOT / 'tools/fascia.py', root / 'tools/fascia.py')
+            shutil.copy2(ROOT / 'tools/nameplate.py', root / 'tools/nameplate.py')
             shutil.copy2(ROOT / 'tools/hinges.py', root / 'tools/hinges.py')
+            shutil.copy2(ROOT / 'tools/dust_cover.py', root / 'tools/dust_cover.py')
             shutil.copy2(ROOT / 'tools/assembly_pose.py', root / 'tools/assembly_pose.py')
             shutil.copy2(ROOT / 'tools/model_sections.py', root / 'tools/model_sections.py')
             for case in cases:
@@ -358,6 +360,7 @@ class MacroReloadTests(unittest.TestCase):
                 (root / 'fascia.py').write_text(f'value = {version}\n')
                 (root / 'nameplate.py').write_text(f'value = {version}\n')
                 (root / 'hinges.py').write_text(f'value = {version}\n')
+                (root / 'dust_cover.py').write_text(f'value = {version}\n')
                 (root / 'model_sections.py').write_text(f'value = {version}\n')
                 (root / 'build_model.py').write_text('from types import SimpleNamespace\nimport model_sections\nclass Doc:\n    StudyBasis = SimpleNamespace(ConfigurationJSON="{}")\n    def save(self): pass\ndef deliver():\n    return Doc(), {"cover_angle_open":70}, model_sections.value\n')
                 (root / 'mechanism_study.py').write_text('import model_sections\ndef render_study(*a): pass\ndef save_report(*a): pass\nvalue=model_sections.value\n')
@@ -369,7 +372,7 @@ class MacroReloadTests(unittest.TestCase):
                 gui=types.ModuleType('FreeCADGui')
                 gui.activeDocument=lambda: types.SimpleNamespace(activeView=lambda: types.SimpleNamespace(fitAll=lambda: None))
                 with patch.dict(sys.modules, {'FreeCADGui': gui}):
-                    for name in ['ac_inlet', 'feet', 'fascia', 'nameplate', 'hinges', 'model_sections',
+                    for name in ['ac_inlet', 'feet', 'fascia', 'nameplate', 'dust_cover', 'hinges', 'model_sections',
                                  'build_model', 'render_views', 'dimension_sheet',
                                  'mechanism_study', 'assembly_pose']:
                         sys.modules.pop(name, None)
@@ -380,6 +383,7 @@ class MacroReloadTests(unittest.TestCase):
                     exec(compile(macro.read_bytes(), str(macro), 'exec'), env)
                     self.assertEqual(env['sections'], 2)
                     self.assertEqual(env['model_sections'].value, 2)
+                    self.assertEqual(env['dust_cover'].value, 2)
                     self.assertEqual(env['mechanism_study'].value, 2)
                     self.assertEqual(env['render_views'].render(), 2)
                     self.assertEqual(env['dimension_sheet'].create(), 2)

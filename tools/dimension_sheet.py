@@ -46,7 +46,7 @@ def create(doc,p):
         out.append(f'<path class="ext" d="M{from_x},{y} H{x+6} M{from_x},{y+height} H{x+6}"/>')
         out.append(f'<path class="dim" marker-start="url(#arrow)" marker-end="url(#arrow)" d="M{x},{y} V{y+height}"/><text class="value" transform="translate({x+23},{y+height/2}) rotate(-90)" text-anchor="middle">{label}</text>')
     hdim(80,552,W*s,510,f'{W:.1f}')
-    hdim(80,912,W*s,865,f'{W:.1f}')
+    hdim(80+(W-p['cover_width'])/2*s,912,p['cover_width']*s,865,f'{p["cover_width"]:.1f}')
     hdim(800,912,D*s,865,f'{D:.1f}')
     vdim(635,510-D*s,D*s,80+W*s,f'{D:.1f}')
     vdim(1245,865-H*s,H*s,800+D*s,f'{H:.1f} *')
@@ -57,7 +57,7 @@ def create(doc,p):
     out.extend([f'<text x="750" y="532" class="note">弯臂机芯尺寸待确认 · 一低音两全频占位</text>',
                 f'<text x="750" y="558" class="note">前格栅后倾 {90-p["front_angle"]:g}° · 木壳厚 {p["wall"]:g}（估算）</text>',
                 '<line x1="60" y1="948" x2="1340" y2="948" stroke="#d8d3cc"/>',
-                f'<text x="60" y="978" class="note">* {H:g} 为当前闭盖总高；原图未明确测量基准。板厚、盖高及内部接口为本项目估算。</text>',
+                f'<text x="60" y="978" class="note">* {H:g} 为当前闭盖总高；盖外尺寸 {p["cover_width"]:g}×{p["cover_depth"]:g}×{p["cover_height"]:g}、厚 {p["cover_wall"]:g} 为用户确认值；接口待验证。</text>',
                 f'<text x="60" y="1006" class="note">线稿为机壳基准；深 {D:g} 不含后凸合页；含合页总深 {D+p["hinges"]["overall_projection_assumption"]:g}。外观 / 空间评审用，非生产加工图。</text>','</svg>'])
     path=ROOT/'previews/dimensions.svg'
     path.write_text('\n'.join(out))

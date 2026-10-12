@@ -24,7 +24,7 @@ V = App.Vector
 # assembly may combine several modeled objects; quantities below are explicit.
 NON_WOOD_CATALOG = [
     ('F01', 1, '前沿银色 T 型铝饰条与 Ariel 铭牌', ['Fascia', 'Nameplate'], '1 条 + 1 片', '铝合金 T 型材与定制铭牌；固定待确认'),
-    ('C01', 1, '透明防尘盖', ['DustCover'], '1 件', '烟灰亚克力；壁厚为暂估'),
+    ('C01', 1, '透明防尘盖', ['DustCover'], '1 件', '烟灰亚克力；壁厚 3 mm 用户确认'),
     ('C02', 1, '可调定位合页与安装板', [f'{prefix}{i}' for i in range(2) for prefix in ('HingeBase','HingePin','HingeSpacer','HingeBacking')], '2 只 + 2 垫片 + 2 压板', '锌合金合页；铝垫片及压板为安装假设'),
     ('C03', 1, '脚垫与固定座', [f'Foot{i}' for i in range(4)]+[f'FootMount{i}' for i in range(4)], '4 套', '已购橡胶脚垫与镀黑锌座；安装孔距暂估'),
     ('K01', 1, '机芯基座与三弹簧', ['KitBase'], '1 座 + 3 弹簧', '平台部分实测；弹簧套筒仅示意外廓'),
@@ -78,7 +78,7 @@ def catalog_from_drawings(data):
     references['Nameplate'] = references['Fascia']
     for code, page, title, names, quantity, material in NON_WOOD_CATALOG:
         if code == 'C01':
-            material = f'烟灰亚克力；壁厚 {cards_by_id["DustCover"]["thickness_mm"]:g} mm 暂估'
+            material = f'烟灰亚克力；壁厚 {cards_by_id["DustCover"]["thickness_mm"]:g} mm 用户确认'
         if code == 'F01':
             card=cards_by_id['Fascia']
             material=f"铝合金 T 型材 {card['size_mm'][2]:g}×{card['size_mm'][1]:g}×{card['thickness_mm']:g}；铭牌激光标记；固定待确认"
