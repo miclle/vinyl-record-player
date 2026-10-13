@@ -1,10 +1,26 @@
-# 黑胶唱片机概念 CAD
+# Ariel 一体式黑胶唱片机
 
-一低音两全频的一体式黑胶唱片机概念 CAD，外形参考 [HYM LUMI Walnut 官方资料](https://www.hym-originals-en.com/products/lumi-turntable-walnut)。当前结构为 **v0.12 防尘盖布局**，沿用七条格栅与 10 mm 内部结构板，保留 v0.9 可调定位合页；当前弯臂机芯与结构统一保存在一个主 CAD 文件中，机芯采用 **v0.6 部分实测居中参数**。扬声器、变压器和功放板已采用用户提供的外廓尺寸；机芯安装接口仍待确认。
+一低音两全频的一体式黑胶唱片机，记录从 FreeCAD 概念设计、木件加工、3D 打印到实物装配的制作过程。外形参考 [HYM LUMI Walnut 官方资料](https://www.hym-originals-en.com/products/lumi-turntable-walnut)。
 
-![开盖 CAD 预览](previews/open.png)
+![Ariel 成品：木色箱体与横格栅、银色前沿、黑色台面和暖色照明](artifact/finished-front-overview.jpg)
+
+[观看成品演示视频（约 11 秒，MP4）](artifact/finished-playing.mp4)
+
+## 成品展示
+
+木色横格栅与银色前沿构成正面，暖光照亮木纹并在桌面留下光晕；黑色台面上布置唱盘、弯臂与右侧 Ariel 控制面板。
+
+| 斜前方：格栅、灯光与箱体层次 | 俯视：唱盘、唱臂与控制面板布局 |
+|---|---|
+| ![成品斜前方视角](artifact/finished-front-angle.jpg) | ![成品俯视视角](artifact/finished-top.jpg) |
+
+更多角度、内部装配及加工记录见[制作素材目录](artifact/README.md)。本组实物照片尚未安装防尘盖，右侧控制面板与格栅照明等制作调整尚未全部回写主 CAD；下文尺寸、安装假设与验证结果描述的是保存的 CAD 版本。
 
 ## 模型选择
+
+当前概念 CAD 为 **v0.12 防尘盖布局**，沿用七条格栅与 10 mm 内部结构板，保留 v0.9 可调定位合页；当前弯臂机芯与结构统一保存在一个主 CAD 文件中，机芯采用 **v0.6 部分实测居中参数**。扬声器、变压器和功放板已采用用户提供的外廓尺寸；CAD 中的机芯安装接口仍待确认。
+
+![开盖 CAD 预览](previews/open.png)
 
 | 文件 | 用途 |
 |---|---|
