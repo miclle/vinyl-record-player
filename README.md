@@ -4,7 +4,11 @@
 
 ![Ariel 成品：木色箱体与横格栅、银色前沿、黑色台面和暖色照明](artifact/finished-front-overview.jpg)
 
-[观看成品演示视频（约 11 秒，MP4）](artifact/finished-playing.mp4)
+成品演示（约 11 秒，点击播放）：
+
+https://github.com/user-attachments/assets/8cd31f62-5ff7-47e6-9cb5-67212d5645ef
+
+[下载原始 MP4](artifact/finished-playing.mp4)
 
 ## 成品展示
 
