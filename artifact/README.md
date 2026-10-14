@@ -16,8 +16,6 @@
 
 本组成品素材中未安装防尘盖。[项目首页](../README.md)嵌入约 11 秒成品演示的 H.264／AAC 播放版本，上传至 GitHub 附件存储，可在 GitHub README 中点击播放；原始视频仍保留在本目录，未被覆盖。
 
-本目录的视频链接指向原始 MP4 文件，视频编码为 HEVC、音频为 AAC；预览支持取决于查看环境，无法直接播放时可下载后使用支持 HEVC 的播放器。
-
 ## 制作与测试
 
 | 素材 | 内容 |
@@ -31,8 +29,33 @@
 | [格栅表面处理](build-grille-surface-finishing.jpg) | 用海绵进行格栅表面处理 |
 | [机芯弹簧近照](build-mechanism-spring-detail.jpg) | 唱盘下方弹簧及机芯侧面 |
 | [机芯工作台装配](build-mechanism-bench-setup.jpg) | 工作台上的机芯、唱片与外接板件 |
-| [黑色唱片测试视频](build-black-record-test.mp4) | 约 20 秒，未完成涂装的台面上进行唱片运行测试 |
-| [控制旋钮测试视频](build-controls-test.mp4) | 约 23 秒，粉色唱片运行中操作控制面板旋钮 |
-| [唱臂操作视频](build-tonearm-operation.mp4) | 约 45 秒，唱臂操作、旋钮调节及唱片运行近景 |
+
+## 制作过程视频
+
+以下播放器使用上传至 GitHub 附件存储的 H.264／AAC 播放版本，点击即可播放；默认静音，点击扬声器按钮可开启声音。下载链接保留原始 HEVC／AAC 视频，可使用支持 HEVC 的播放器打开。
+
+### 黑色唱片测试（约 20 秒）
+
+未完成涂装的台面上进行唱片运行测试。
+
+https://github.com/user-attachments/assets/6d4ae5aa-47e9-449b-a401-17b22107f13c
+
+[下载原始 MP4](build-black-record-test.mp4)
+
+### 控制旋钮测试（约 23 秒）
+
+粉色唱片运行中操作控制面板旋钮。
+
+https://github.com/user-attachments/assets/c1b58fca-b611-4cc4-90f3-96065e823c62
+
+[下载原始 MP4](build-controls-test.mp4)
+
+### 唱臂操作（约 45 秒）
+
+唱臂操作、旋钮调节及唱片运行近景。
+
+https://github.com/user-attachments/assets/399030c0-71a6-472b-919b-bf7628a41d48
+
+[下载原始 MP4](build-tonearm-operation.mp4)
 
 [返回项目 README](../README.md)
