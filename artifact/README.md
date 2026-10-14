@@ -8,13 +8,21 @@
 
 四个角度展示整机比例、格栅层次、暖光，以及唱盘、唱臂与控制面板布局。本组成品素材中未安装防尘盖。
 
-| 正前上方全景 | 低角度正面 |
-|---|---|
-| ![正前上方全景：唱盘、台面与发光格栅](finished-front-overview.jpg) | ![低角度正面：前沿、格栅与脚垫](finished-front.jpg) |
+**正前上方全景**
 
-| 斜前方 | 俯视 |
-|---|---|
-| ![斜前方：箱体侧面与正面层次](finished-front-angle.jpg) | ![俯视：唱盘、弯臂和右侧控制面板](finished-top.jpg) |
+<img src="finished-front-overview.jpg" alt="正前上方全景：唱盘、台面与发光格栅" width="960">
+
+**低角度正面**
+
+<img src="finished-front.jpg" alt="低角度正面：前沿、格栅与脚垫" width="960">
+
+**斜前方**
+
+<img src="finished-front-angle.jpg" alt="斜前方：箱体侧面与正面层次" width="960">
+
+**俯视**
+
+<img src="finished-top.jpg" alt="俯视：唱盘、弯臂和右侧控制面板" width="960">
 
 ### 成品演示（约 11 秒）
 
@@ -26,17 +34,41 @@ https://github.com/user-attachments/assets/8cd31f62-5ff7-47e6-9cb5-67212d5645ef
 
 ## 制作与测试
 
-| 木板备料 | 台面划线与唱片尺寸比对 | 手锯加工 |
-|---|---|---|
-| ![木板备料：加工台上的木板与木纹](build-wood-panels.jpg) | <img src="build-deck-record-layout.jpg" alt="台面划线与唱片尺寸比对：套着内袋的唱片放在已划线木板上" height="240"> | ![手锯切削木件](build-hand-saw-cutting.jpg) |
+**木板备料**
 
-| 台面黑色涂装 | 内部音腔与布线 | 机芯弹簧近照 |
-|---|---|---|
-| ![滚涂黑色台面](build-deck-black-coating.jpg) | ![内部音腔与布线：隔板、扬声器背部及电路接线](build-chambers-and-wiring.jpg) | ![唱盘下方弹簧及机芯侧面](build-mechanism-spring-detail.jpg) |
+<img src="build-wood-panels.jpg" alt="木板备料：加工台上的木板与木纹" width="960">
 
-| 格栅夹持定位 | 格栅表面处理 | 机芯工作台装配 |
-|---|---|---|
-| ![格栅装配时的夹具与定位件](build-grille-clamping.jpg) | ![用海绵进行格栅表面处理](build-grille-surface-finishing.jpg) | ![工作台上的机芯、唱片与外接板件](build-mechanism-bench-setup.jpg) |
+**台面划线与唱片尺寸比对**
+
+<img src="build-deck-record-layout.jpg" alt="台面划线与唱片尺寸比对：套着内袋的唱片放在已划线木板上" width="360">
+
+**手锯加工**
+
+<img src="build-hand-saw-cutting.jpg" alt="手锯切削木件" width="960">
+
+**台面黑色涂装**
+
+<img src="build-deck-black-coating.jpg" alt="滚涂黑色台面" width="960">
+
+**内部音腔与布线**
+
+<img src="build-chambers-and-wiring.jpg" alt="内部音腔与布线：隔板、扬声器背部及电路接线" width="960">
+
+**机芯弹簧近照**
+
+<img src="build-mechanism-spring-detail.jpg" alt="唱盘下方弹簧及机芯侧面" width="960">
+
+**格栅夹持定位**
+
+<img src="build-grille-clamping.jpg" alt="格栅装配时的夹具与定位件" width="960">
+
+**格栅表面处理**
+
+<img src="build-grille-surface-finishing.jpg" alt="用海绵进行格栅表面处理" width="960">
+
+**机芯工作台装配**
+
+<img src="build-mechanism-bench-setup.jpg" alt="工作台上的机芯、唱片与外接板件" width="960">
 
 ## 制作过程视频
 
